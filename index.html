@@ -242,14 +242,19 @@
             <header class="player-top-bar panel-glass">
                 <button class="btn-back-player" id="close-player-btn">⬅ FECHAR REPRODUTOR</button>
                 <div class="series-control-hub" id="episodes-selectors-box" style="display:none;">
-                    <div class="control-unit">
-                        <label>TEMPORADA</label>
-                        <input type="number" id="player-season-input" class="input-number-glass" value="1" min="1">
+                    <div class="control-unit modern-select-unit">
+                        <span class="select-label">T</span>
+                        <select id="player-season-select" class="glass-select">
+                            <option value="1">Temp 1</option>
+                        </select>
                     </div>
-                    <div class="control-unit">
-                        <label>EPISÓDIO</label>
-                        <input type="number" id="player-episode-input" class="input-number-glass" value="1" min="1">
+                    <div class="control-unit modern-select-unit">
+                        <span class="select-label">E</span>
+                        <select id="player-episode-select" class="glass-select">
+                            <option value="1">Ep 1</option>
+                        </select>
                     </div>
+                    <button id="btn-next-ep" class="btn-action-glass" title="Próximo Episódio">⏭</button>
                 </div>
             </header>
             <div class="player-viewport">

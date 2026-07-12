@@ -413,12 +413,19 @@ function salvarReview() {
 }
 
 // ==========================================
-// REPRODUTOR DE VÍDEO
+// REPRODUTOR DE VÍDEO E SELETORES DINÂMICOS
 // ==========================================
-function abrirPlayer(id, tipo) {
+async function abrirPlayer(id, tipo) {
     const epBox = document.getElementById('episodes-selectors-box');
-    if (tipo === 'tv') { epBox.style.display = 'flex'; modoPlayerAtual = 'series'; } 
-    else { epBox.style.display = 'none'; modoPlayerAtual = 'geral'; }
+    
+    if (tipo === 'tv') { 
+        epBox.style.display = 'flex'; 
+        modoPlayerAtual = 'series'; 
+        await carregarTemporadasNoPlayer(id); 
+    } else { 
+        epBox.style.display = 'none'; 
+        modoPlayerAtual = 'geral'; 
+    }
 
     document.getElementById('playerModal').style.display = 'flex';
     alternarScrollBody(true); 
@@ -435,12 +442,80 @@ function atualizarIframePlayer() {
     if (!itemSelecionado) return;
     const id = itemSelecionado.id;
     const player = document.getElementById('videoPlayer');
+    
     if (modoPlayerAtual === 'geral') {
         player.src = `https://mgeb.top/embed/${id}?player=vidstack#color:${corDestaque}`;
     } else {
-        const season = document.getElementById('player-season-input').value || 1;
-        const episode = document.getElementById('player-episode-input').value || 1;
+        const season = document.getElementById('player-season-select').value || 1;
+        const episode = document.getElementById('player-episode-select').value || 1;
         player.src = `https://mgeb.top/embed/tv/${id}/${season}/${episode}?player=vidstack#color:${corDestaque}`;
+    }
+}
+
+async function carregarTemporadasNoPlayer(idSerie) {
+    const seasonSelect = document.getElementById('player-season-select');
+    seasonSelect.innerHTML = '<option value="1">Carregando...</option>';
+    
+    try {
+        const dadosSerie = await fetchTMDB(`/tv/${idSerie}`);
+        const numTemporadas = dadosSerie.number_of_seasons || 1;
+        
+        seasonSelect.innerHTML = '';
+        for(let i = 1; i <= numTemporadas; i++) {
+            seasonSelect.innerHTML += `<option value="${i}">Temp ${i}</option>`;
+        }
+        
+        seasonSelect.value = "1";
+        await carregarEpisodiosNoPlayer(idSerie, 1);
+    } catch (e) {
+        console.error("Erro ao carregar temporadas");
+    }
+}
+
+async function carregarEpisodiosNoPlayer(idSerie, numeroTemporada) {
+    const epSelect = document.getElementById('player-episode-select');
+    epSelect.innerHTML = '<option value="1">Carregando...</option>';
+    
+    try {
+        const tempDados = await fetchTMDB(`/tv/${idSerie}/season/${numeroTemporada}`);
+        const numEpisodios = tempDados.episodes ? tempDados.episodes.length : 20; 
+        
+        epSelect.innerHTML = '';
+        for(let i = 1; i <= numEpisodios; i++) {
+            const epNome = tempDados.episodes[i-1] ? ` - ${tempDados.episodes[i-1].name}` : '';
+            const nomeCurto = epNome.length > 22 ? epNome.substring(0, 22) + '...' : epNome;
+            epSelect.innerHTML += `<option value="${i}">Ep ${i}${nomeCurto}</option>`;
+        }
+        
+        epSelect.value = "1";
+        atualizarIframePlayer();
+    } catch (e) {
+        console.error("Erro ao carregar episodios");
+    }
+}
+
+function avancarProximoEpisodio() {
+    if (modoPlayerAtual !== 'series') return;
+    
+    const epSelect = document.getElementById('player-episode-select');
+    const seasonSelect = document.getElementById('player-season-select');
+    
+    let epAtual = parseInt(epSelect.value);
+    let maxEps = epSelect.options.length;
+    
+    if (epAtual < maxEps) {
+        epSelect.value = epAtual + 1;
+        atualizarIframePlayer();
+    } else {
+        let tempAtual = parseInt(seasonSelect.value);
+        let maxTemps = seasonSelect.options.length;
+        
+        if (tempAtual < maxTemps) {
+            seasonSelect.value = tempAtual + 1;
+            carregarEpisodiosNoPlayer(itemSelecionado.id, tempAtual + 1);
+        } else {
+            alert("Você chegou ao fim da série!");
+        }
     }
 }
 
@@ -546,6 +621,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Reprodutor de Vídeo (Player)
     document.getElementById('close-player-btn').addEventListener('click', fecharPlayer);
-    document.getElementById('player-season-input').addEventListener('change', atualizarIframePlayer);
-    document.getElementById('player-episode-input').addEventListener('change', atualizarIframePlayer);
+    
+    // Novos seletores de episódio e temporadas dinâmicos
+    document.getElementById('player-season-select').addEventListener('change', (e) => {
+        carregarEpisodiosNoPlayer(itemSelecionado.id, e.target.value);
+    });
+    document.getElementById('player-episode-select').addEventListener('change', atualizarIframePlayer);
+    document.getElementById('btn-next-ep').addEventListener('click', avancarProximoEpisodio);
 });

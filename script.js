@@ -140,7 +140,7 @@ function salvarDados() {
 }
 
 // ==========================================
-// CONTROLADOR DE FLUXO (ABAS COMPLETAS)
+// CONTROLADOR DE FLUXO (ABAS)
 // ==========================================
 function setNavActive(idDesktop, idMobile) {
     document.querySelectorAll('.nav-menu a, .mobile-bottom-nav a').forEach(el => {
@@ -419,7 +419,7 @@ function salvarReview() {
 }
 
 // ==========================================
-// REPRODUTOR DE VÍDEO
+// REPRODUTOR DE VÍDEO E SELETORES
 // ==========================================
 async function abrirPlayer(id, tipo) {
     const epBox = document.getElementById('episodes-selectors-box');
@@ -551,7 +551,7 @@ function atualizarUIUsuario() {
 }
 
 // ==========================================
-// CINEBOT 2.0 (INTELIGÊNCIA MELHORADA)
+// CINEBOT 2.0 (INTELIGÊNCIA MELHORADA - MUITA VARIEDADE)
 // ==========================================
 const generosBotTMDB = {
     "ação": 28, "acao": 28, "aventura": 12,
@@ -570,48 +570,70 @@ async function processarMensagemChatbot(mensagemUsuario) {
     let tipoMidia = 'movie'; 
     let idGenero = null;
     let queryBusca = null;
+    let isNovo = false; // Flag para Lançamentos Novos
 
-    // Detectar tipo e gênero básico
+    // 1. O que o usuário quer?
     if (msg.includes('série') || msg.includes('serie')) tipoMidia = 'tv';
     else if (msg.includes('anime') || msg.includes('shounen')) { tipoMidia = 'tv'; idGenero = 16; }
     else if (msg.includes('desenho')) { tipoMidia = 'movie'; idGenero = 16; }
 
+    // 2. Ele quer algo NOVO? (Lançamentos recentes)
+    if (msg.includes('novo') || msg.includes('nova') || msg.includes('lançamento') || msg.includes('recente') || msg.includes('lançamentos')) {
+        isNovo = true;
+    }
+
+    // 3. Ele falou algum gênero?
     for (const [chave, id] of Object.entries(generosBotTMDB)) {
         if (msg.includes(chave)) { idGenero = id; break; }
     }
 
-    // Se o usuário pedir um filme ESPECÍFICO pelo nome (ex: "me recomende o filme batman")
+    // 4. Ele pediu o nome específico?
     if(msg.includes("o filme ") || msg.includes("a série ")) {
         queryBusca = msg.split("filme ")[1] || msg.split("série ")[1];
     }
 
+    // 5. Montar a URL Mágica
     let url = "";
     if (queryBusca) {
         url = `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&language=pt-BR&query=${encodeURIComponent(queryBusca)}`;
     } else {
         url = `https://api.themoviedb.org/3/discover/${tipoMidia}?api_key=${TMDB_KEY}&language=pt-BR&sort_by=popularity.desc`;
         if (idGenero) url += `&with_genres=${idGenero}`;
+        
+        // Se pediu novo, filtra pelo ano atual!
+        if (isNovo) {
+            const anoAtual = new Date().getFullYear();
+            if (tipoMidia === 'movie') {
+                url += `&primary_release_year=${anoAtual}`;
+            } else {
+                url += `&first_air_date_year=${anoAtual}`;
+            }
+        }
     }
 
     try {
         const response = await fetch(url);
         const data = await response.json();
         
+        // Limpar resultados sem imagem
         let validResults = data.results ? data.results.filter(i => i.poster_path) : [];
         
         if (validResults.length > 0) {
-            // Pega um item top 5 aleatório (ou o 1º se for busca direta)
-            const index = queryBusca ? 0 : Math.floor(Math.random() * Math.min(5, validResults.length));
+            // O SEGREDO DA VARIEDADE: Pegar até 20 opções e sortear! 
+            // Se for pesquisa pelo nome (queryBusca), pega o 1º resultado direto (índice 0)
+            const limiteSorteio = queryBusca ? 1 : Math.min(20, validResults.length); 
+            const index = Math.floor(Math.random() * limiteSorteio);
             const rec = validResults[index]; 
             
             const titulo = rec.title || rec.name;
             const sinopse = rec.overview ? rec.overview.substring(0, 130) + "..." : "Sem sinopse.";
             const imagem = `https://image.tmdb.org/t/p/w200${rec.poster_path}`;
             const tipoCard = rec.media_type || tipoMidia;
+            
+            const textoResposta = isNovo ? `Aqui está um super lançamento recente para você:` : `Encontrei esta obra fantástica para você:`;
 
-            // Retorna HTML Customizado para o chat
             return `
-                Encontrei esta obra-prima para você: <b>${titulo}</b>!
+                ${textoResposta} <b>${titulo}</b>!
                 <div class="bot-msg-movie-card" onclick="abrirDetalhes(${rec.id}, '${tipoCard}')" style="cursor:pointer;">
                     <img src="${imagem}" alt="Poster">
                     <div>

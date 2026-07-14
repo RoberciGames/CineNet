@@ -7,6 +7,13 @@ let debounceTimer;
 let currentUserUID = null;
 let filtroBuscaAtual = 'all';
 let ultimoTermoBusca = '';
+
+// DADOS DE UTILIZADOR
+let perfilUsuario = {
+    username: "CineNet User",
+    avatar: "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png"
+};
+let avatarTemp = "";
 let biblioteca = { watchlist: {}, reviews: {} };
 let isLoginMode = true;
 
@@ -72,7 +79,6 @@ firebase.auth().onAuthStateChanged(user => {
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('app-content').style.display = 'block';
         
-        // Bloqueio dinâmico do painel administrativo
         if (user.email === ADMIN_EMAIL) {
             document.getElementById('li-nav-admin').style.display = 'block';
             document.getElementById('mob-nav-admin').style.display = 'flex';
@@ -94,14 +100,73 @@ function logout() { firebase.auth().signOut(); }
 document.getElementById('logout-btn-pc').addEventListener('click', logout);
 document.getElementById('logout-btn-mobile').addEventListener('click', logout);
 
+// ==========================================
+// SINCRONIZAÇÃO E EDIÇÃO DE PERFIL
+// ==========================================
 function carregarDadosUsuario() {
     firebase.database().ref('users/' + currentUserUID).once('value').then(snapshot => {
-        if (snapshot.val() && snapshot.val().biblioteca) biblioteca = snapshot.val().biblioteca;
-        if (!biblioteca.watchlist) biblioteca.watchlist = {};
+        const data = snapshot.val();
+        if (data) {
+            if (data.biblioteca) biblioteca = data.biblioteca;
+            if (!biblioteca.watchlist) biblioteca.watchlist = {};
+            if (!biblioteca.reviews) biblioteca.reviews = {};
+            
+            if (data.perfil) {
+                perfilUsuario = data.perfil;
+                atualizarInterfacePerfil();
+            }
+        }
     });
 }
+
 function salvarDados() {
-    if (currentUserUID) firebase.database().ref('users/' + currentUserUID + '/biblioteca').set(biblioteca);
+    if (currentUserUID) {
+        firebase.database().ref('users/' + currentUserUID + '/biblioteca').set(biblioteca);
+    }
+}
+
+// Eventos de clique para abrir modal de perfil
+document.getElementById('profile-trigger-pc').addEventListener('click', abrirModalPerfil);
+document.getElementById('user-avatar-mobile').addEventListener('click', abrirModalPerfil);
+
+function abrirModalPerfil() {
+    document.getElementById('profile-modal-username').value = perfilUsuario.username;
+    document.getElementById('profile-modal-avatar-preview').src = perfilUsuario.avatar;
+    avatarTemp = perfilUsuario.avatar;
+    document.getElementById('profileModal').style.display = 'flex';
+    alternarScrollBody(true);
+}
+
+function fecharModalPerfil() {
+    document.getElementById('profileModal').style.display = 'none';
+    alternarScrollBody(false);
+}
+
+function selecionarAvatarTemporario(url) {
+    avatarTemp = url;
+    document.getElementById('profile-modal-avatar-preview').src = url;
+}
+
+function salvarPerfilUsuario() {
+    const novoNome = document.getElementById('profile-modal-username').value.trim();
+    if (!novoNome) return alert("O nome não pode estar vazio!");
+
+    perfilUsuario.username = novoNome;
+    perfilUsuario.avatar = avatarTemp;
+
+    if (currentUserUID) {
+        firebase.database().ref('users/' + currentUserUID + '/perfil').set(perfilUsuario)
+            .then(() => {
+                atualizarInterfacePerfil();
+                fecharModalPerfil();
+            });
+    }
+}
+
+function atualizarInterfacePerfil() {
+    document.getElementById('user-name-pc').innerText = perfilUsuario.username;
+    document.getElementById('user-avatar-pc').src = perfilUsuario.avatar;
+    document.getElementById('user-avatar-mobile').src = perfilUsuario.avatar;
 }
 
 // ==========================================
@@ -182,7 +247,46 @@ function alternarScrollBody(travar) {
 }
 
 // ==========================================
-// RENDERIZAÇÃO DE CONTEÚDO TMDB
+// FORMULÁRIO ADMIN: SALVAR PARA A PESQUISA
+// ==========================================
+document.getElementById('admin-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const user = firebase.auth().currentUser;
+    
+    if (!user || user.email !== ADMIN_EMAIL) {
+        alert("Ação não autorizada!");
+        return;
+    }
+
+    const titulo = document.getElementById('admin-titulo').value;
+    const poster = document.getElementById('admin-poster').value;
+    const backdrop = document.getElementById('admin-backdrop').value;
+    const video = document.getElementById('admin-video').value;
+    const sinopse = document.getElementById('admin-sinopse').value;
+    const tipo = document.getElementById('admin-categoria').value; 
+
+    const novoConteudo = {
+        id: 'custom_' + Date.now(),
+        title: titulo,
+        poster_path: poster,
+        backdrop_path: backdrop,
+        video_url: video,
+        overview: sinopse,
+        media_type: tipo,
+        is_custom: true,
+        adicionadoEm: Date.now()
+    };
+
+    firebase.database().ref('conteudos_customizados/' + novoConteudo.id).set(novoConteudo)
+        .then(() => {
+            alert("Sucesso! O conteúdo foi adicionado e já pode ser procurado na barra de pesquisa.");
+            document.getElementById('admin-form').reset();
+        })
+        .catch(error => alert("Erro ao guardar na base de dados: " + error.message));
+});
+
+// ==========================================
+// RENDERIZAÇÃO DE CONTEÚDO TMDB (HOME)
 // ==========================================
 async function fetchTMDB(endpoint) {
     try {
@@ -201,7 +305,7 @@ async function carregarHome() {
         document.getElementById('hero-banner').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${hero.backdrop_path})`;
         document.getElementById('hero-title').innerText = hero.title || hero.name;
         document.getElementById('hero-desc').innerText = hero.overview || "";
-        document.getElementById('hero-play-btn').onclick = () => abrirPlayer(hero.id, hero.media_type || 'movie');
+        document.getElementById('hero-play-btn').onclick = () => abrirDetalhes(hero.id, hero.media_type || 'movie', true);
         document.getElementById('hero-info-btn').onclick = () => abrirDetalhes(hero.id, hero.media_type || 'movie');
     }
     renderCards(dataTrending.results, 'row-trending');
@@ -224,7 +328,9 @@ function renderCards(items, containerId, forceType = null) {
     });
 }
 
-// Sistema de Busca
+// ==========================================
+// SISTEMA DE BUSCA MISTA (TMDB + CUSTOM)
+// ==========================================
 function iniciarBusca(termo) {
     clearTimeout(debounceTimer);
     document.getElementById('search-clear').style.display = termo.length > 0 ? 'block' : 'none';
@@ -235,7 +341,7 @@ function iniciarBusca(termo) {
             document.getElementById('search-grid').innerHTML = '';
             return;
         }
-        executarBuscaTMDB(termo);
+        executarBusca(termo);
     }, 600);
 }
 
@@ -247,22 +353,58 @@ function limparBusca() {
 }
 document.getElementById('main-search-input').addEventListener('input', (e) => iniciarBusca(e.target.value));
 
-async function ejecutarBuscaTMDB(termo) {
-    const data = await fetchTMDB(`/search/multi?query=${encodeURIComponent(termo)}`);
+async function executarBusca(termo) {
     const container = document.getElementById('search-grid');
     const emptyState = document.getElementById('search-empty-state');
     container.innerHTML = '';
 
-    let filtrados = data.results.filter(item => item.poster_path);
-    if (filtrados.length === 0) {
+    let resultadosFinais = [];
+    const termoLower = termo.toLowerCase();
+
+    // 1. Procura na base de dados customizada (Filmes do Admin)
+    try {
+        const snapshot = await firebase.database().ref('conteudos_customizados').once('value');
+        const customData = snapshot.val();
+        if (customData) {
+            Object.values(customData).forEach(item => {
+                if (item.title && item.title.toLowerCase().includes(termoLower)) {
+                    resultadosFinais.push(item);
+                }
+            });
+        }
+    } catch(e) { console.error("Erro ao ler Firebase custom:", e); }
+
+    // 2. Procura no TMDB oficial
+    const data = await fetchTMDB(`/search/multi?query=${encodeURIComponent(termo)}`);
+    let filtradosTMDB = data.results.filter(item => item.poster_path);
+    
+    // 3. Junta tudo num único Array
+    resultadosFinais = [...resultadosFinais, ...filtradosTMDB];
+
+    if (resultadosFinais.length === 0) {
         emptyState.style.display = 'block';
     } else {
         emptyState.style.display = 'none';
-        renderCards(filtrados, 'search-grid');
+        
+        resultadosFinais.forEach(item => {
+            if (!item.poster_path) return;
+            const card = document.createElement('div');
+            card.className = 'movie-card';
+            const indicator = biblioteca.watchlist[item.id] ? '<div class="watched-indicator">✔</div>' : '';
+            
+            const finalPosterUrl = item.poster_path.startsWith('http') ? item.poster_path : `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+            
+            card.innerHTML = `<img src="${finalPosterUrl}" loading="lazy" style="height: 195px; object-fit: cover; border-radius: 6px;">${indicator}`;
+            
+            card.onclick = () => abrirDetalhes(item.id, item.media_type || 'movie');
+            container.appendChild(card);
+        });
     }
 }
 
-// Sistema de Watchlist
+// ==========================================
+// WATCHLIST
+// ==========================================
 function renderizarWatchlist() {
     const container = document.getElementById('watchlist-grid');
     const emptyState = document.getElementById('watchlist-empty-state');
@@ -278,31 +420,12 @@ function renderizarWatchlist() {
         validItems.forEach(item => {
             const card = document.createElement('div');
             card.className = 'movie-card';
-            const finalPosterUrl = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+            const finalPosterUrl = item.poster_path.startsWith('http') ? item.poster_path : `https://image.tmdb.org/t/p/w500${item.poster_path}`;
             card.innerHTML = `<img src="${finalPosterUrl}" loading="lazy"><div class="watched-indicator">✔</div>`;
             card.onclick = () => abrirDetalhes(item.id, item.tipo);
             container.appendChild(card);
         });
     }
-}
-
-async function abrirDetalhes(id, tipo) {
-    const data = await fetchTMDB(`/${tipo}/${id}`);
-    itemSelecionado = { id: id, tipo: tipo, poster_path: data.poster_path, title: data.title || data.name };
-    document.getElementById('modal-banner').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${data.backdrop_path})`;
-    document.getElementById('modal-title').innerText = itemSelecionado.title;
-    document.getElementById('modal-overview').innerText = data.overview || "Sem sinopse disponível.";
-    document.getElementById('modal-year').innerText = (data.release_date || data.first_air_date || "N/A").substring(0, 4);
-    document.getElementById('modal-rating').innerText = data.vote_average ? `Classificação: ${data.vote_average.toFixed(1)}` : "N/A";
-    document.getElementById('modal-play-btn').onclick = () => abrirPlayer(id, tipo);
-    atualizarBotaoWatchlist();
-    document.getElementById('detailsModal').style.display = 'flex';
-    alternarScrollBody(true);
-}
-
-function fecharDetalhes() {
-    document.getElementById('detailsModal').style.display = 'none';
-    alternarScrollBody(false);
 }
 
 function alternarWatchlist() {
@@ -324,6 +447,106 @@ function alternarWatchlist() {
 function atualizarBotaoWatchlist() {
     const btn = document.getElementById('btn-watchlist');
     btn.innerText = biblioteca.watchlist[itemSelecionado.id] ? "✔ Na Minha Lista" : "+ A Minha Lista";
+}
+
+// ==========================================
+// MODAL DE DETALHES COM SINOPSE E AVALIAÇÃO
+// ==========================================
+async function abrirDetalhes(id, tipo, diretoplay = false) {
+    resetarVisualEstrelas();
+    
+    // 1. SE FOR CONTEÚDO EXCLUSIVO DO ADMIN
+    if (String(id).startsWith('custom_')) {
+        const snapshot = await firebase.database().ref('conteudos_customizados/' + id).once('value');
+        const customItem = snapshot.val();
+        
+        if (customItem) {
+            itemSelecionado = { id: customItem.id, tipo: customItem.media_type, poster_path: customItem.poster_path, title: customItem.title, video_url: customItem.video_url };
+            
+            document.getElementById('modal-banner').style.backgroundImage = `url(${customItem.backdrop_path || customItem.poster_path})`;
+            document.getElementById('modal-title').innerText = customItem.title;
+            document.getElementById('modal-overview').innerText = customItem.overview || "Sem sinopse disponível.";
+            document.getElementById('modal-year').innerText = "Exclusivo CineNet";
+            document.getElementById('modal-rating').innerText = "Premium";
+            
+            document.getElementById('modal-play-btn').onclick = () => {
+                fecharDetalhes();
+                document.getElementById('main-content').style.display = 'none';
+                document.getElementById('episodes-selectors-box').style.display = 'none';
+                document.getElementById('videoPlayer').src = customItem.video_url; 
+                document.getElementById('streaming-player-screen').style.display = 'block';
+                alternarScrollBody(true);
+            };
+            
+            if (biblioteca.reviews && biblioteca.reviews[id]) {
+                pintarEstrelas(biblioteca.reviews[id]);
+            }
+            
+            atualizarBotaoWatchlist();
+            document.getElementById('detailsModal').style.display = 'flex';
+            alternarScrollBody(true);
+            return;
+        }
+    }
+    
+    // 2. SE FOR CONTEÚDO PADRÃO TMDB
+    const data = await fetchTMDB(`/${tipo}/${id}`);
+    itemSelecionado = { id: id, tipo: tipo, poster_path: data.poster_path, title: data.title || data.name };
+    
+    document.getElementById('modal-banner').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${data.backdrop_path})`;
+    document.getElementById('modal-title').innerText = itemSelecionado.title;
+    document.getElementById('modal-overview').innerText = data.overview || "Sem sinopse disponível.";
+    document.getElementById('modal-year').innerText = (data.release_date || data.first_air_date || "N/A").substring(0, 4);
+    document.getElementById('modal-rating').innerText = data.vote_average ? `Classificação: ${data.vote_average.toFixed(1)}` : "N/A";
+    
+    document.getElementById('modal-play-btn').onclick = () => abrirPlayer(id, tipo);
+    
+    if (biblioteca.reviews && biblioteca.reviews[id]) {
+        pintarEstrelas(biblioteca.reviews[id]);
+    }
+    
+    atualizarBotaoWatchlist();
+    
+    if (diretoplay) {
+        abrirPlayer(id, tipo);
+    } else {
+        document.getElementById('detailsModal').style.display = 'flex';
+        alternarScrollBody(true);
+    }
+}
+
+function fecharDetalhes() {
+    document.getElementById('detailsModal').style.display = 'none';
+    alternarScrollBody(false);
+}
+
+// FUNÇÕES AUXILIARES DE AVALIAÇÃO (ESTRELAS)
+function votarEstrelas(nota) {
+    if (!itemSelecionado) return;
+    
+    if (!biblioteca.reviews) biblioteca.reviews = {};
+    
+    if (biblioteca.reviews[itemSelecionado.id] === nota) {
+        delete biblioteca.reviews[itemSelecionado.id];
+        resetarVisualEstrelas();
+    } else {
+        biblioteca.reviews[itemSelecionado.id] = nota;
+        pintarEstrelas(nota);
+    }
+    
+    salvarDados();
+}
+
+function pintarEstrelas(nota) {
+    resetarVisualEstrelas();
+    const estrelas = document.querySelectorAll('.star-unit');
+    for (let i = 0; i < nota; i++) {
+        if (estrelas[i]) estrelas[i].classList.add('active');
+    }
+}
+
+function resetarVisualEstrelas() {
+    document.querySelectorAll('.star-unit').forEach(star => star.classList.remove('active'));
 }
 
 // ==========================================

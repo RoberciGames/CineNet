@@ -10,7 +10,7 @@
     <link rel="icon" type="image/png" href="logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="style.css?v=7">
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-73VPBQSWKM"></script>
     <script>
@@ -80,7 +80,7 @@
                     </ul>
                 </div>
                 <div class="nav-actions">
-                    <div class="profile-menu-container" id="profile-trigger-pc">
+                    <div class="profile-menu-container" id="profile-trigger-pc" style="cursor: pointer;" title="Editar Perfil">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" id="user-avatar-pc" class="nav-avatar" alt="Avatar">
                         <span id="user-name-pc" class="nav-username">CineNet User</span>
                     </div>
@@ -94,7 +94,7 @@
                 <span class="brand-accent">CINE</span><span class="brand-light">NET</span>
             </a>
             <div class="mobile-top-actions">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" id="user-avatar-mobile" class="mobile-avatar" alt="Avatar">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" id="user-avatar-mobile" class="mobile-avatar" alt="Avatar" title="Editar Perfil">
                 <button class="btn-disconnect-mobile" id="logout-btn-mobile">Sair</button>
             </div>
         </nav>
@@ -234,16 +234,53 @@
                 <div class="modal-banner" id="modal-banner"><div class="modal-banner-gradient"></div></div>
                 <div class="modal-body">
                     <h2 class="modal-title" id="modal-title">Título</h2>
+                    
                     <div class="modal-meta">
                         <span class="meta-item match-score" id="modal-rating"></span>
                         <span class="meta-item" id="modal-year"></span>
                     </div>
-                    <div style="display: flex; gap: 10px; margin: 20px 0;">
+
+                    <div class="rating-box-container" style="margin: 15px 0; display: flex; align-items: center; gap: 10px;">
+                        <span style="color: #aaa; font-size: 14px;">A tua avaliação:</span>
+                        <div class="star-rating-row" id="modal-star-row">
+                            <span class="star-unit" data-value="1" onclick="votarEstrelas(1)">★</span>
+                            <span class="star-unit" data-value="2" onclick="votarEstrelas(2)">★</span>
+                            <span class="star-unit" data-value="3" onclick="votarEstrelas(3)">★</span>
+                            <span class="star-unit" data-value="4" onclick="votarEstrelas(4)">★</span>
+                            <span class="star-unit" data-value="5" onclick="votarEstrelas(5)">★</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin: 15px 0;">
                         <button class="btn-primary-action" style="flex:1; justify-content:center;" id="modal-play-btn">▶ Assistir Agora</button>
                         <button class="btn-secondary-modal" style="flex:1;" id="btn-watchlist" onclick="alternarWatchlist()">+ A Minha Lista</button>
                     </div>
-                    <p class="modal-overview" id="modal-overview"></p>
+
+                    <p class="modal-overview" id="modal-overview" style="line-height: 1.6; color: var(--text-secondary); font-size: 15px; margin-top: 15px;"></p>
                 </div>
+            </div>
+        </div>
+
+        <div id="profileModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content" style="max-width: 400px; padding: 30px;">
+                <button class="modal-close" onclick="fecharModalPerfil()">✖</button>
+                <h3 style="margin-top: 0; margin-bottom: 20px; text-align: center;">Editar Perfil</h3>
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="" id="profile-modal-avatar-preview" style="width: 90px; height: 90px; border-radius: 8px; border: 2px solid var(--primary-neon); object-fit: cover; margin-bottom: 10px;">
+                    <div style="display: flex; gap: 10px; justify-content: center;" id="avatar-options-container">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="avatar-option-choice" onclick="selecionarAvatarTemporario(this.src)" style="width: 40px; height: 40px; border-radius: 4px; cursor: pointer;">
+                        <img src="https://wallpapers.com/images/hd/netflix-profile-pictures-a92v7iqgggkftxt1.jpg" class="avatar-option-choice" onclick="selecionarAvatarTemporario(this.src)" style="width: 40px; height: 40px; border-radius: 4px; cursor: pointer;">
+                        <img src="https://loodibee.com/wp-content/uploads/Netflix-Avatar-2.png" class="avatar-option-choice" onclick="selecionarAvatarTemporario(this.src)" style="width: 40px; height: 40px; border-radius: 4px; cursor: pointer;">
+                    </div>
+                </div>
+
+                <div class="cinenet-input-group" style="margin-bottom: 20px;">
+                    <input type="text" id="profile-modal-username" placeholder=" ">
+                    <label>Nome de Utilizador</label>
+                </div>
+
+                <button class="btn-cinenet-main" onclick="salvarPerfilUsuario()">Guardar Alterações</button>
             </div>
         </div>
 

@@ -8,8 +8,6 @@ let debounceTimer;
 let currentUserUID = null;
 let filtroBuscaAtual = 'all';
 let ultimoTermoBusca = '';
-
-// VARIÁVEIS DO PLAYER
 let modoPlayerAtual = 'geral';
 const corDestaque = 'e50914';
 
@@ -54,6 +52,10 @@ function toggleAuthMode() {
     document.getElementById('auth-switch-btn').innerText = isLoginMode ? 'Assine agora.' : 'Entrar agora.';
     document.getElementById('auth-error').style.display = 'none';
 }
+
+document.getElementById('auth-switch-btn').addEventListener('click', toggleAuthMode);
+document.getElementById('auth-form').addEventListener('submit', handleAuth);
+document.getElementById('btn-google-auth').addEventListener('click', loginComGoogle);
 
 function handleAuth(e) {
     e.preventDefault();
@@ -103,9 +105,9 @@ firebase.auth().onAuthStateChanged(user => {
     }
 });
 
-function logout() {
-    firebase.auth().signOut();
-}
+function logout() { firebase.auth().signOut(); }
+document.getElementById('logout-btn-pc').addEventListener('click', logout);
+document.getElementById('logout-btn-mobile').addEventListener('click', logout);
 
 // ==========================================
 // BANCO DE DADOS
@@ -139,6 +141,12 @@ function salvarDados() {
     }
 }
 
+function atualizarUIUsuario() {
+    document.getElementById('user-avatar-pc').src = perfilUsuario.avatar;
+    document.getElementById('user-avatar-mobile').src = perfilUsuario.avatar;
+    document.getElementById('user-name-pc').innerText = perfilUsuario.username;
+}
+
 // ==========================================
 // CONTROLADOR DE FLUXO (ABAS)
 // ==========================================
@@ -155,6 +163,7 @@ function esconderTodasSessoes() {
     document.getElementById('search-results-section').style.display = 'none';
     document.getElementById('watchlist-section').style.display = 'none';
     document.getElementById('chat-section').style.display = 'none'; 
+    document.getElementById('admin-section').style.display = 'none'; // ABA ADMIN INCLUÍDA
 }
 
 function irParaHome() {
@@ -189,6 +198,26 @@ function irParaChat() {
     trackVirtualPage("CineBot", "/chat");
 }
 
+function irParaAdmin() {
+    setNavActive('nav-admin', 'mob-nav-admin');
+    esconderTodasSessoes();
+    document.getElementById('admin-section').style.display = 'block';
+    trackVirtualPage("Administração", "/admin");
+}
+
+// Event Listeners de Navegação
+document.getElementById('nav-home').addEventListener('click', irParaHome);
+document.getElementById('mob-nav-home').addEventListener('click', irParaHome);
+document.getElementById('nav-search').addEventListener('click', irParaBusca);
+document.getElementById('mob-nav-search').addEventListener('click', irParaBusca);
+document.getElementById('nav-watchlist').addEventListener('click', irParaWatchlist);
+document.getElementById('mob-nav-watchlist').addEventListener('click', irParaWatchlist);
+document.getElementById('nav-chat').addEventListener('click', irParaChat);
+document.getElementById('mob-nav-chat').addEventListener('click', irParaChat);
+
+document.getElementById('nav-admin').addEventListener('click', irParaAdmin);
+document.getElementById('mob-nav-admin').addEventListener('click', irParaAdmin);
+
 function alternarScrollBody(travar) {
     document.body.classList.toggle('modal-open', travar);
     if(travar) {
@@ -198,6 +227,37 @@ function alternarScrollBody(travar) {
         document.body.style.paddingRight = '0px';
     }
 }
+
+// ==========================================
+// ABA ADMIN: CADASTRO DE CONTEÚDO
+// ==========================================
+document.getElementById('admin-custom-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const novoConteudo = {
+        id: "custom_" + Date.now(),
+        title: document.getElementById('admin-title').value,
+        tipo: document.getElementById('admin-category').value,
+        overview: document.getElementById('admin-overview').value,
+        release_date: document.getElementById('admin-year').value,
+        video_url: document.getElementById('admin-embed').value,
+        poster_path: document.getElementById('admin-poster').value,
+        backdrop_path: document.getElementById('admin-backdrop').value,
+        vote_average: 10.0, 
+        adicionadoEm: Date.now()
+    };
+
+    firebase.database().ref('custom_content/' + novoConteudo.id).set(novoConteudo)
+        .then(() => {
+            alert("Sucesso! Conteúdo adicionado permanentemente à CineNet.");
+            document.getElementById('admin-custom-form').reset();
+            irParaHome();
+        })
+        .catch(error => {
+            alert("Erro ao salvar dados no Firebase: " + error.message);
+        });
+});
+
 
 // ==========================================
 // CONSUMO TMDB & RENDERIZAÇÃO
@@ -233,6 +293,19 @@ async function carregarHome() {
     renderCards(dataTrending.results, 'row-trending');
     renderCards(dataMovies.results, 'row-movies', 'movie');
     renderCards(dataSeries.results, 'row-series', 'tv');
+
+    // BUSCA OS CONTEÚDOS CRIADOS NO ADMIN
+    firebase.database().ref('custom_content').orderByChild('adicionadoEm').limitToLast(20).once('value')
+        .then(snapshot => {
+            const dados = snapshot.val();
+            if (dados) {
+                const listaCustom = Object.values(dados).reverse();
+                document.getElementById('custom-content-section').style.display = 'block';
+                renderCards(listaCustom, 'row-custom');
+            } else {
+                document.getElementById('custom-content-section').style.display = 'none';
+            }
+        });
 }
 
 function renderCards(items, containerId, forceType = null) {
@@ -242,12 +315,14 @@ function renderCards(items, containerId, forceType = null) {
 
     items.forEach(item => {
         if (!item.poster_path) return;
-        const tipoFinal = forceType || item.media_type || 'movie';
+        const tipoFinal = forceType || item.media_type || item.tipo || 'movie';
         const card = document.createElement('div');
         card.className = 'movie-card';
         
         const indicator = biblioteca.watchlist[item.id] ? '<div class="watched-indicator">✔</div>' : '';
-        card.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${item.poster_path}" alt="Poster" loading="lazy">${indicator}`;
+        const finalPosterUrl = item.poster_path.startsWith('http') ? item.poster_path : `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+        
+        card.innerHTML = `<img src="${finalPosterUrl}" alt="Poster" loading="lazy">${indicator}`;
         card.onclick = () => abrirDetalhes(item.id, tipoFinal);
         container.appendChild(card);
     });
@@ -268,7 +343,8 @@ function renderizarWatchlist() {
         validItems.forEach(item => {
             const card = document.createElement('div');
             card.className = 'movie-card';
-            card.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${item.poster_path}" loading="lazy"><div class="watched-indicator">✔</div>`;
+            const finalPosterUrl = item.poster_path.startsWith('http') ? item.poster_path : `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+            card.innerHTML = `<img src="${finalPosterUrl}" loading="lazy"><div class="watched-indicator">✔</div>`;
             card.onclick = () => abrirDetalhes(item.id, item.tipo);
             container.appendChild(card);
         });
@@ -298,6 +374,16 @@ function limparBusca() {
     document.getElementById('search-grid').innerHTML = '';
     ultimoTermoBusca = '';
 }
+document.getElementById('main-search-input').addEventListener('input', (e) => iniciarBusca(e.target.value));
+
+function setSearchFilter(tipo, el) {
+    document.querySelectorAll('.filter-pill').forEach(btn => btn.classList.remove('active'));
+    el.classList.add('active');
+    filtroBuscaAtual = tipo;
+    if (ultimoTermoBusca.length >= 2) {
+        executarBuscaTMDB(ultimoTermoBusca);
+    }
+}
 
 async function executarBuscaTMDB(termo) {
     const data = await fetchTMDB(`/search/multi?query=${encodeURIComponent(termo)}`);
@@ -306,7 +392,6 @@ async function executarBuscaTMDB(termo) {
     container.innerHTML = '';
 
     let filtrados = data.results.filter(item => item.poster_path);
-
     if (filtroBuscaAtual !== 'all') {
         filtrados = filtrados.filter(item => item.media_type === filtroBuscaAtual);
     }
@@ -323,30 +408,42 @@ async function executarBuscaTMDB(termo) {
 // MODAL DE DETALHES & SISTEMA DE REVIEW
 // ==========================================
 async function abrirDetalhes(id, tipo) {
-    const data = await fetchTMDB(`/${tipo}/${id}`);
-    itemSelecionado = {
-        id: id,
-        tipo: tipo,
-        poster_path: data.poster_path,
-        title: data.title || data.name
-    };
+    let data;
+    
+    if (String(id).startsWith('custom_')) {
+        const snapshot = await firebase.database().ref('custom_content/' + id).once('value');
+        data = snapshot.val();
+        if(!data) return;
+    } else {
+        data = await fetchTMDB(`/${tipo}/${id}`);
+    }
 
-    document.getElementById('modal-banner').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${data.backdrop_path || data.poster_path})`;
+    itemSelecionado = { id: id, tipo: tipo, poster_path: data.poster_path, title: data.title || data.name };
+    
+    const finalBackdropUrl = (data.backdrop_path && data.backdrop_path.startsWith('http')) ? data.backdrop_path : `https://image.tmdb.org/t/p/original${data.backdrop_path || data.poster_path}`;
+    
+    document.getElementById('modal-banner').style.backgroundImage = `url(${finalBackdropUrl})`;
     document.getElementById('modal-title').innerText = itemSelecionado.title;
     document.getElementById('modal-overview').innerText = data.overview || "Nenhuma sinopse disponível até o momento.";
     document.getElementById('modal-year').innerText = (data.release_date || data.first_air_date || "N/A").substring(0, 4);
     document.getElementById('modal-rating').innerText = (data.vote_average ? data.vote_average.toFixed(1) : "N/A") + " de Pontuação";
-
-    document.getElementById('modal-play-btn').onclick = () => abrirPlayer(id, tipo);
+    
+    document.getElementById('modal-play-btn').onclick = () => {
+        if (String(id).startsWith('custom_')) {
+            fecharDetalhes();
+            document.getElementById('main-content').style.display = 'none';
+            document.getElementById('videoPlayer').src = data.video_url;
+            document.getElementById('streaming-player-screen').style.display = 'block';
+            alternarScrollBody(true);
+        } else {
+            abrirPlayer(id, tipo);
+        }
+    };
+    
     atualizarBotaoWatchlist();
     carregarReviewUI();
-
     document.getElementById('detailsModal').style.display = 'flex';
     alternarScrollBody(true);
-
-    if (typeof gtag === 'function') {
-        gtag('event', 'view_item', { 'item_id': id, 'item_name': itemSelecionado.title });
-    }
 }
 
 function fecharDetalhes() {
@@ -358,7 +455,6 @@ function fecharDetalhes() {
 function alternarWatchlist() {
     if (!itemSelecionado) return;
     const id = itemSelecionado.id;
-
     if (biblioteca.watchlist[id]) {
         delete biblioteca.watchlist[id];
     } else {
@@ -371,7 +467,6 @@ function alternarWatchlist() {
     }
     atualizarBotaoWatchlist();
     salvarDados();
-
     if(document.getElementById('watchlist-section').style.display === 'block') {
         renderizarWatchlist();
     }
@@ -388,378 +483,190 @@ function atualizarBotaoWatchlist() {
     }
 }
 
+// SISTEMA DE REVIEWS
 function setRating(num) {
     estrelasAtivas = num;
-    const spans = document.getElementById('star-container').children;
-    for (let i = 0; i < spans.length; i++) {
-        if (i < num) {
-            spans[i].classList.add('active');
-        } else {
-            spans[i].classList.remove('active');
-        }
-    }
+    document.querySelectorAll('.star-rating span').forEach((star, index) => {
+        star.classList.toggle('active', index < num);
+    });
+}
+document.querySelectorAll('.star-rating span').forEach(star => {
+    star.addEventListener('click', function() { setRating(this.getAttribute('data-value')); });
+});
+
+function salvarReview() {
+    if(!itemSelecionado) return;
+    const txt = document.getElementById('review-text').value;
+    biblioteca.reviews[itemSelecionado.id] = { nota: estrelasAtivas, texto: txt, timestamp: Date.now() };
+    salvarDados();
+    document.getElementById('review-feedback').style.display = 'block';
+    setTimeout(() => document.getElementById('review-feedback').style.display = 'none', 3000);
 }
 
 function carregarReviewUI() {
+    estrelasAtivas = 0;
     document.getElementById('review-text').value = '';
     setRating(0);
-    if (biblioteca.reviews[itemSelecionado.id]) {
-        setRating(biblioteca.reviews[itemSelecionado.id].rating);
-        document.getElementById('review-text').value = biblioteca.reviews[itemSelecionado.id].text || "";
+    const r = biblioteca.reviews[itemSelecionado.id];
+    if (r) {
+        setRating(r.nota);
+        document.getElementById('review-text').value = r.texto;
     }
 }
 
-function salvarReview() {
-    const nota = estrelasAtivas;
-    const textoComentario = document.getElementById('review-text').value.trim();
-    if (nota === 0) { alert("Selecione pelo menos 1 estrela."); return; }
-    biblioteca.reviews[itemSelecionado.id] = { rating: nota, text: textoComentario };
-    salvarDados(); 
-    alert("Avaliação salva com sucesso!");
-}
-
 // ==========================================
-// REPRODUTOR DE VÍDEO E SELETORES
+// REPRODUTOR DE VÍDEO E CONTROLES
 // ==========================================
-async function abrirPlayer(id, tipo) {
-    const epBox = document.getElementById('episodes-selectors-box');
-    if (tipo === 'tv') { 
-        epBox.style.display = 'flex'; 
-        modoPlayerAtual = 'series'; 
-        await carregarTemporadasNoPlayer(id); 
-    } else { 
-        epBox.style.display = 'none'; 
-        modoPlayerAtual = 'geral'; 
-    }
-    document.getElementById('playerModal').style.display = 'flex';
-    alternarScrollBody(true); 
-    atualizarIframePlayer();
-}
-
-function fecharPlayer() { 
-    document.getElementById('playerModal').style.display = 'none'; 
-    document.getElementById('videoPlayer').src = ""; 
-    alternarScrollBody(false); 
-}
-
-function atualizarIframePlayer() {
-    if (!itemSelecionado) return;
-    const id = itemSelecionado.id;
-    const player = document.getElementById('videoPlayer');
-    if (modoPlayerAtual === 'geral') {
-        player.src = `https://mgeb.top/embed/${id}?player=vidstack#color:${corDestaque}`;
+async function abrirPlayer(id, tipo, isPlay = false) {
+    fecharDetalhes();
+    document.getElementById('main-content').style.display = 'none';
+    
+    if (tipo === 'tv') {
+        document.getElementById('episodes-selectors-box').style.display = 'flex';
+        await carregarTemporadasNoPlayer(id);
+        const playerS = document.getElementById('player-season-select');
+        const playerE = document.getElementById('player-episode-select');
+        document.getElementById('videoPlayer').src = `https://embed.su/embed/tv/${id}/${playerS.value}/${playerE.value}`;
+        
+        playerS.onchange = async () => {
+            await atualizarEpisodiosNoPlayer(id, playerS.value);
+            document.getElementById('videoPlayer').src = `https://embed.su/embed/tv/${id}/${playerS.value}/${document.getElementById('player-episode-select').value}`;
+        };
+        playerE.onchange = () => {
+            document.getElementById('videoPlayer').src = `https://embed.su/embed/tv/${id}/${playerS.value}/${playerE.value}`;
+        };
+        document.getElementById('btn-next-ep').onclick = () => avancarEpisodioNoPlayer(id);
     } else {
-        const season = document.getElementById('player-season-select').value || 1;
-        const episode = document.getElementById('player-episode-select').value || 1;
-        player.src = `https://mgeb.top/embed/tv/${id}/${season}/${episode}?player=vidstack#color:${corDestaque}`;
+        document.getElementById('episodes-selectors-box').style.display = 'none';
+        document.getElementById('videoPlayer').src = `https://embed.su/embed/movie/${id}`;
     }
-}
 
-async function carregarTemporadasNoPlayer(idSerie) {
-    const seasonSelect = document.getElementById('player-season-select');
-    seasonSelect.innerHTML = '<option value="1">Carregando...</option>';
-    try {
-        const dadosSerie = await fetchTMDB(`/tv/${idSerie}`);
-        const numTemporadas = dadosSerie.number_of_seasons || 1;
-        seasonSelect.innerHTML = '';
-        for(let i = 1; i <= numTemporadas; i++) {
-            seasonSelect.innerHTML += `<option value="${i}">Temp ${i}</option>`;
-        }
-        seasonSelect.value = "1";
-        await carregarEpisodiosNoPlayer(idSerie, 1);
-    } catch (e) { console.error("Erro ao carregar temporadas"); }
-}
-
-async function carregarEpisodiosNoPlayer(idSerie, numeroTemporada) {
-    const epSelect = document.getElementById('player-episode-select');
-    epSelect.innerHTML = '<option value="1">Carregando...</option>';
-    try {
-        const tempDados = await fetchTMDB(`/tv/${idSerie}/season/${numeroTemporada}`);
-        const numEpisodios = tempDados.episodes ? tempDados.episodes.length : 20; 
-        epSelect.innerHTML = '';
-        for(let i = 1; i <= numEpisodios; i++) {
-            const epNome = tempDados.episodes[i-1] ? ` - ${tempDados.episodes[i-1].name}` : '';
-            const nomeCurto = epNome.length > 22 ? epNome.substring(0, 22) + '...' : epNome;
-            epSelect.innerHTML += `<option value="${i}">Ep ${i}${nomeCurto}</option>`;
-        }
-        epSelect.value = "1";
-        atualizarIframePlayer();
-    } catch (e) { console.error("Erro ao carregar episodios"); }
-}
-
-function avancarProximoEpisodio() {
-    if (modoPlayerAtual !== 'series') return;
-    const epSelect = document.getElementById('player-episode-select');
-    const seasonSelect = document.getElementById('player-season-select');
-    let epAtual = parseInt(epSelect.value);
-    let maxEps = epSelect.options.length;
-    if (epAtual < maxEps) {
-        epSelect.value = epAtual + 1;
-        atualizarIframePlayer();
-    } else {
-        let tempAtual = parseInt(seasonSelect.value);
-        let maxTemps = seasonSelect.options.length;
-        if (tempAtual < maxTemps) {
-            seasonSelect.value = tempAtual + 1;
-            carregarEpisodiosNoPlayer(itemSelecionado.id, tempAtual + 1);
-        } else {
-            alert("Você chegou ao fim da série!");
-        }
-    }
-}
-
-// ==========================================
-// CONFIGURAÇÃO DO PERFIL
-// ==========================================
-function abrirModalPerfil() {
-    avatarTemp = perfilUsuario.avatar;
-    document.getElementById('edit-username').value = perfilUsuario.username;
-    document.getElementById('input-profile-avatar-url').value = ""; 
-    document.querySelectorAll('.avatar-option').forEach(img => {
-        if (img.src === avatarTemp) img.classList.add('active');
-        else img.classList.remove('active');
-    });
-    document.getElementById('profileModal').style.display = 'flex';
+    document.getElementById('streaming-player-screen').style.display = 'block';
     alternarScrollBody(true);
 }
-function fecharModalPerfil() {
-    document.getElementById('profileModal').style.display = 'none';
+
+async function carregarTemporadasNoPlayer(id) {
+    const data = await fetchTMDB(`/tv/${id}`);
+    const select = document.getElementById('player-season-select');
+    select.innerHTML = '';
+    
+    const validSeasons = data.seasons.filter(s => s.season_number > 0);
+    validSeasons.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.season_number;
+        opt.innerText = `Temp ${s.season_number}`;
+        select.appendChild(opt);
+    });
+    
+    if (validSeasons.length > 0) {
+        await atualizarEpisodiosNoPlayer(id, validSeasons[0].season_number);
+    }
+}
+
+async function atualizarEpisodiosNoPlayer(id, sNum) {
+    const data = await fetchTMDB(`/tv/${id}/season/${sNum}`);
+    const select = document.getElementById('player-episode-select');
+    select.innerHTML = '';
+    
+    if (data.episodes) {
+        data.episodes.forEach(ep => {
+            const opt = document.createElement('option');
+            opt.value = ep.episode_number;
+            opt.innerText = `Ep ${ep.episode_number}`;
+            select.appendChild(opt);
+        });
+    }
+}
+
+function avancarEpisodioNoPlayer(id) {
+    const sSelect = document.getElementById('player-season-select');
+    const eSelect = document.getElementById('player-episode-select');
+    
+    let nextIndex = eSelect.selectedIndex + 1;
+    if (nextIndex < eSelect.options.length) {
+        eSelect.selectedIndex = nextIndex;
+        document.getElementById('videoPlayer').src = `https://embed.su/embed/tv/${id}/${sSelect.value}/${eSelect.value}`;
+    } else {
+        alert("Fim da temporada alcançado.");
+    }
+}
+
+function fecharPlayer() {
+    document.getElementById('streaming-player-screen').style.display = 'none';
+    document.getElementById('videoPlayer').src = '';
+    document.getElementById('main-content').style.display = 'block';
     alternarScrollBody(false);
 }
-function selecionarAvatar(imgElement) {
-    document.getElementById('input-profile-avatar-url').value = "";
-    document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('active'));
-    imgElement.classList.add('active');
-    avatarTemp = imgElement.src;
-}
-function limparSelecaoAvatar() {
-    document.querySelectorAll('.avatar-option').forEach(img => img.classList.remove('active'));
-}
-function salvarPerfil() {
-    const novoNome = document.getElementById('edit-username').value.trim();
-    const urlCustom = document.getElementById('input-profile-avatar-url').value.trim();
-    if (novoNome) perfilUsuario.username = novoNome;
-    perfilUsuario.avatar = urlCustom !== "" ? urlCustom : avatarTemp;
-    salvarDados();
-    atualizarUIUsuario();
-    fecharModalPerfil();
-}
-function atualizarUIUsuario() {
-    document.getElementById('user-avatar-pc').src = perfilUsuario.avatar;
-    document.getElementById('user-avatar-mobile').src = perfilUsuario.avatar;
-    document.getElementById('user-name-pc').innerText = perfilUsuario.username;
-}
+document.getElementById('close-player-btn').addEventListener('click', fecharPlayer);
 
 // ==========================================
-// CINEBOT 2.0 (INTELIGÊNCIA MELHORADA - MUITA VARIEDADE)
-// ==========================================
-const generosBotTMDB = {
-    "ação": 28, "acao": 28, "aventura": 12,
-    "comédia": 35, "comedia": 35, "engraçado": 35,
-    "terror": 27, "assustador": 27, "medo": 27,
-    "romance": 10749, "amor": 10749,
-    "animação": 16, "animacao": 16, "desenho": 16,
-    "ficção": 878, "ficcao": 878, "sci-fi": 878, "espaço": 878,
-    "drama": 18, "triste": 18,
-    "fantasia": 14, "magia": 14,
-    "documentário": 99, "documentario": 99
-};
-
-async function processarMensagemChatbot(mensagemUsuario) {
-    const msg = mensagemUsuario.toLowerCase();
-    let tipoMidia = 'movie'; 
-    let idGenero = null;
-    let queryBusca = null;
-    let isNovo = false; // Flag para Lançamentos Novos
-
-    // 1. O que o usuário quer?
-    if (msg.includes('série') || msg.includes('serie')) tipoMidia = 'tv';
-    else if (msg.includes('anime') || msg.includes('shounen')) { tipoMidia = 'tv'; idGenero = 16; }
-    else if (msg.includes('desenho')) { tipoMidia = 'movie'; idGenero = 16; }
-
-    // 2. Ele quer algo NOVO? (Lançamentos recentes)
-    if (msg.includes('novo') || msg.includes('nova') || msg.includes('lançamento') || msg.includes('recente') || msg.includes('lançamentos')) {
-        isNovo = true;
-    }
-
-    // 3. Ele falou algum gênero?
-    for (const [chave, id] of Object.entries(generosBotTMDB)) {
-        if (msg.includes(chave)) { idGenero = id; break; }
-    }
-
-    // 4. Ele pediu o nome específico?
-    if(msg.includes("o filme ") || msg.includes("a série ")) {
-        queryBusca = msg.split("filme ")[1] || msg.split("série ")[1];
-    }
-
-    // 5. Montar a URL Mágica
-    let url = "";
-    if (queryBusca) {
-        url = `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&language=pt-BR&query=${encodeURIComponent(queryBusca)}`;
-    } else {
-        url = `https://api.themoviedb.org/3/discover/${tipoMidia}?api_key=${TMDB_KEY}&language=pt-BR&sort_by=popularity.desc`;
-        if (idGenero) url += `&with_genres=${idGenero}`;
-        
-        // Se pediu novo, filtra pelo ano atual!
-        if (isNovo) {
-            const anoAtual = new Date().getFullYear();
-            if (tipoMidia === 'movie') {
-                url += `&primary_release_year=${anoAtual}`;
-            } else {
-                url += `&first_air_date_year=${anoAtual}`;
-            }
-        }
-    }
-
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        // Limpar resultados sem imagem
-        let validResults = data.results ? data.results.filter(i => i.poster_path) : [];
-        
-        if (validResults.length > 0) {
-            // O SEGREDO DA VARIEDADE: Pegar até 20 opções e sortear! 
-            // Se for pesquisa pelo nome (queryBusca), pega o 1º resultado direto (índice 0)
-            const limiteSorteio = queryBusca ? 1 : Math.min(20, validResults.length); 
-            const index = Math.floor(Math.random() * limiteSorteio);
-            const rec = validResults[index]; 
-            
-            const titulo = rec.title || rec.name;
-            const sinopse = rec.overview ? rec.overview.substring(0, 130) + "..." : "Sem sinopse.";
-            const imagem = `https://image.tmdb.org/t/p/w200${rec.poster_path}`;
-            const tipoCard = rec.media_type || tipoMidia;
-            
-            const textoResposta = isNovo ? `Aqui está um super lançamento recente para você:` : `Encontrei esta obra fantástica para você:`;
-
-            return `
-                ${textoResposta} <b>${titulo}</b>!
-                <div class="bot-msg-movie-card" onclick="abrirDetalhes(${rec.id}, '${tipoCard}')" style="cursor:pointer;">
-                    <img src="${imagem}" alt="Poster">
-                    <div>
-                        <h4>⭐ ${(rec.vote_average || 0).toFixed(1)}</h4>
-                        <p>${sinopse}</p>
-                    </div>
-                </div>
-                <small style="color:var(--primary-neon); font-weight:bold; cursor:pointer;" onclick="abrirDetalhes(${rec.id}, '${tipoCard}')">▶ Clique aqui para assistir</small>
-            `;
-        } else {
-            return "Desculpe, a minha inteligência artificial não encontrou nada com essas palavras. Tente buscar por um gênero como 'Terror', 'Comédia' ou 'Série de Ação'!";
-        }
-    } catch (error) {
-        return "Opa, as estrelas se alinharam errado e perdi a conexão. Tente novamente! 🔌";
-    }
-}
-
-// ==========================================
-// INICIALIZAÇÃO DE EVENTOS
+// CINEBOT (IA)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('auth-form').addEventListener('submit', handleAuth);
-    document.getElementById('auth-switch-btn').addEventListener('click', toggleAuthMode);
-    document.getElementById('btn-google-auth').addEventListener('click', loginComGoogle);
-    
-    document.getElementById('logout-btn-pc').addEventListener('click', logout);
-    document.getElementById('logout-btn-mobile').addEventListener('click', logout);
-    
-    document.getElementById('nav-home').addEventListener('click', irParaHome);
-    document.getElementById('mob-nav-home').addEventListener('click', irParaHome);
-    document.getElementById('brand-pc').addEventListener('click', irParaHome);
-    document.getElementById('brand-mobile').addEventListener('click', irParaHome);
-    
-    document.getElementById('nav-search').addEventListener('click', irParaBusca);
-    document.getElementById('mob-nav-search').addEventListener('click', irParaBusca);
-    
-    document.getElementById('nav-watchlist').addEventListener('click', irParaWatchlist);
-    document.getElementById('mob-nav-watchlist').addEventListener('click', irParaWatchlist);
-    document.getElementById('explore-catalog-btn').addEventListener('click', irParaHome);
-
-    document.getElementById('nav-chat').addEventListener('click', irParaChat);
-    document.getElementById('mob-nav-chat').addEventListener('click', irParaChat);
-
-    document.getElementById('main-search-input').addEventListener('input', (e) => iniciarBusca(e.target.value));
-    document.getElementById('search-clear').addEventListener('click', limparBusca);
-    document.getElementById('filter-pills-container').addEventListener('click', (e) => {
-        if(e.target.classList.contains('filter-pill')) {
-            document.querySelectorAll('.filter-pill').forEach(pill => pill.classList.remove('active'));
-            e.target.classList.add('active');
-            filtroBuscaAtual = e.target.getAttribute('data-filter');
-            if (ultimoTermoBusca.length >= 2) executarBuscaTMDB(ultimoTermoBusca);
-        }
-    });
-
-    document.getElementById('close-details-btn').addEventListener('click', fecharDetalhes);
-    document.getElementById('btn-watchlist').addEventListener('click', alternarWatchlist);
-    document.getElementById('save-review-btn').addEventListener('click', salvarReview);
-    document.getElementById('star-container').addEventListener('click', (e) => {
-        if(e.target.hasAttribute('data-star')) setRating(parseInt(e.target.getAttribute('data-star')));
-    });
-
-    document.getElementById('profile-trigger-pc').addEventListener('click', abrirModalPerfil);
-    document.getElementById('user-avatar-mobile').addEventListener('click', abrirModalPerfil);
-    document.getElementById('close-profile-btn').addEventListener('click', fecharModalPerfil);
-    document.getElementById('save-profile-btn').addEventListener('click', salvarPerfil);
-    document.getElementById('avatar-grid').addEventListener('click', (e) => {
-        if(e.target.classList.contains('avatar-option')) selecionarAvatar(e.target);
-    });
-    document.getElementById('input-profile-avatar-url').addEventListener('input', limparSelecaoAvatar);
-
-    document.getElementById('close-player-btn').addEventListener('click', fecharPlayer);
-    document.getElementById('player-season-select').addEventListener('change', (e) => {
-        carregarEpisodiosNoPlayer(itemSelecionado.id, e.target.value);
-    });
-    document.getElementById('player-episode-select').addEventListener('change', atualizarIframePlayer);
-    document.getElementById('btn-next-ep').addEventListener('click', avancarProximoEpisodio);
-
-    // ====================================================
-    // CINEBOT 2.0 (Eventos do Chat)
-    // ====================================================
-    const sendBtn = document.getElementById('chatbot-send-btn');
     const chatInput = document.getElementById('chatbot-input');
+    const sendBtn = document.getElementById('chatbot-send-btn');
     const messagesContainer = document.getElementById('chatbot-messages');
     const quickActionsContainer = document.getElementById('chat-quick-actions');
 
-    if(sendBtn && chatInput) {
-        function addMessage(text, sender) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = sender === 'user' ? 'user-msg' : 'bot-msg';
-            msgDiv.innerHTML = text; 
-            messagesContainer.appendChild(msgDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight; 
+    function addMessage(text, type) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = type === 'user' ? 'user-msg' : 'bot-msg';
+        msgDiv.innerHTML = text; 
+        messagesContainer.appendChild(msgDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight; 
+    }
+
+    async function enviarParaOBot(textoOriginal) {
+        const text = textoOriginal.trim();
+        if (!text) return;
+
+        addMessage(text, 'user');
+        chatInput.value = '';
+
+        const loadingId = 'loading-' + Date.now();
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'bot-msg';
+        loadingDiv.id = loadingId;
+        loadingDiv.innerHTML = '<small><i>Pesquisando na matriz...</i></small>';
+        messagesContainer.appendChild(loadingDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        const response = await processarMensagemChatbot(text);
+        
+        document.getElementById(loadingId).remove();
+        addMessage(response, 'bot');
+    }
+
+    sendBtn.addEventListener('click', () => enviarParaOBot(chatInput.value));
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') enviarParaOBot(chatInput.value);
+    });
+
+    quickActionsContainer.addEventListener('click', (e) => {
+        if(e.target.classList.contains('chat-chip')) {
+            enviarParaOBot(e.target.innerText);
         }
+    });
 
-        async function enviarParaOBot(textoOriginal) {
-            const text = textoOriginal.trim();
-            if (!text) return;
-
-            addMessage(text, 'user');
-            chatInput.value = '';
-
-            const loadingId = 'loading-' + Date.now();
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'bot-msg';
-            loadingDiv.id = loadingId;
-            loadingDiv.innerHTML = '<small><i>Pesquisando na matriz...</i></small>';
-            messagesContainer.appendChild(loadingDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-            const response = await processarMensagemChatbot(text);
-            
-            document.getElementById(loadingId).remove();
-            addMessage(response, 'bot');
+    async function processarMensagemChatbot(mensagem) {
+        const msgLower = mensagem.toLowerCase();
+        
+        if (msgLower.includes("oi") || msgLower.includes("olá") || msgLower.includes("ola")) {
+            return "Olá! Sou o CineBot. Posso te recomendar filmes, séries, criar roteiros ou até resumir histórias. O que você gostaria?";
         }
-
-        // Envio Normal
-        sendBtn.addEventListener('click', () => enviarParaOBot(chatInput.value));
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') enviarParaOBot(chatInput.value);
-        });
-
-        // Envio via Botões Rápidos (Chips)
-        quickActionsContainer.addEventListener('click', (e) => {
-            if(e.target.classList.contains('chat-chip')) {
-                enviarParaOBot(e.target.innerText);
-            }
-        });
+        if (msgLower.includes("filme de terror")) {
+            return "Recomendo fortemente 'Hereditário' ou 'Invocação do Mal' para bons sustos!";
+        }
+        if (msgLower.includes("resuma") && msgLower.includes("interestelar")) {
+            return "Interestelar acompanha o ex-piloto da NASA, Cooper, que se junta a uma equipe de pesquisadores para viajar por um buraco de minhoca no espaço, na tentativa de garantir a sobrevivência da humanidade.";
+        }
+        if (msgLower.includes("séries sci-fi")) {
+            return "Algumas das melhores são: 'Ruptura (Severance)', 'Dark', 'Fringe' e 'The Expanse'.";
+        }
+        if (msgLower.includes("animes de ação")) {
+            return "Com certeza assista 'Jujutsu Kaisen', 'Demon Slayer', 'Chainsaw Man' e o clássico 'Hunter x Hunter'.";
+        }
+        
+        return "Neste momento meus circuitos de IA estão em manutenção e estou trabalhando com respostas limitadas! Tente pedir para eu resumir 'Interestelar' ou recomendar animes de ação.";
     }
 });

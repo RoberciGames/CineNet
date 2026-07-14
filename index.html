@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -10,7 +10,7 @@
     <link rel="icon" type="image/png" href="logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="style.css?v=5">
+    <link rel="stylesheet" href="style.css?v=6">
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-73VPBQSWKM"></script>
     <script>
@@ -148,15 +148,44 @@
         </div>
 
         <div id="admin-section" style="display: none; padding: 90px 4% 40px;">
-            <div class="admin-panel-card" style="text-align: center;">
-                <h2>Painel Administrativo Restrito</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 25px; font-size: 14px;">
-                    Sessão iniciada como Administrador Principal da CineNet.
+            <div class="admin-panel-card">
+                <h2 style="text-align: center;">Painel Administrativo Restrito</h2>
+                <p style="color: var(--text-secondary); text-align: center; margin-bottom: 25px; font-size: 14px;">
+                    Sessão iniciada como <strong>Roberci Azevedo</strong>.<br>Os conteúdos adicionados aqui ficarão disponíveis através da barra de pesquisa.
                 </p>
-                <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; border: 1px solid var(--glass-border);">
-                    <p style="margin: 0; color: #fff; font-size: 16px;">👋 Olá, <strong>Roberci Azevedo</strong>!</p>
-                    <p style="margin: 5px 0 0; color: #888; font-size: 13px;">O teu acesso está validado e seguro contra utilizadores externos.</p>
-                </div>
+                
+                <form id="admin-form">
+                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
+                        <input type="text" id="admin-titulo" placeholder=" " required>
+                        <label>Título do Conteúdo</label>
+                    </div>
+                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
+                        <input type="url" id="admin-poster" placeholder=" " required>
+                        <label>URL da Imagem do Poster (Vertical)</label>
+                    </div>
+                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
+                        <input type="url" id="admin-backdrop" placeholder=" " required>
+                        <label>URL da Imagem de Fundo (Horizontal)</label>
+                    </div>
+                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
+                        <input type="url" id="admin-video" placeholder=" " required>
+                        <label>URL de Embed do Vídeo (Servidor Externo)</label>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <textarea id="admin-sinopse" class="admin-textarea" placeholder="Digite a sinopse do conteúdo aqui..." required></textarea>
+                    </div>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <label style="color: #aaa; display: block; margin-bottom: 8px; font-size: 13px;">Selecione a Categoria:</label>
+                        <select id="admin-categoria" class="admin-select">
+                            <option value="movie">🎬 Filme</option>
+                            <option value="tv">📺 Série</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn-cinenet-main">Adicionar ao Catálogo (Pesquisa)</button>
+                </form>
             </div>
         </div>
 
@@ -248,6 +277,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
-    <script src="script.js?v=5"></script>
+    <script src="script.js"></script>
 </body>
 </html>

@@ -37,18 +37,14 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-// Rastreamento Manual para Google Analytics
 function trackVirtualPage(pageTitle, pagePath) {
     if (typeof gtag === 'function') {
-        gtag('event', 'page_view', {
-            page_title: pageTitle,
-            page_path: pagePath
-        });
+        gtag('event', 'page_view', { page_title: pageTitle, page_path: pagePath });
     }
 }
 
 // ==========================================
-// GERENCIAMENTO DE AUTENTICAÇÃO (Email + Google)
+// GERENCIAMENTO DE AUTENTICAÇÃO
 // ==========================================
 function toggleAuthMode() {
     isLoginMode = !isLoginMode;
@@ -80,7 +76,6 @@ function handleAuth(e) {
     }
 }
 
-// Autenticação com o Google (Previne erro de site malicioso)
 function loginComGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
@@ -113,7 +108,7 @@ function logout() {
 }
 
 // ==========================================
-// BANCO DE DADOS (REALTIME DATABASE)
+// BANCO DE DADOS
 // ==========================================
 function carregarDadosUsuario() {
     const user = firebase.auth().currentUser;
@@ -126,7 +121,6 @@ function carregarDadosUsuario() {
                 if (!biblioteca.watchlist) biblioteca.watchlist = {};
                 if (!biblioteca.reviews) biblioteca.reviews = {};
             } else if (user) {
-                // Puxa a foto do Google se for o primeiro login!
                 perfilUsuario.username = user.displayName || "Usuário CineNet";
                 perfilUsuario.avatar = user.photoURL || "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png";
                 salvarDados();
@@ -146,7 +140,7 @@ function salvarDados() {
 }
 
 // ==========================================
-// CONTROLADOR DE FLUXO (ABAS)
+// CONTROLADOR DE FLUXO (ABAS COMPLETAS)
 // ==========================================
 function setNavActive(idDesktop, idMobile) {
     document.querySelectorAll('.nav-menu a, .mobile-bottom-nav a').forEach(el => {
@@ -156,19 +150,24 @@ function setNavActive(idDesktop, idMobile) {
     if(idMobile) document.getElementById(idMobile).classList.add('active-nav');
 }
 
-function irParaHome() {
-    setNavActive('nav-home', 'mob-nav-home');
-    document.getElementById('main-content').style.display = 'block';
+function esconderTodasSessoes() {
+    document.getElementById('main-content').style.display = 'none';
     document.getElementById('search-results-section').style.display = 'none';
     document.getElementById('watchlist-section').style.display = 'none';
+    document.getElementById('chat-section').style.display = 'none'; 
+}
+
+function irParaHome() {
+    setNavActive('nav-home', 'mob-nav-home');
+    esconderTodasSessoes();
+    document.getElementById('main-content').style.display = 'block';
     carregarHome();
     trackVirtualPage("Início", "/home");
 }
 
 function irParaBusca() {
     setNavActive('nav-search', 'mob-nav-search');
-    document.getElementById('main-content').style.display = 'none';
-    document.getElementById('watchlist-section').style.display = 'none';
+    esconderTodasSessoes();
     document.getElementById('search-results-section').style.display = 'block';
     document.getElementById('main-search-input').focus();
     trackVirtualPage("Busca", "/search");
@@ -176,11 +175,18 @@ function irParaBusca() {
 
 function irParaWatchlist() {
     setNavActive('nav-watchlist', 'mob-nav-watchlist');
-    document.getElementById('main-content').style.display = 'none';
-    document.getElementById('search-results-section').style.display = 'none';
+    esconderTodasSessoes();
     document.getElementById('watchlist-section').style.display = 'block';
     renderizarWatchlist();
     trackVirtualPage("Minha Lista", "/watchlist");
+}
+
+function irParaChat() {
+    setNavActive('nav-chat', 'mob-nav-chat');
+    esconderTodasSessoes();
+    document.getElementById('chat-section').style.display = 'block';
+    document.getElementById('chatbot-input').focus();
+    trackVirtualPage("CineBot", "/chat");
 }
 
 function alternarScrollBody(travar) {
@@ -413,11 +419,10 @@ function salvarReview() {
 }
 
 // ==========================================
-// REPRODUTOR DE VÍDEO E SELETORES DINÂMICOS
+// REPRODUTOR DE VÍDEO
 // ==========================================
 async function abrirPlayer(id, tipo) {
     const epBox = document.getElementById('episodes-selectors-box');
-    
     if (tipo === 'tv') { 
         epBox.style.display = 'flex'; 
         modoPlayerAtual = 'series'; 
@@ -426,7 +431,6 @@ async function abrirPlayer(id, tipo) {
         epBox.style.display = 'none'; 
         modoPlayerAtual = 'geral'; 
     }
-
     document.getElementById('playerModal').style.display = 'flex';
     alternarScrollBody(true); 
     atualizarIframePlayer();
@@ -442,7 +446,6 @@ function atualizarIframePlayer() {
     if (!itemSelecionado) return;
     const id = itemSelecionado.id;
     const player = document.getElementById('videoPlayer');
-    
     if (modoPlayerAtual === 'geral') {
         player.src = `https://mgeb.top/embed/${id}?player=vidstack#color:${corDestaque}`;
     } else {
@@ -455,61 +458,47 @@ function atualizarIframePlayer() {
 async function carregarTemporadasNoPlayer(idSerie) {
     const seasonSelect = document.getElementById('player-season-select');
     seasonSelect.innerHTML = '<option value="1">Carregando...</option>';
-    
     try {
         const dadosSerie = await fetchTMDB(`/tv/${idSerie}`);
         const numTemporadas = dadosSerie.number_of_seasons || 1;
-        
         seasonSelect.innerHTML = '';
         for(let i = 1; i <= numTemporadas; i++) {
             seasonSelect.innerHTML += `<option value="${i}">Temp ${i}</option>`;
         }
-        
         seasonSelect.value = "1";
         await carregarEpisodiosNoPlayer(idSerie, 1);
-    } catch (e) {
-        console.error("Erro ao carregar temporadas");
-    }
+    } catch (e) { console.error("Erro ao carregar temporadas"); }
 }
 
 async function carregarEpisodiosNoPlayer(idSerie, numeroTemporada) {
     const epSelect = document.getElementById('player-episode-select');
     epSelect.innerHTML = '<option value="1">Carregando...</option>';
-    
     try {
         const tempDados = await fetchTMDB(`/tv/${idSerie}/season/${numeroTemporada}`);
         const numEpisodios = tempDados.episodes ? tempDados.episodes.length : 20; 
-        
         epSelect.innerHTML = '';
         for(let i = 1; i <= numEpisodios; i++) {
             const epNome = tempDados.episodes[i-1] ? ` - ${tempDados.episodes[i-1].name}` : '';
             const nomeCurto = epNome.length > 22 ? epNome.substring(0, 22) + '...' : epNome;
             epSelect.innerHTML += `<option value="${i}">Ep ${i}${nomeCurto}</option>`;
         }
-        
         epSelect.value = "1";
         atualizarIframePlayer();
-    } catch (e) {
-        console.error("Erro ao carregar episodios");
-    }
+    } catch (e) { console.error("Erro ao carregar episodios"); }
 }
 
 function avancarProximoEpisodio() {
     if (modoPlayerAtual !== 'series') return;
-    
     const epSelect = document.getElementById('player-episode-select');
     const seasonSelect = document.getElementById('player-season-select');
-    
     let epAtual = parseInt(epSelect.value);
     let maxEps = epSelect.options.length;
-    
     if (epAtual < maxEps) {
         epSelect.value = epAtual + 1;
         atualizarIframePlayer();
     } else {
         let tempAtual = parseInt(seasonSelect.value);
         let maxTemps = seasonSelect.options.length;
-        
         if (tempAtual < maxTemps) {
             seasonSelect.value = tempAtual + 1;
             carregarEpisodiosNoPlayer(itemSelecionado.id, tempAtual + 1);
@@ -520,7 +509,7 @@ function avancarProximoEpisodio() {
 }
 
 // ==========================================
-// CONFIGURAÇÃO E CUSTOMIZAÇÃO DO PERFIL
+// CONFIGURAÇÃO DO PERFIL
 // ==========================================
 function abrirModalPerfil() {
     avatarTemp = perfilUsuario.avatar;
@@ -533,23 +522,19 @@ function abrirModalPerfil() {
     document.getElementById('profileModal').style.display = 'flex';
     alternarScrollBody(true);
 }
-
 function fecharModalPerfil() {
     document.getElementById('profileModal').style.display = 'none';
     alternarScrollBody(false);
 }
-
 function selecionarAvatar(imgElement) {
     document.getElementById('input-profile-avatar-url').value = "";
     document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('active'));
     imgElement.classList.add('active');
     avatarTemp = imgElement.src;
 }
-
 function limparSelecaoAvatar() {
     document.querySelectorAll('.avatar-option').forEach(img => img.classList.remove('active'));
 }
-
 function salvarPerfil() {
     const novoNome = document.getElementById('edit-username').value.trim();
     const urlCustom = document.getElementById('input-profile-avatar-url').value.trim();
@@ -559,7 +544,6 @@ function salvarPerfil() {
     atualizarUIUsuario();
     fecharModalPerfil();
 }
-
 function atualizarUIUsuario() {
     document.getElementById('user-avatar-pc').src = perfilUsuario.avatar;
     document.getElementById('user-avatar-mobile').src = perfilUsuario.avatar;
@@ -567,10 +551,88 @@ function atualizarUIUsuario() {
 }
 
 // ==========================================
-// ASSINATURA DE EVENTOS (MAPEAMENTO UNIFICADO)
+// CINEBOT 2.0 (INTELIGÊNCIA MELHORADA)
+// ==========================================
+const generosBotTMDB = {
+    "ação": 28, "acao": 28, "aventura": 12,
+    "comédia": 35, "comedia": 35, "engraçado": 35,
+    "terror": 27, "assustador": 27, "medo": 27,
+    "romance": 10749, "amor": 10749,
+    "animação": 16, "animacao": 16, "desenho": 16,
+    "ficção": 878, "ficcao": 878, "sci-fi": 878, "espaço": 878,
+    "drama": 18, "triste": 18,
+    "fantasia": 14, "magia": 14,
+    "documentário": 99, "documentario": 99
+};
+
+async function processarMensagemChatbot(mensagemUsuario) {
+    const msg = mensagemUsuario.toLowerCase();
+    let tipoMidia = 'movie'; 
+    let idGenero = null;
+    let queryBusca = null;
+
+    // Detectar tipo e gênero básico
+    if (msg.includes('série') || msg.includes('serie')) tipoMidia = 'tv';
+    else if (msg.includes('anime') || msg.includes('shounen')) { tipoMidia = 'tv'; idGenero = 16; }
+    else if (msg.includes('desenho')) { tipoMidia = 'movie'; idGenero = 16; }
+
+    for (const [chave, id] of Object.entries(generosBotTMDB)) {
+        if (msg.includes(chave)) { idGenero = id; break; }
+    }
+
+    // Se o usuário pedir um filme ESPECÍFICO pelo nome (ex: "me recomende o filme batman")
+    if(msg.includes("o filme ") || msg.includes("a série ")) {
+        queryBusca = msg.split("filme ")[1] || msg.split("série ")[1];
+    }
+
+    let url = "";
+    if (queryBusca) {
+        url = `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&language=pt-BR&query=${encodeURIComponent(queryBusca)}`;
+    } else {
+        url = `https://api.themoviedb.org/3/discover/${tipoMidia}?api_key=${TMDB_KEY}&language=pt-BR&sort_by=popularity.desc`;
+        if (idGenero) url += `&with_genres=${idGenero}`;
+    }
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        let validResults = data.results ? data.results.filter(i => i.poster_path) : [];
+        
+        if (validResults.length > 0) {
+            // Pega um item top 5 aleatório (ou o 1º se for busca direta)
+            const index = queryBusca ? 0 : Math.floor(Math.random() * Math.min(5, validResults.length));
+            const rec = validResults[index]; 
+            
+            const titulo = rec.title || rec.name;
+            const sinopse = rec.overview ? rec.overview.substring(0, 130) + "..." : "Sem sinopse.";
+            const imagem = `https://image.tmdb.org/t/p/w200${rec.poster_path}`;
+            const tipoCard = rec.media_type || tipoMidia;
+
+            // Retorna HTML Customizado para o chat
+            return `
+                Encontrei esta obra-prima para você: <b>${titulo}</b>!
+                <div class="bot-msg-movie-card" onclick="abrirDetalhes(${rec.id}, '${tipoCard}')" style="cursor:pointer;">
+                    <img src="${imagem}" alt="Poster">
+                    <div>
+                        <h4>⭐ ${(rec.vote_average || 0).toFixed(1)}</h4>
+                        <p>${sinopse}</p>
+                    </div>
+                </div>
+                <small style="color:var(--primary-neon); font-weight:bold; cursor:pointer;" onclick="abrirDetalhes(${rec.id}, '${tipoCard}')">▶ Clique aqui para assistir</small>
+            `;
+        } else {
+            return "Desculpe, a minha inteligência artificial não encontrou nada com essas palavras. Tente buscar por um gênero como 'Terror', 'Comédia' ou 'Série de Ação'!";
+        }
+    } catch (error) {
+        return "Opa, as estrelas se alinharam errado e perdi a conexão. Tente novamente! 🔌";
+    }
+}
+
+// ==========================================
+// INICIALIZAÇÃO DE EVENTOS
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Autenticação Email/Senha + Google
     document.getElementById('auth-form').addEventListener('submit', handleAuth);
     document.getElementById('auth-switch-btn').addEventListener('click', toggleAuthMode);
     document.getElementById('btn-google-auth').addEventListener('click', loginComGoogle);
@@ -578,18 +640,21 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('logout-btn-pc').addEventListener('click', logout);
     document.getElementById('logout-btn-mobile').addEventListener('click', logout);
     
-    // Navegação entre Seções
     document.getElementById('nav-home').addEventListener('click', irParaHome);
     document.getElementById('mob-nav-home').addEventListener('click', irParaHome);
     document.getElementById('brand-pc').addEventListener('click', irParaHome);
     document.getElementById('brand-mobile').addEventListener('click', irParaHome);
+    
     document.getElementById('nav-search').addEventListener('click', irParaBusca);
     document.getElementById('mob-nav-search').addEventListener('click', irParaBusca);
+    
     document.getElementById('nav-watchlist').addEventListener('click', irParaWatchlist);
     document.getElementById('mob-nav-watchlist').addEventListener('click', irParaWatchlist);
     document.getElementById('explore-catalog-btn').addEventListener('click', irParaHome);
 
-    // Sistema de Busca
+    document.getElementById('nav-chat').addEventListener('click', irParaChat);
+    document.getElementById('mob-nav-chat').addEventListener('click', irParaChat);
+
     document.getElementById('main-search-input').addEventListener('input', (e) => iniciarBusca(e.target.value));
     document.getElementById('search-clear').addEventListener('click', limparBusca);
     document.getElementById('filter-pills-container').addEventListener('click', (e) => {
@@ -601,7 +666,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Detalhes, Watchlist e Review
     document.getElementById('close-details-btn').addEventListener('click', fecharDetalhes);
     document.getElementById('btn-watchlist').addEventListener('click', alternarWatchlist);
     document.getElementById('save-review-btn').addEventListener('click', salvarReview);
@@ -609,7 +673,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if(e.target.hasAttribute('data-star')) setRating(parseInt(e.target.getAttribute('data-star')));
     });
 
-    // Gerenciamento do Perfil
     document.getElementById('profile-trigger-pc').addEventListener('click', abrirModalPerfil);
     document.getElementById('user-avatar-mobile').addEventListener('click', abrirModalPerfil);
     document.getElementById('close-profile-btn').addEventListener('click', fecharModalPerfil);
@@ -619,13 +682,62 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('input-profile-avatar-url').addEventListener('input', limparSelecaoAvatar);
 
-    // Reprodutor de Vídeo (Player)
     document.getElementById('close-player-btn').addEventListener('click', fecharPlayer);
-    
-    // Novos seletores de episódio e temporadas dinâmicos
     document.getElementById('player-season-select').addEventListener('change', (e) => {
         carregarEpisodiosNoPlayer(itemSelecionado.id, e.target.value);
     });
     document.getElementById('player-episode-select').addEventListener('change', atualizarIframePlayer);
     document.getElementById('btn-next-ep').addEventListener('click', avancarProximoEpisodio);
+
+    // ====================================================
+    // CINEBOT 2.0 (Eventos do Chat)
+    // ====================================================
+    const sendBtn = document.getElementById('chatbot-send-btn');
+    const chatInput = document.getElementById('chatbot-input');
+    const messagesContainer = document.getElementById('chatbot-messages');
+    const quickActionsContainer = document.getElementById('chat-quick-actions');
+
+    if(sendBtn && chatInput) {
+        function addMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = sender === 'user' ? 'user-msg' : 'bot-msg';
+            msgDiv.innerHTML = text; 
+            messagesContainer.appendChild(msgDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight; 
+        }
+
+        async function enviarParaOBot(textoOriginal) {
+            const text = textoOriginal.trim();
+            if (!text) return;
+
+            addMessage(text, 'user');
+            chatInput.value = '';
+
+            const loadingId = 'loading-' + Date.now();
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'bot-msg';
+            loadingDiv.id = loadingId;
+            loadingDiv.innerHTML = '<small><i>Pesquisando na matriz...</i></small>';
+            messagesContainer.appendChild(loadingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            const response = await processarMensagemChatbot(text);
+            
+            document.getElementById(loadingId).remove();
+            addMessage(response, 'bot');
+        }
+
+        // Envio Normal
+        sendBtn.addEventListener('click', () => enviarParaOBot(chatInput.value));
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') enviarParaOBot(chatInput.value);
+        });
+
+        // Envio via Botões Rápidos (Chips)
+        quickActionsContainer.addEventListener('click', (e) => {
+            if(e.target.classList.contains('chat-chip')) {
+                enviarParaOBot(e.target.innerText);
+            }
+        });
+    }
 });

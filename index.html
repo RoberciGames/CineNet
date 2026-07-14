@@ -9,7 +9,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/png" href="logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    
+    <link rel="stylesheet" href="style.css?v=2">
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-73VPBQSWKM"></script>
     <script>
@@ -23,38 +24,38 @@
 
     <div id="auth-screen">
         <div class="auth-bg-overlay"></div>
-        <div class="auth-container-netflix">
-            <div class="auth-card-netflix">
-                <div class="app-brand-netflix">
+        <div class="auth-container-cinenet">
+            <div class="auth-card-cinenet">
+                <div class="app-brand-cinenet">
                     <span class="brand-accent">CINE</span><span class="brand-light">NET</span>
                 </div>
                 <h2 id="auth-title">Entrar</h2>
                 
                 <form id="auth-form">
-                    <div class="netflix-input-group" style="margin-bottom: 15px;">
+                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
                         <input type="email" id="auth-email" placeholder=" " required>
                         <label>Email do Usuário</label>
                     </div>
-                    <div class="netflix-input-group" style="margin-bottom: 25px;">
+                    <div class="cinenet-input-group" style="margin-bottom: 25px;">
                         <input type="password" id="auth-password" placeholder=" " required minlength="6">
                         <label>Senha</label>
                     </div>
-                    <button type="submit" class="btn-netflix-main" id="auth-submit-btn">Entrar</button>
+                    <button type="submit" class="btn-cinenet-main" id="auth-submit-btn">Entrar</button>
                     
                     <div style="text-align: center; margin: 15px 0; color: #888; font-size: 13px;">OU</div>
                     
-                    <button type="button" class="btn-google-netflix" id="btn-google-auth">
+                    <button type="button" class="btn-google-cinenet" id="btn-google-auth">
                         <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="Google Logo">
                         Entrar com o Google
                     </button>
                 </form>
 
-                <div class="auth-extra-netflix">
+                <div class="auth-extra-cinenet">
                     <span>Lembrar-me</span>
                     <span>Precisa de ajuda?</span>
                 </div>
-                <div id="auth-error" class="alert-box-netflix" style="display:none;"></div>
-                <div class="auth-footer-netflix">
+                <div id="auth-error" class="alert-box-cinenet" style="display:none;"></div>
+                <div class="auth-footer-cinenet">
                     <span id="auth-switch-text">Novo por aqui?</span>
                     <button type="button" id="auth-switch-btn">Assine agora.</button>
                 </div>
@@ -74,6 +75,7 @@
                         <li><a href="#" class="active" id="nav-home">Início</a></li>
                         <li><a href="#" id="nav-search">Pesquisar</a></li>
                         <li><a href="#" id="nav-watchlist">Minha Lista</a></li>
+                        <li><a href="#" id="nav-chat">CineBot</a></li>
                     </ul>
                 </div>
                 <div class="nav-actions">
@@ -105,6 +107,9 @@
             </a>
             <a href="#" id="mob-nav-watchlist">
                 <span>⭐</span><span>Lista</span>
+            </a>
+            <a href="#" id="mob-nav-chat">
+                <span>🤖</span><span>CineBot</span>
             </a>
         </nav>
 
@@ -179,10 +184,35 @@
             </div>
         </div>
 
-        <div class="modal-netflix" id="detailsModal" style="display:none;">
-            <div class="modal-netflix-content">
-                <div class="close-netflix-modal" id="close-details-btn">✖</div>
-                <div class="modal-netflix-banner" id="modal-banner">
+        <div id="chat-section" style="display:none;">
+            <div class="search-page-container">
+                <h2 style="margin-bottom: 5px; font-size: 28px;">🤖 CineBot 2.0</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">Seu assistente virtual de recomendações super inteligente.</p>
+            </div>
+
+            <div class="chat-full-container">
+                <div class="chatbot-messages" id="chatbot-messages">
+                    <div class="bot-msg">Olá! Sou o CineBot. Como posso ajudar hoje? Digite o que procura ou escolha uma opção abaixo! 👇</div>
+                </div>
+                
+                <div class="chat-quick-actions" id="chat-quick-actions">
+                    <span class="chat-chip">Filme de Ação</span>
+                    <span class="chat-chip">Série de Comédia</span>
+                    <span class="chat-chip">Anime Shounen</span>
+                    <span class="chat-chip">Filme de Terror</span>
+                </div>
+
+                <div class="chatbot-input-area">
+                    <input type="text" id="chatbot-input" placeholder="Ex: Quero um filme de ficção...">
+                    <button id="chatbot-send-btn">Enviar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-cinenet" id="detailsModal" style="display:none;">
+            <div class="modal-cinenet-content">
+                <div class="close-cinenet-modal" id="close-details-btn">✖</div>
+                <div class="modal-cinenet-banner" id="modal-banner">
                     <div class="modal-banner-overlay"></div>
                     <div class="modal-banner-content">
                         <h2 id="modal-title" style="font-size: 32px; font-weight: 800; margin: 0 0 10px;"></h2>
@@ -193,9 +223,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-netflix-info">
+                <div class="modal-cinenet-info">
                     <div class="modal-action-buttons">
-                        <button class="btn-play-netflix-modal" id="modal-play-btn">▶ Assistir</button>
+                        <button class="btn-play-cinenet-modal" id="modal-play-btn">▶ Assistir</button>
                         <button class="btn-secondary-modal" id="btn-watchlist">+ Minha Lista</button>
                     </div>
                     <p class="modal-overview-text" id="modal-overview"></p>
@@ -211,12 +241,12 @@
             </div>
         </div>
 
-        <div class="modal-netflix" id="profileModal" style="display:none;">
-            <div class="modal-netflix-content small-modal">
-                <div class="close-netflix-modal" id="close-profile-btn">✖</div>
+        <div class="modal-cinenet" id="profileModal" style="display:none;">
+            <div class="modal-cinenet-content small-modal">
+                <div class="close-cinenet-modal" id="close-profile-btn">✖</div>
                 <h3 style="margin-bottom: 20px; text-align: center; color: var(--primary-neon);">Editar Perfil</h3>
                 
-                <div class="netflix-input-group" style="margin-bottom: 20px;">
+                <div class="cinenet-input-group" style="margin-bottom: 20px;">
                     <input type="text" id="edit-username" placeholder=" ">
                     <label>Nome de Exibição</label>
                 </div>
@@ -229,12 +259,12 @@
                     <img src="https://prodigits.co.uk/thumb/a/i/1/8/8750800-zstq0hff.jpg" class="avatar-option">
                 </div>
 
-                <div class="netflix-input-group" style="margin-top:20px;">
+                <div class="cinenet-input-group" style="margin-top:20px;">
                     <input type="url" id="input-profile-avatar-url" placeholder=" ">
                     <label>Ou insira a URL de uma imagem externa...</label>
                 </div>
 
-                <button class="btn-netflix-main" style="margin-top: 25px; box-shadow: 0 4px 15px var(--primary-glow);" id="save-profile-btn">Confirmar Alterações</button>
+                <button class="btn-cinenet-main" style="margin-top: 25px; box-shadow: 0 4px 15px var(--primary-glow);" id="save-profile-btn">Confirmar Alterações</button>
             </div>
         </div>
 
@@ -267,6 +297,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="script.js"></script>
+    
+    <script src="script.js?v=2"></script>
 </body>
 </html>

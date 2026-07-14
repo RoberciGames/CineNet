@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -10,7 +10,7 @@
     <link rel="icon" type="image/png" href="logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=5">
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-73VPBQSWKM"></script>
     <script>
@@ -34,11 +34,11 @@
                 <form id="auth-form">
                     <div class="cinenet-input-group" style="margin-bottom: 15px;">
                         <input type="email" id="auth-email" placeholder=" " required>
-                        <label>Email do Usuário</label>
+                        <label>E-mail do Utilizador</label>
                     </div>
                     <div class="cinenet-input-group" style="margin-bottom: 25px;">
                         <input type="password" id="auth-password" placeholder=" " required minlength="6">
-                        <label>Senha</label>
+                        <label>Palavra-passe</label>
                     </div>
                     <button type="submit" class="btn-cinenet-main" id="auth-submit-btn">Entrar</button>
                     
@@ -57,7 +57,7 @@
                 <div id="auth-error" class="alert-box-cinenet" style="display:none;"></div>
                 <div class="auth-footer-cinenet">
                     <span id="auth-switch-text">Novo por aqui?</span>
-                    <button type="button" id="auth-switch-btn">Assine agora.</button>
+                    <button type="button" id="auth-switch-btn">Registe-se agora.</button>
                 </div>
             </div>
         </div>
@@ -74,9 +74,9 @@
                     <ul class="nav-menu">
                         <li><a href="#" class="active" id="nav-home">Início</a></li>
                         <li><a href="#" id="nav-search">Pesquisar</a></li>
-                        <li><a href="#" id="nav-watchlist">Minha Lista</a></li>
+                        <li><a href="#" id="nav-watchlist">A Minha Lista</a></li>
                         <li><a href="#" id="nav-chat">CineBot</a></li>
-                        <li><a href="#" id="nav-admin">🔧 Adicionar</a></li>
+                        <li id="li-nav-admin" style="display: none;"><a href="#" id="nav-admin">🔧 Admin</a></li>
                     </ul>
                 </div>
                 <div class="nav-actions">
@@ -104,7 +104,7 @@
                 <span>🏠</span><span>Início</span>
             </a>
             <a href="#" id="mob-nav-search">
-                <span>🔍</span><span>Buscar</span>
+                <span>🔍</span><span>Procurar</span>
             </a>
             <a href="#" id="mob-nav-watchlist">
                 <span>⭐</span><span>Lista</span>
@@ -112,8 +112,8 @@
             <a href="#" id="mob-nav-chat">
                 <span>🤖</span><span>CineBot</span>
             </a>
-            <a href="#" id="mob-nav-admin">
-                <span>➕</span><span>Adicionar</span>
+            <a href="#" id="mob-nav-admin" style="display: none;">
+                <span>🔧</span><span>Admin</span>
             </a>
         </nav>
 
@@ -122,7 +122,7 @@
                 <div class="hero-overlay-shadow"></div>
                 <div class="hero-inner">
                     <span class="hero-badge">EM DESTAQUE HOJE</span>
-                    <h1 class="hero-title-text" id="hero-title">Carregando...</h1>
+                    <h1 class="hero-title-text" id="hero-title">A carregar...</h1>
                     <p class="hero-description" id="hero-desc"></p>
                     <div style="display:flex; gap:15px;">
                         <button class="btn-primary-action" id="hero-play-btn">▶ Assistir</button>
@@ -132,13 +132,25 @@
             </div>
 
             <div class="main-container">
-                <div class="movie-section" id="custom-content-section" style="display:none;">
-                    <h3 class="section-title">Adicionados por Você</h3>
-                    <div class="movie-row" id="row-custom"></div>
-                </div>
-                
                 <div class="movie-section">
-                    <h3 class="section-title">Bombando na CineNet</h3>
+                    <h3 class="section-title">🎬 Os Meus Filmes Adicionados</h3>
+                    <div class="movie-row" id="row-custom-filmes"></div>
+                </div>
+                <div class="movie-section">
+                    <h3 class="section-title">📺 As Minhas Séries Adicionadas</h3>
+                    <div class="movie-row" id="row-custom-series"></div>
+                </div>
+                <div class="movie-section">
+                    <h3 class="section-title">💥 Animes Exclusivos</h3>
+                    <div class="movie-row" id="row-custom-animes"></div>
+                </div>
+                <div class="movie-section">
+                    <h3 class="section-title">🎨 Desenhos Animados</h3>
+                    <div class="movie-row" id="row-custom-desenhos"></div>
+                </div>
+
+                <div class="movie-section">
+                    <h3 class="section-title">A Bombar na CineNet</h3>
                     <div class="movie-row" id="row-trending"></div>
                 </div>
                 <div class="movie-section">
@@ -152,112 +164,85 @@
             </div>
         </div>
 
-        <div id="admin-section" style="display:none; padding: 90px 4% 40px;">
-            <div style="max-width: 650px; margin: 0 auto; background: var(--surface-panel); border: 1px solid var(--glass-border); padding: 30px; border-radius: 12px; backdrop-filter: blur(12px);">
-                <h2 style="margin-top:0; margin-bottom: 5px; color: #fff;">Cadastrar Novo Conteúdo</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 25px; font-size: 14px;">Adicione títulos personalizados diretamente ao catálogo do seu Firebase.</p>
+        <div id="admin-section" style="display: none; padding: 90px 4% 40px;">
+            <div class="admin-panel-card">
+                <h2>Painel Administrativo Restrito</h2>
+                <p style="color: var(--text-secondary); text-align: center; margin-bottom: 25px; font-size: 14px;">
+                    Adicione novos conteúdos exclusivos divididos por categoria na plataforma.
+                </p>
                 
-                <form id="admin-custom-form" style="display: flex; flex-direction: column; gap: 20px;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div class="cinenet-input-group">
-                            <input type="text" id="admin-title" placeholder=" " required style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);">
-                            <label>Título do Conteúdo</label>
-                        </div>
-                        <div class="cinenet-input-group">
-                            <select id="admin-category" style="width: 100%; height: 56px; background: #222; border: 1px solid var(--glass-border); border-radius: 4px; color: #fff; padding: 0 15px; font-size: 15px; outline: none;">
-                                <option value="movie">🎬 Filme</option>
-                                <option value="tv">📺 Série</option>
-                                <option value="anime">⛩️ Anime</option>
-                                <option value="cartoon">🧸 Desenho Animado</option>
-                            </select>
-                        </div>
+                <form id="admin-form">
+                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
+                        <input type="text" id="admin-titulo" placeholder=" " required>
+                        <label>Título do Conteúdo</label>
                     </div>
-
-                    <div class="cinenet-input-group">
-                        <textarea id="admin-overview" placeholder="Sinopse / Descrição detalhada..." required style="width: 100%; height: 100px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 4px; padding: 15px; color: white; font-family: 'Outfit'; font-size: 15px; resize: none; outline:none;"></textarea>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div class="cinenet-input-group">
-                            <input type="number" id="admin-year" placeholder=" " required style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);">
-                            <label>Ano de Lançamento</label>
-                        </div>
-                        <div class="cinenet-input-group">
-                            <input type="text" id="admin-embed" placeholder=" " required style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);">
-                            <label>URL do Video/Embed (Player)</label>
-                        </div>
-                    </div>
-
-                    <div class="cinenet-input-group">
-                        <input type="url" id="admin-poster" placeholder=" " required style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);">
+                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
+                        <input type="url" id="admin-poster" placeholder=" " required>
                         <label>URL da Imagem do Poster (Vertical)</label>
                     </div>
-
-                    <div class="cinenet-input-group">
-                        <input type="url" id="admin-backdrop" placeholder=" " required style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);">
-                        <label>URL do Wallpaper/Fundo (Horizontal)</label>
+                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
+                        <input type="url" id="admin-backdrop" placeholder=" " required>
+                        <label>URL da Imagem de Fundo (Horizontal)</label>
                     </div>
-
-                    <button type="submit" class="btn-cinenet-main" style="margin-top: 10px; font-weight: 600;">Salvar na Plataforma</button>
+                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
+                        <input type="url" id="admin-video" placeholder=" " required>
+                        <label>URL de Embed do Vídeo (Player/Iframe)</label>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <textarea id="admin-sinopse" class="admin-textarea" placeholder="Digite a sinopse do conteúdo aqui..." required></textarea>
+                    </div>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <label style="color: #aaa; display: block; margin-bottom: 8px; font-size: 13px;">Selecione a Categoria:</label>
+                        <select id="admin-categoria" class="admin-select">
+                            <option value="filmes">Filme</option>
+                            <option value="series">Série</option>
+                            <option value="animes">Anime</option>
+                            <option value="desenhos">Desenho Animado</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn-cinenet-main">Publicar Conteúdo</button>
                 </form>
             </div>
         </div>
 
         <div id="search-results-section" style="display:none;">
-            <div class="search-page-container">
+             <div class="search-page-container">
                 <h2 style="margin-bottom: 5px; font-size: 28px;">Busca Avançada</h2>
-                <p style="color: #888; font-size: 14px; margin-bottom: 20px;">Encontre filmes, séries e animes na CineNet</p>
                 <div class="search-input-wrapper">
                     <span class="search-icon-inside">🔍</span>
                     <input type="text" id="main-search-input" placeholder="Digite o nome do título...">
                     <span class="search-clear-btn" id="search-clear" style="display:none;" onclick="limparBusca()">✖</span>
                 </div>
-                <div class="search-filter-pills">
-                    <div class="filter-pill active" onclick="setSearchFilter('all', this)">Todos</div>
-                    <div class="filter-pill" onclick="setSearchFilter('movie', this)">Filmes</div>
-                    <div class="filter-pill" onclick="setSearchFilter('tv', this)">Séries</div>
-                </div>
             </div>
             <div id="search-empty-state" style="display:none; text-align: center; color: #555; padding: 50px 0;">
-                <div style="font-size: 40px; margin-bottom: 15px;">👀</div>
-                <p>Nenhum resultado encontrado para a sua busca.</p>
+                <p>Nenhum resultado encontrado.</p>
             </div>
             <div class="grid-layout" id="search-grid"></div>
         </div>
 
         <div id="watchlist-section" style="display:none;">
-            <h2 style="margin-bottom: 5px;">Minha Lista</h2>
-            <p style="color: #888; margin-bottom: 30px; font-size: 14px;">Títulos salvos por você para assistir mais tarde.</p>
+            <h2 style="margin-bottom: 5px;">A Minha Lista</h2>
             <div id="watchlist-empty-state" style="display:none; text-align: center; color: #555; padding: 50px 0;">
-                <div style="font-size: 40px; margin-bottom: 15px;">⭐</div>
-                <p>Sua lista está vazia. Adicione conteúdos que você gostar!</p>
+                <p>A tua lista está vazia.</p>
             </div>
             <div class="grid-layout" id="watchlist-grid"></div>
         </div>
 
         <div id="chat-section" style="display:none;">
-            <div class="chatbot-container">
+             <div class="chatbot-container">
                 <div class="chatbot-header">
                     <div class="chatbot-avatar">🤖</div>
-                    <div>
-                        <h3 style="margin:0; font-size: 16px;">CineBot Inteligente</h3>
-                        <span style="font-size: 12px; color: #4ade80;">Online e pronto para ajudar</span>
-                    </div>
+                    <div><h3 style="margin:0; font-size: 16px;">CineBot Inteligente</h3></div>
                 </div>
                 <div class="chatbot-messages" id="chatbot-messages">
-                    <div class="bot-msg">Olá! Eu sou o assistente IA da CineNet. Posso recomendar filmes, criar roteiros, resumir histórias, sugerir animes e muito mais. Como posso te ajudar hoje?</div>
-                </div>
-                <div class="chat-quick-actions" id="chat-quick-actions">
-                    <div class="chat-chip">Recomende um filme de terror</div>
-                    <div class="chat-chip">Quais as melhores séries sci-fi?</div>
-                    <div class="chat-chip">Me indique animes de ação</div>
-                    <div class="chat-chip">Resuma o filme Interestelar</div>
+                    <div class="bot-msg">Olá! Sou o assistente IA da CineNet. Em que posso ajudar?</div>
                 </div>
                 <div class="chatbot-input-area">
-                    <input type="text" id="chatbot-input" placeholder="Pergunte qualquer coisa sobre cinema...">
-                    <button id="chatbot-send-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </button>
+                    <input type="text" id="chatbot-input" placeholder="Pergunta-me algo...">
+                    <button id="chatbot-send-btn">Enviar</button>
                 </div>
             </div>
         </div>
@@ -265,31 +250,18 @@
         <div id="detailsModal" class="modal-overlay">
             <div class="modal-content">
                 <button class="modal-close" onclick="fecharDetalhes()">✖</button>
-                <div class="modal-banner" id="modal-banner">
-                    <div class="modal-banner-gradient"></div>
-                </div>
+                <div class="modal-banner" id="modal-banner"><div class="modal-banner-gradient"></div></div>
                 <div class="modal-body">
                     <h2 class="modal-title" id="modal-title">Título</h2>
                     <div class="modal-meta">
                         <span class="meta-item match-score" id="modal-rating"></span>
                         <span class="meta-item" id="modal-year"></span>
-                        <span class="meta-item hd-badge">4K HDR</span>
                     </div>
                     <div style="display: flex; gap: 10px; margin: 20px 0;">
                         <button class="btn-primary-action" style="flex:1; justify-content:center;" id="modal-play-btn">▶ Assistir Agora</button>
-                        <button class="btn-secondary-modal" style="flex:1;" id="btn-watchlist" onclick="alternarWatchlist()">+ Minha Lista</button>
+                        <button class="btn-secondary-modal" style="flex:1;" id="btn-watchlist" onclick="alternarWatchlist()">+ A Minha Lista</button>
                     </div>
                     <p class="modal-overview" id="modal-overview"></p>
-                    
-                    <div class="review-section-box">
-                        <h4 style="margin: 0 0 10px; font-weight: 500;">Sua Avaliação Pessoal</h4>
-                        <div class="star-rating" id="star-rating-container">
-                            <span data-value="1">★</span><span data-value="2">★</span><span data-value="3">★</span><span data-value="4">★</span><span data-value="5">★</span>
-                        </div>
-                        <textarea class="review-textarea" id="review-text" placeholder="Escreva o que você achou..."></textarea>
-                        <button class="btn-secondary-modal" style="width:100%; border-color: rgba(255,255,255,0.2);" onclick="salvarReview()">Salvar Avaliação</button>
-                        <div id="review-feedback" style="display:none; color: #4ade80; font-size: 13px; text-align:center; margin-top:10px;">Avaliação salva com sucesso!</div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -324,6 +296,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
-    <script src="script.js?v=3"></script>
+    <script src="script.js?v=5"></script>
 </body>
 </html>

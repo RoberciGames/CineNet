@@ -3,24 +3,20 @@
 // ==========================================
 const TMDB_KEY = '17c56e3825d7fbae6581866083d0d778'; 
 let itemSelecionado = null;
-let estrelasAtivas = 0;
 let debounceTimer; 
 let currentUserUID = null;
 let filtroBuscaAtual = 'all';
 let ultimoTermoBusca = '';
-let modoPlayerAtual = 'geral';
-const corDestaque = 'e50914';
-
-let perfilUsuario = {
-    username: "CineNet User",
-    avatar: "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png"
-};
-let avatarTemp = "";
 let biblioteca = { watchlist: {}, reviews: {} };
 let isLoginMode = true;
 
 // ==========================================
-// CONFIGURAÇÃO DO FIREBASE E GA4
+// E-MAIL DE ADMINISTRADOR (EXCLUSIVO)
+// ==========================================
+const ADMIN_EMAIL = "roberci.azevedo@academico.ifpb.edu.br"; 
+
+// ==========================================
+// CONFIGURAÇÃO DO FIREBASE
 // ==========================================
 const firebaseConfig = {
     apiKey: "AIzaSyAfPWvnGdvPKZ_lrVwOuag14WHLY9AgML8",
@@ -32,7 +28,6 @@ const firebaseConfig = {
     appId: "1:1098247355110:web:c9f867826f26b0ef171927",
     measurementId: "G-73VPBQSWKM"
 };
-
 firebase.initializeApp(firebaseConfig);
 
 function trackVirtualPage(pageTitle, pagePath) {
@@ -42,60 +37,50 @@ function trackVirtualPage(pageTitle, pagePath) {
 }
 
 // ==========================================
-// GERENCIAMENTO DE AUTENTICAÇÃO
+// AUTENTICAÇÃO E VERIFICAÇÃO DE ADMIN
 // ==========================================
 function toggleAuthMode() {
     isLoginMode = !isLoginMode;
-    document.getElementById('auth-title').innerText = isLoginMode ? 'Entrar' : 'Cadastrar';
-    document.getElementById('auth-submit-btn').innerText = isLoginMode ? 'Entrar' : 'Cadastrar';
+    document.getElementById('auth-title').innerText = isLoginMode ? 'Entrar' : 'Registar';
+    document.getElementById('auth-submit-btn').innerText = isLoginMode ? 'Entrar' : 'Registar';
     document.getElementById('auth-switch-text').innerText = isLoginMode ? 'Novo por aqui?' : 'Já possui uma conta?';
-    document.getElementById('auth-switch-btn').innerText = isLoginMode ? 'Assine agora.' : 'Entrar agora.';
+    document.getElementById('auth-switch-btn').innerText = isLoginMode ? 'Registe-se agora.' : 'Entrar agora.';
     document.getElementById('auth-error').style.display = 'none';
 }
-
 document.getElementById('auth-switch-btn').addEventListener('click', toggleAuthMode);
-document.getElementById('auth-form').addEventListener('submit', handleAuth);
-document.getElementById('btn-google-auth').addEventListener('click', loginComGoogle);
 
-function handleAuth(e) {
+document.getElementById('auth-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
-    const errorBox = document.getElementById('auth-error');
-
     if (isLoginMode) {
-        firebase.auth().signInWithEmailAndPassword(email, password)
-            .catch(error => {
-                errorBox.innerText = "Erro ao entrar: Verifique as credenciais digitadas.";
-                errorBox.style.display = 'block';
-            });
+        firebase.auth().signInWithEmailAndPassword(email, password).catch(err => alert(err.message));
     } else {
-        firebase.auth().createUserWithEmailAndPassword(email, password)
-            .catch(error => {
-                errorBox.innerText = "Erro ao cadastrar: " + error.message;
-                errorBox.style.display = 'block';
-            });
+        firebase.auth().createUserWithEmailAndPassword(email, password).catch(err => alert(err.message));
     }
-}
+});
 
-function loginComGoogle() {
+document.getElementById('btn-google-auth').addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
-    const errorBox = document.getElementById('auth-error');
+    firebase.auth().signInWithPopup(provider).catch(err => alert(err.message));
+});
 
-    firebase.auth().signInWithPopup(provider)
-        .catch((error) => {
-            console.error("Erro no login do Google:", error);
-            errorBox.innerText = "Erro ao entrar com Google: " + error.message;
-            errorBox.style.display = 'block';
-        });
-}
-
+// Listener de Login - VERIFICAÇÃO DO E-MAIL DO ADMIN AQUI
 firebase.auth().onAuthStateChanged(user => {
     if (user) {
         currentUserUID = user.uid;
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('app-content').style.display = 'block';
+        
+        // --- CONTROLO RESTRITO POR E-MAIL ---
+        if (user.email === ADMIN_EMAIL) {
+            document.getElementById('li-nav-admin').style.display = 'block';
+            document.getElementById('mob-nav-admin').style.display = 'flex';
+        } else {
+            document.getElementById('li-nav-admin').style.display = 'none';
+            document.getElementById('mob-nav-admin').style.display = 'none';
+        }
+        
         carregarDadosUsuario();
         irParaHome();
     } else {
@@ -109,51 +94,21 @@ function logout() { firebase.auth().signOut(); }
 document.getElementById('logout-btn-pc').addEventListener('click', logout);
 document.getElementById('logout-btn-mobile').addEventListener('click', logout);
 
-// ==========================================
-// BANCO DE DADOS
-// ==========================================
 function carregarDadosUsuario() {
-    const user = firebase.auth().currentUser;
-    firebase.database().ref('users/' + currentUserUID).once('value')
-        .then(snapshot => {
-            const data = snapshot.val();
-            if (data) {
-                if (data.perfil) perfilUsuario = data.perfil;
-                if (data.biblioteca) biblioteca = data.biblioteca;
-                if (!biblioteca.watchlist) biblioteca.watchlist = {};
-                if (!biblioteca.reviews) biblioteca.reviews = {};
-            } else if (user) {
-                perfilUsuario.username = user.displayName || "Usuário CineNet";
-                perfilUsuario.avatar = user.photoURL || "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png";
-                salvarDados();
-            }
-            atualizarUIUsuario();
-        })
-        .catch(error => console.error("Erro ao sincronizar dados:", error));
+    firebase.database().ref('users/' + currentUserUID).once('value').then(snapshot => {
+        if (snapshot.val() && snapshot.val().biblioteca) biblioteca = snapshot.val().biblioteca;
+        if (!biblioteca.watchlist) biblioteca.watchlist = {};
+    });
 }
-
 function salvarDados() {
-    if (currentUserUID) {
-        firebase.database().ref('users/' + currentUserUID).set({
-            perfil: perfilUsuario,
-            biblioteca: biblioteca
-        });
-    }
-}
-
-function atualizarUIUsuario() {
-    document.getElementById('user-avatar-pc').src = perfilUsuario.avatar;
-    document.getElementById('user-avatar-mobile').src = perfilUsuario.avatar;
-    document.getElementById('user-name-pc').innerText = perfilUsuario.username;
+    if (currentUserUID) firebase.database().ref('users/' + currentUserUID + '/biblioteca').set(biblioteca);
 }
 
 // ==========================================
-// CONTROLADOR DE FLUXO (ABAS)
+// CONTROLADOR DE FLUXO (Navegação das Abas)
 // ==========================================
 function setNavActive(idDesktop, idMobile) {
-    document.querySelectorAll('.nav-menu a, .mobile-bottom-nav a').forEach(el => {
-        el.classList.remove('active', 'active-nav');
-    });
+    document.querySelectorAll('.nav-menu a, .mobile-bottom-nav a').forEach(el => el.classList.remove('active', 'active-nav'));
     if(idDesktop) document.getElementById(idDesktop).classList.add('active');
     if(idMobile) document.getElementById(idMobile).classList.add('active-nav');
 }
@@ -163,7 +118,7 @@ function esconderTodasSessoes() {
     document.getElementById('search-results-section').style.display = 'none';
     document.getElementById('watchlist-section').style.display = 'none';
     document.getElementById('chat-section').style.display = 'none'; 
-    document.getElementById('admin-section').style.display = 'none'; // ABA ADMIN INCLUÍDA
+    document.getElementById('admin-section').style.display = 'none';
 }
 
 function irParaHome() {
@@ -171,7 +126,21 @@ function irParaHome() {
     esconderTodasSessoes();
     document.getElementById('main-content').style.display = 'block';
     carregarHome();
+    carregarConteudosCustomizados();
     trackVirtualPage("Início", "/home");
+}
+
+function irParaAdmin() {
+    const user = firebase.auth().currentUser;
+    if (!user || user.email !== ADMIN_EMAIL) {
+        alert("Acesso Negado: Área restrita ao dono da plataforma.");
+        irParaHome();
+        return;
+    }
+    setNavActive('nav-admin', 'mob-nav-admin');
+    esconderTodasSessoes();
+    document.getElementById('admin-section').style.display = 'block';
+    trackVirtualPage("Administração", "/admin");
 }
 
 function irParaBusca() {
@@ -187,7 +156,7 @@ function irParaWatchlist() {
     esconderTodasSessoes();
     document.getElementById('watchlist-section').style.display = 'block';
     renderizarWatchlist();
-    trackVirtualPage("Minha Lista", "/watchlist");
+    trackVirtualPage("A Minha Lista", "/watchlist");
 }
 
 function irParaChat() {
@@ -198,16 +167,10 @@ function irParaChat() {
     trackVirtualPage("CineBot", "/chat");
 }
 
-function irParaAdmin() {
-    setNavActive('nav-admin', 'mob-nav-admin');
-    esconderTodasSessoes();
-    document.getElementById('admin-section').style.display = 'block';
-    trackVirtualPage("Administração", "/admin");
-}
-
-// Event Listeners de Navegação
 document.getElementById('nav-home').addEventListener('click', irParaHome);
 document.getElementById('mob-nav-home').addEventListener('click', irParaHome);
+document.getElementById('nav-admin').addEventListener('click', irParaAdmin);
+document.getElementById('mob-nav-admin').addEventListener('click', irParaAdmin);
 document.getElementById('nav-search').addEventListener('click', irParaBusca);
 document.getElementById('mob-nav-search').addEventListener('click', irParaBusca);
 document.getElementById('nav-watchlist').addEventListener('click', irParaWatchlist);
@@ -215,119 +178,157 @@ document.getElementById('mob-nav-watchlist').addEventListener('click', irParaWat
 document.getElementById('nav-chat').addEventListener('click', irParaChat);
 document.getElementById('mob-nav-chat').addEventListener('click', irParaChat);
 
-document.getElementById('nav-admin').addEventListener('click', irParaAdmin);
-document.getElementById('mob-nav-admin').addEventListener('click', irParaAdmin);
-
 function alternarScrollBody(travar) {
     document.body.classList.toggle('modal-open', travar);
-    if(travar) {
-        const larguraScroll = window.innerWidth - document.documentElement.clientWidth;
-        document.body.style.paddingRight = `${larguraScroll}px`;
-    } else {
-        document.body.style.paddingRight = '0px';
-    }
 }
 
 // ==========================================
-// ABA ADMIN: CADASTRO DE CONTEÚDO
+// SISTEMA DO ADMINISTRADOR (Gravar no Firebase)
 // ==========================================
-document.getElementById('admin-custom-form').addEventListener('submit', function(e) {
+document.getElementById('admin-form').addEventListener('submit', function(e) {
     e.preventDefault();
+    const user = firebase.auth().currentUser;
     
+    if (!user || user.email !== ADMIN_EMAIL) {
+        alert("Ação não autorizada!");
+        return;
+    }
+
+    const titulo = document.getElementById('admin-titulo').value;
+    const poster = document.getElementById('admin-poster').value;
+    const backdrop = document.getElementById('admin-backdrop').value;
+    const video = document.getElementById('admin-video').value;
+    const sinopse = document.getElementById('admin-sinopse').value;
+    const categoria = document.getElementById('admin-categoria').value;
+
     const novoConteudo = {
-        id: "custom_" + Date.now(),
-        title: document.getElementById('admin-title').value,
-        tipo: document.getElementById('admin-category').value,
-        overview: document.getElementById('admin-overview').value,
-        release_date: document.getElementById('admin-year').value,
-        video_url: document.getElementById('admin-embed').value,
-        poster_path: document.getElementById('admin-poster').value,
-        backdrop_path: document.getElementById('admin-backdrop').value,
-        vote_average: 10.0, 
+        id: 'custom_' + Date.now(),
+        title: titulo,
+        poster_path: poster,
+        backdrop_path: backdrop,
+        video_url: video,
+        overview: sinopse,
+        media_type: (categoria === 'filmes' ? 'movie' : 'tv'),
+        categoria: categoria,
         adicionadoEm: Date.now()
     };
 
-    firebase.database().ref('custom_content/' + novoConteudo.id).set(novoConteudo)
+    firebase.database().ref('conteudos/' + categoria).push(novoConteudo)
         .then(() => {
-            alert("Sucesso! Conteúdo adicionado permanentemente à CineNet.");
-            document.getElementById('admin-custom-form').reset();
-            irParaHome();
+            alert("Sucesso! Conteúdo adicionado na categoria: " + categoria);
+            document.getElementById('admin-form').reset();
+            carregarConteudosCustomizados();
         })
-        .catch(error => {
-            alert("Erro ao salvar dados no Firebase: " + error.message);
-        });
+        .catch(error => alert("Erro ao guardar na base de dados: " + error.message));
 });
 
+function carregarConteudosCustomizados() {
+    const categorias = ['filmes', 'series', 'animes', 'desenhos'];
+    categorias.forEach(cat => {
+        firebase.database().ref('conteudos/' + cat).once('value').then(snapshot => {
+            const container = document.getElementById('row-custom-' + cat);
+            if (!container) return;
+            container.innerHTML = '';
+            const data = snapshot.val();
+            
+            if (data) {
+                Object.values(data).reverse().forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'movie-card';
+                    const indicator = biblioteca.watchlist[item.id] ? '<div class="watched-indicator">✔</div>' : '';
+                    card.innerHTML = `<img src="${item.poster_path}" alt="Poster" loading="lazy" style="height: 195px; object-fit: cover; border-radius: 6px;">${indicator}`;
+                    card.onclick = () => abrirDetalhesCustom(item);
+                    container.appendChild(card);
+                });
+            } else {
+                container.innerHTML = '<p style="color:#555; font-size:13px; font-style:italic; padding-left: 10px;">Sem títulos nesta categoria.</p>';
+            }
+        });
+    });
+}
 
 // ==========================================
-// CONSUMO TMDB & RENDERIZAÇÃO
+// RENDERIZAÇÃO, DETALHES E PESQUISA
 // ==========================================
 async function fetchTMDB(endpoint) {
     try {
-        const url = `https://api.themoviedb.org/3${endpoint}${endpoint.includes('?') ? '&' : '?'}api_key=${TMDB_KEY}&language=pt-BR`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Erro na resposta TMDB");
+        const response = await fetch(`https://api.themoviedb.org/3${endpoint}${endpoint.includes('?') ? '&' : '?'}api_key=${TMDB_KEY}&language=pt-PT`);
         return await response.json();
-    } catch (error) {
-        return { results: [] };
-    }
+    } catch { return { results: [] }; }
 }
 
 async function carregarHome() {
     const [dataTrending, dataMovies, dataSeries] = await Promise.all([
-        fetchTMDB('/trending/all/day'),
-        fetchTMDB('/movie/popular'),
-        fetchTMDB('/tv/popular')
+        fetchTMDB('/trending/all/day'), fetchTMDB('/movie/popular'), fetchTMDB('/tv/popular')
     ]);
 
     if (dataTrending.results.length > 0) {
-        const heroItem = dataTrending.results[0];
-        document.getElementById('hero-banner').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${heroItem.backdrop_path})`;
-        document.getElementById('hero-title').innerText = heroItem.title || heroItem.name;
-        document.getElementById('hero-desc').innerText = heroItem.overview || "Nenhuma descrição disponível para este conteúdo.";
-        
-        document.getElementById('hero-play-btn').onclick = () => abrirPlayer(heroItem.id, heroItem.media_type || 'movie');
-        document.getElementById('hero-info-btn').onclick = () => abrirDetalhes(heroItem.id, heroItem.media_type || 'movie');
+        const hero = dataTrending.results[0];
+        document.getElementById('hero-banner').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${hero.backdrop_path})`;
+        document.getElementById('hero-title').innerText = hero.title || hero.name;
+        document.getElementById('hero-desc').innerText = hero.overview || "";
+        document.getElementById('hero-play-btn').onclick = () => abrirPlayer(hero.id, hero.media_type || 'movie');
+        document.getElementById('hero-info-btn').onclick = () => abrirDetalhes(hero.id, hero.media_type || 'movie');
     }
-
     renderCards(dataTrending.results, 'row-trending');
     renderCards(dataMovies.results, 'row-movies', 'movie');
     renderCards(dataSeries.results, 'row-series', 'tv');
-
-    // BUSCA OS CONTEÚDOS CRIADOS NO ADMIN
-    firebase.database().ref('custom_content').orderByChild('adicionadoEm').limitToLast(20).once('value')
-        .then(snapshot => {
-            const dados = snapshot.val();
-            if (dados) {
-                const listaCustom = Object.values(dados).reverse();
-                document.getElementById('custom-content-section').style.display = 'block';
-                renderCards(listaCustom, 'row-custom');
-            } else {
-                document.getElementById('custom-content-section').style.display = 'none';
-            }
-        });
 }
 
 function renderCards(items, containerId, forceType = null) {
     const container = document.getElementById(containerId);
     if(!container) return;
     container.innerHTML = '';
-
     items.forEach(item => {
         if (!item.poster_path) return;
-        const tipoFinal = forceType || item.media_type || item.tipo || 'movie';
         const card = document.createElement('div');
         card.className = 'movie-card';
-        
         const indicator = biblioteca.watchlist[item.id] ? '<div class="watched-indicator">✔</div>' : '';
-        const finalPosterUrl = item.poster_path.startsWith('http') ? item.poster_path : `https://image.tmdb.org/t/p/w500${item.poster_path}`;
-        
-        card.innerHTML = `<img src="${finalPosterUrl}" alt="Poster" loading="lazy">${indicator}`;
-        card.onclick = () => abrirDetalhes(item.id, tipoFinal);
+        card.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${item.poster_path}" loading="lazy">${indicator}`;
+        card.onclick = () => abrirDetalhes(item.id, forceType || item.media_type || 'movie');
         container.appendChild(card);
     });
 }
 
+// Pesquisa
+function iniciarBusca(termo) {
+    clearTimeout(debounceTimer);
+    document.getElementById('search-clear').style.display = termo.length > 0 ? 'block' : 'none';
+    ultimoTermoBusca = termo;
+
+    debounceTimer = setTimeout(() => {
+        if (termo.length < 2) {
+            document.getElementById('search-grid').innerHTML = '';
+            return;
+        }
+        executarBuscaTMDB(termo);
+    }, 600);
+}
+
+function limparBusca() {
+    document.getElementById('main-search-input').value = '';
+    document.getElementById('search-clear').style.display = 'none';
+    document.getElementById('search-grid').innerHTML = '';
+    ultimoTermoBusca = '';
+}
+document.getElementById('main-search-input').addEventListener('input', (e) => iniciarBusca(e.target.value));
+
+async function executarBuscaTMDB(termo) {
+    const data = await fetchTMDB(`/search/multi?query=${encodeURIComponent(termo)}`);
+    const container = document.getElementById('search-grid');
+    const emptyState = document.getElementById('search-empty-state');
+    container.innerHTML = '';
+
+    let filtrados = data.results.filter(item => item.poster_path);
+    if (filtrados.length === 0) {
+        emptyState.style.display = 'block';
+    } else {
+        emptyState.style.display = 'none';
+        renderCards(filtrados, 'search-grid');
+    }
+}
+
+// Watchlist
 function renderizarWatchlist() {
     const container = document.getElementById('watchlist-grid');
     const emptyState = document.getElementById('watchlist-empty-state');
@@ -351,104 +352,41 @@ function renderizarWatchlist() {
     }
 }
 
-// ==========================================
-// ENGINE DE PESQUISA AVANÇADA
-// ==========================================
-function iniciarBusca(termo) {
-    clearTimeout(debounceTimer);
-    document.getElementById('search-clear').style.display = termo.length > 0 ? 'block' : 'none';
-    ultimoTermoBusca = termo;
-
-    debounceTimer = setTimeout(() => {
-        if (termo.length < 2) {
-            document.getElementById('search-grid').innerHTML = '';
-            return;
-        }
-        executarBuscaTMDB(termo);
-    }, 600);
-}
-
-function limparBusca() {
-    document.getElementById('main-search-input').value = '';
-    document.getElementById('search-clear').style.display = 'none';
-    document.getElementById('search-grid').innerHTML = '';
-    ultimoTermoBusca = '';
-}
-document.getElementById('main-search-input').addEventListener('input', (e) => iniciarBusca(e.target.value));
-
-function setSearchFilter(tipo, el) {
-    document.querySelectorAll('.filter-pill').forEach(btn => btn.classList.remove('active'));
-    el.classList.add('active');
-    filtroBuscaAtual = tipo;
-    if (ultimoTermoBusca.length >= 2) {
-        executarBuscaTMDB(ultimoTermoBusca);
-    }
-}
-
-async function executarBuscaTMDB(termo) {
-    const data = await fetchTMDB(`/search/multi?query=${encodeURIComponent(termo)}`);
-    const container = document.getElementById('search-grid');
-    const emptyState = document.getElementById('search-empty-state');
-    container.innerHTML = '';
-
-    let filtrados = data.results.filter(item => item.poster_path);
-    if (filtroBuscaAtual !== 'all') {
-        filtrados = filtrados.filter(item => item.media_type === filtroBuscaAtual);
-    }
-
-    if (filtrados.length === 0) {
-        emptyState.style.display = 'block';
-    } else {
-        emptyState.style.display = 'none';
-        renderCards(filtrados, 'search-grid');
-    }
-}
-
-// ==========================================
-// MODAL DE DETALHES & SISTEMA DE REVIEW
-// ==========================================
-async function abrirDetalhes(id, tipo) {
-    let data;
-    
-    if (String(id).startsWith('custom_')) {
-        const snapshot = await firebase.database().ref('custom_content/' + id).once('value');
-        data = snapshot.val();
-        if(!data) return;
-    } else {
-        data = await fetchTMDB(`/${tipo}/${id}`);
-    }
-
-    itemSelecionado = { id: id, tipo: tipo, poster_path: data.poster_path, title: data.title || data.name };
-    
-    const finalBackdropUrl = (data.backdrop_path && data.backdrop_path.startsWith('http')) ? data.backdrop_path : `https://image.tmdb.org/t/p/original${data.backdrop_path || data.poster_path}`;
-    
-    document.getElementById('modal-banner').style.backgroundImage = `url(${finalBackdropUrl})`;
-    document.getElementById('modal-title').innerText = itemSelecionado.title;
-    document.getElementById('modal-overview').innerText = data.overview || "Nenhuma sinopse disponível até o momento.";
-    document.getElementById('modal-year').innerText = (data.release_date || data.first_air_date || "N/A").substring(0, 4);
-    document.getElementById('modal-rating').innerText = (data.vote_average ? data.vote_average.toFixed(1) : "N/A") + " de Pontuação";
-    
+// Modal para Conteúdo Customizado
+function abrirDetalhesCustom(item) {
+    itemSelecionado = { id: item.id, tipo: item.media_type, poster_path: item.poster_path, title: item.title, video_url: item.video_url };
+    document.getElementById('modal-banner').style.backgroundImage = `url(${item.backdrop_path || item.poster_path})`;
+    document.getElementById('modal-title').innerText = item.title;
+    document.getElementById('modal-overview').innerText = item.overview || "Sem sinopse disponível.";
+    document.getElementById('modal-year').innerText = "Exclusivo";
+    document.getElementById('modal-rating').innerText = "CineNet Premium";
     document.getElementById('modal-play-btn').onclick = () => {
-        if (String(id).startsWith('custom_')) {
-            fecharDetalhes();
-            document.getElementById('main-content').style.display = 'none';
-            document.getElementById('videoPlayer').src = data.video_url;
-            document.getElementById('streaming-player-screen').style.display = 'block';
-            alternarScrollBody(true);
-        } else {
-            abrirPlayer(id, tipo);
-        }
+        fecharDetalhes();
+        document.getElementById('videoPlayer').src = item.video_url;
+        document.getElementById('streaming-player-screen').style.display = 'block';
+        alternarScrollBody(true);
     };
-    
     atualizarBotaoWatchlist();
-    carregarReviewUI();
+    document.getElementById('detailsModal').style.display = 'flex';
+    alternarScrollBody(true);
+}
+
+// Modal para Conteúdo TMDB
+async function abrirDetalhes(id, tipo) {
+    const data = await fetchTMDB(`/${tipo}/${id}`);
+    itemSelecionado = { id: id, tipo: tipo, poster_path: data.poster_path, title: data.title || data.name };
+    document.getElementById('modal-banner').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${data.backdrop_path})`;
+    document.getElementById('modal-title').innerText = itemSelecionado.title;
+    document.getElementById('modal-overview').innerText = data.overview || "";
+    document.getElementById('modal-year').innerText = (data.release_date || data.first_air_date || "N/A").substring(0, 4);
+    document.getElementById('modal-play-btn').onclick = () => abrirPlayer(id, tipo);
+    atualizarBotaoWatchlist();
     document.getElementById('detailsModal').style.display = 'flex';
     alternarScrollBody(true);
 }
 
 function fecharDetalhes() {
     document.getElementById('detailsModal').style.display = 'none';
-    itemSelecionado = null;
     alternarScrollBody(false);
 }
 
@@ -458,15 +396,11 @@ function alternarWatchlist() {
     if (biblioteca.watchlist[id]) {
         delete biblioteca.watchlist[id];
     } else {
-        biblioteca.watchlist[id] = {
-            id: id,
-            tipo: itemSelecionado.tipo,
-            poster_path: itemSelecionado.poster_path,
-            adicionadoEm: Date.now()
-        };
+        biblioteca.watchlist[id] = { id: id, tipo: itemSelecionado.tipo, poster_path: itemSelecionado.poster_path, adicionadoEm: Date.now() };
     }
     atualizarBotaoWatchlist();
     salvarDados();
+    
     if(document.getElementById('watchlist-section').style.display === 'block') {
         renderizarWatchlist();
     }
@@ -474,71 +408,42 @@ function alternarWatchlist() {
 
 function atualizarBotaoWatchlist() {
     const btn = document.getElementById('btn-watchlist');
-    if (biblioteca.watchlist[itemSelecionado.id]) {
-        btn.innerText = "✔ Na Minha Lista";
-        btn.style.background = "rgba(255,255,255,0.2)";
-    } else {
-        btn.innerText = "+ Minha Lista";
-        btn.style.background = "rgba(255,255,255,0.1)";
-    }
-}
-
-// SISTEMA DE REVIEWS
-function setRating(num) {
-    estrelasAtivas = num;
-    document.querySelectorAll('.star-rating span').forEach((star, index) => {
-        star.classList.toggle('active', index < num);
-    });
-}
-document.querySelectorAll('.star-rating span').forEach(star => {
-    star.addEventListener('click', function() { setRating(this.getAttribute('data-value')); });
-});
-
-function salvarReview() {
-    if(!itemSelecionado) return;
-    const txt = document.getElementById('review-text').value;
-    biblioteca.reviews[itemSelecionado.id] = { nota: estrelasAtivas, texto: txt, timestamp: Date.now() };
-    salvarDados();
-    document.getElementById('review-feedback').style.display = 'block';
-    setTimeout(() => document.getElementById('review-feedback').style.display = 'none', 3000);
-}
-
-function carregarReviewUI() {
-    estrelasAtivas = 0;
-    document.getElementById('review-text').value = '';
-    setRating(0);
-    const r = biblioteca.reviews[itemSelecionado.id];
-    if (r) {
-        setRating(r.nota);
-        document.getElementById('review-text').value = r.texto;
-    }
+    btn.innerText = biblioteca.watchlist[itemSelecionado.id] ? "✔ Na Minha Lista" : "+ A Minha Lista";
 }
 
 // ==========================================
-// REPRODUTOR DE VÍDEO E CONTROLES
+// REPRODUTOR DE VÍDEO E CONTROLES (Atualizado para mgeb.top)
 // ==========================================
-async function abrirPlayer(id, tipo, isPlay = false) {
+async function abrirPlayer(id, tipo) {
     fecharDetalhes();
     document.getElementById('main-content').style.display = 'none';
     
     if (tipo === 'tv') {
         document.getElementById('episodes-selectors-box').style.display = 'flex';
         await carregarTemporadasNoPlayer(id);
+        
         const playerS = document.getElementById('player-season-select');
         const playerE = document.getElementById('player-episode-select');
-        document.getElementById('videoPlayer').src = `https://embed.su/embed/tv/${id}/${playerS.value}/${playerE.value}`;
+        
+        // Novo provedor: mgeb.top
+        document.getElementById('videoPlayer').src = `https://mgeb.top/embed/tv/${id}/${playerS.value}/${playerE.value}`;
         
         playerS.onchange = async () => {
             await atualizarEpisodiosNoPlayer(id, playerS.value);
-            document.getElementById('videoPlayer').src = `https://embed.su/embed/tv/${id}/${playerS.value}/${document.getElementById('player-episode-select').value}`;
+            document.getElementById('videoPlayer').src = `https://mgeb.top/embed/tv/${id}/${playerS.value}/${document.getElementById('player-episode-select').value}`;
         };
+        
         playerE.onchange = () => {
-            document.getElementById('videoPlayer').src = `https://embed.su/embed/tv/${id}/${playerS.value}/${playerE.value}`;
+            document.getElementById('videoPlayer').src = `https://mgeb.top/embed/tv/${id}/${playerS.value}/${playerE.value}`;
         };
-        document.getElementById('btn-next-ep').onclick = () => avancarEpisodioNoPlayer(id);
+        
+        const btnNext = document.getElementById('btn-next-ep');
+        if(btnNext) {
+            btnNext.onclick = () => avancarEpisodioNoPlayer(id);
+        }
     } else {
         document.getElementById('episodes-selectors-box').style.display = 'none';
-        document.getElementById('videoPlayer').src = `https://embed.su/embed/movie/${id}`;
+        document.getElementById('videoPlayer').src = `https://mgeb.top/embed/movie/${id}`;
     }
 
     document.getElementById('streaming-player-screen').style.display = 'block';
@@ -548,9 +453,11 @@ async function abrirPlayer(id, tipo, isPlay = false) {
 async function carregarTemporadasNoPlayer(id) {
     const data = await fetchTMDB(`/tv/${id}`);
     const select = document.getElementById('player-season-select');
+    if(!select) return;
+    
     select.innerHTML = '';
     
-    const validSeasons = data.seasons.filter(s => s.season_number > 0);
+    const validSeasons = data.seasons ? data.seasons.filter(s => s.season_number > 0) : [];
     validSeasons.forEach(s => {
         const opt = document.createElement('option');
         opt.value = s.season_number;
@@ -566,6 +473,8 @@ async function carregarTemporadasNoPlayer(id) {
 async function atualizarEpisodiosNoPlayer(id, sNum) {
     const data = await fetchTMDB(`/tv/${id}/season/${sNum}`);
     const select = document.getElementById('player-episode-select');
+    if(!select) return;
+    
     select.innerHTML = '';
     
     if (data.episodes) {
@@ -581,32 +490,33 @@ async function atualizarEpisodiosNoPlayer(id, sNum) {
 function avancarEpisodioNoPlayer(id) {
     const sSelect = document.getElementById('player-season-select');
     const eSelect = document.getElementById('player-episode-select');
+    if(!sSelect || !eSelect) return;
     
     let nextIndex = eSelect.selectedIndex + 1;
     if (nextIndex < eSelect.options.length) {
         eSelect.selectedIndex = nextIndex;
-        document.getElementById('videoPlayer').src = `https://embed.su/embed/tv/${id}/${sSelect.value}/${eSelect.value}`;
+        document.getElementById('videoPlayer').src = `https://mgeb.top/embed/tv/${id}/${sSelect.value}/${eSelect.value}`;
     } else {
-        alert("Fim da temporada alcançado.");
+        alert("Fim da temporada alcançado!");
     }
 }
 
-function fecharPlayer() {
+document.getElementById('close-player-btn').addEventListener('click', () => {
     document.getElementById('streaming-player-screen').style.display = 'none';
     document.getElementById('videoPlayer').src = '';
     document.getElementById('main-content').style.display = 'block';
     alternarScrollBody(false);
-}
-document.getElementById('close-player-btn').addEventListener('click', fecharPlayer);
+});
 
 // ==========================================
-// CINEBOT (IA)
+// CINEBOT (IA BÁSICA)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const chatInput = document.getElementById('chatbot-input');
     const sendBtn = document.getElementById('chatbot-send-btn');
     const messagesContainer = document.getElementById('chatbot-messages');
-    const quickActionsContainer = document.getElementById('chat-quick-actions');
+
+    if(!chatInput || !sendBtn) return;
 
     function addMessage(text, type) {
         const msgDiv = document.createElement('div');
@@ -616,57 +526,11 @@ document.addEventListener('DOMContentLoaded', () => {
         messagesContainer.scrollTop = messagesContainer.scrollHeight; 
     }
 
-    async function enviarParaOBot(textoOriginal) {
-        const text = textoOriginal.trim();
-        if (!text) return;
-
+    sendBtn.addEventListener('click', () => {
+        const text = chatInput.value.trim();
+        if(!text) return;
         addMessage(text, 'user');
         chatInput.value = '';
-
-        const loadingId = 'loading-' + Date.now();
-        const loadingDiv = document.createElement('div');
-        loadingDiv.className = 'bot-msg';
-        loadingDiv.id = loadingId;
-        loadingDiv.innerHTML = '<small><i>Pesquisando na matriz...</i></small>';
-        messagesContainer.appendChild(loadingDiv);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-        const response = await processarMensagemChatbot(text);
-        
-        document.getElementById(loadingId).remove();
-        addMessage(response, 'bot');
-    }
-
-    sendBtn.addEventListener('click', () => enviarParaOBot(chatInput.value));
-    chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') enviarParaOBot(chatInput.value);
+        setTimeout(() => addMessage("Sou um bot básico, ainda estou a aprender!", 'bot'), 600);
     });
-
-    quickActionsContainer.addEventListener('click', (e) => {
-        if(e.target.classList.contains('chat-chip')) {
-            enviarParaOBot(e.target.innerText);
-        }
-    });
-
-    async function processarMensagemChatbot(mensagem) {
-        const msgLower = mensagem.toLowerCase();
-        
-        if (msgLower.includes("oi") || msgLower.includes("olá") || msgLower.includes("ola")) {
-            return "Olá! Sou o CineBot. Posso te recomendar filmes, séries, criar roteiros ou até resumir histórias. O que você gostaria?";
-        }
-        if (msgLower.includes("filme de terror")) {
-            return "Recomendo fortemente 'Hereditário' ou 'Invocação do Mal' para bons sustos!";
-        }
-        if (msgLower.includes("resuma") && msgLower.includes("interestelar")) {
-            return "Interestelar acompanha o ex-piloto da NASA, Cooper, que se junta a uma equipe de pesquisadores para viajar por um buraco de minhoca no espaço, na tentativa de garantir a sobrevivência da humanidade.";
-        }
-        if (msgLower.includes("séries sci-fi")) {
-            return "Algumas das melhores são: 'Ruptura (Severance)', 'Dark', 'Fringe' e 'The Expanse'.";
-        }
-        if (msgLower.includes("animes de ação")) {
-            return "Com certeza assista 'Jujutsu Kaisen', 'Demon Slayer', 'Chainsaw Man' e o clássico 'Hunter x Hunter'.";
-        }
-        
-        return "Neste momento meus circuitos de IA estão em manutenção e estou trabalhando com respostas limitadas! Tente pedir para eu resumir 'Interestelar' ou recomendar animes de ação.";
-    }
 });

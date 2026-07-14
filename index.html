@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -81,8 +81,8 @@
                 </div>
                 <div class="nav-actions">
                     <div class="profile-menu-container" id="profile-trigger-pc">
-                        <img src="" id="user-avatar-pc" class="nav-avatar" alt="Avatar">
-                        <span id="user-name-pc" class="nav-username"></span>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" id="user-avatar-pc" class="nav-avatar" alt="Avatar">
+                        <span id="user-name-pc" class="nav-username">CineNet User</span>
                     </div>
                     <button class="btn-disconnect" id="logout-btn-pc">Sair</button>
                 </div>
@@ -94,7 +94,7 @@
                 <span class="brand-accent">CINE</span><span class="brand-light">NET</span>
             </a>
             <div class="mobile-top-actions">
-                <img src="" id="user-avatar-mobile" class="mobile-avatar" alt="Avatar">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" id="user-avatar-mobile" class="mobile-avatar" alt="Avatar">
                 <button class="btn-disconnect-mobile" id="logout-btn-mobile">Sair</button>
             </div>
         </nav>
@@ -133,23 +133,6 @@
 
             <div class="main-container">
                 <div class="movie-section">
-                    <h3 class="section-title">🎬 Os Meus Filmes Adicionados</h3>
-                    <div class="movie-row" id="row-custom-filmes"></div>
-                </div>
-                <div class="movie-section">
-                    <h3 class="section-title">📺 As Minhas Séries Adicionadas</h3>
-                    <div class="movie-row" id="row-custom-series"></div>
-                </div>
-                <div class="movie-section">
-                    <h3 class="section-title">💥 Animes Exclusivos</h3>
-                    <div class="movie-row" id="row-custom-animes"></div>
-                </div>
-                <div class="movie-section">
-                    <h3 class="section-title">🎨 Desenhos Animados</h3>
-                    <div class="movie-row" id="row-custom-desenhos"></div>
-                </div>
-
-                <div class="movie-section">
                     <h3 class="section-title">A Bombar na CineNet</h3>
                     <div class="movie-row" id="row-trending"></div>
                 </div>
@@ -165,46 +148,15 @@
         </div>
 
         <div id="admin-section" style="display: none; padding: 90px 4% 40px;">
-            <div class="admin-panel-card">
+            <div class="admin-panel-card" style="text-align: center;">
                 <h2>Painel Administrativo Restrito</h2>
-                <p style="color: var(--text-secondary); text-align: center; margin-bottom: 25px; font-size: 14px;">
-                    Adicione novos conteúdos exclusivos divididos por categoria na plataforma.
+                <p style="color: var(--text-secondary); margin-bottom: 25px; font-size: 14px;">
+                    Sessão iniciada como Administrador Principal da CineNet.
                 </p>
-                
-                <form id="admin-form">
-                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
-                        <input type="text" id="admin-titulo" placeholder=" " required>
-                        <label>Título do Conteúdo</label>
-                    </div>
-                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
-                        <input type="url" id="admin-poster" placeholder=" " required>
-                        <label>URL da Imagem do Poster (Vertical)</label>
-                    </div>
-                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
-                        <input type="url" id="admin-backdrop" placeholder=" " required>
-                        <label>URL da Imagem de Fundo (Horizontal)</label>
-                    </div>
-                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
-                        <input type="url" id="admin-video" placeholder=" " required>
-                        <label>URL de Embed do Vídeo (Player/Iframe)</label>
-                    </div>
-                    
-                    <div style="margin-bottom: 15px;">
-                        <textarea id="admin-sinopse" class="admin-textarea" placeholder="Digite a sinopse do conteúdo aqui..." required></textarea>
-                    </div>
-                    
-                    <div style="margin-bottom: 25px;">
-                        <label style="color: #aaa; display: block; margin-bottom: 8px; font-size: 13px;">Selecione a Categoria:</label>
-                        <select id="admin-categoria" class="admin-select">
-                            <option value="filmes">Filme</option>
-                            <option value="series">Série</option>
-                            <option value="animes">Anime</option>
-                            <option value="desenhos">Desenho Animado</option>
-                        </select>
-                    </div>
-                    
-                    <button type="submit" class="btn-cinenet-main">Publicar Conteúdo</button>
-                </form>
+                <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; border: 1px solid var(--glass-border);">
+                    <p style="margin: 0; color: #fff; font-size: 16px;">👋 Olá, <strong>Roberci Azevedo</strong>!</p>
+                    <p style="margin: 5px 0 0; color: #888; font-size: 13px;">O teu acesso está validado e seguro contra utilizadores externos.</p>
+                </div>
             </div>
         </div>
 

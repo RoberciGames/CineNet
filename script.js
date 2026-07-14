@@ -3,12 +3,16 @@
 // ==========================================
 const TMDB_KEY = '17c56e3825d7fbae6581866083d0d778'; 
 let itemSelecionado = null;
+let estrelasAtivas = 0;
 let debounceTimer; 
 let currentUserUID = null;
 let filtroBuscaAtual = 'all';
 let ultimoTermoBusca = '';
 
-// DADOS DE UTILIZADOR
+// VARIÁVEIS DO PLAYER
+let modoPlayerAtual = 'geral';
+const corDestaque = 'e50914';
+
 let perfilUsuario = {
     username: "CineNet User",
     avatar: "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png"
@@ -17,13 +21,11 @@ let avatarTemp = "";
 let biblioteca = { watchlist: {}, reviews: {} };
 let isLoginMode = true;
 
-// ==========================================
 // CONTROLO DE ACESSO DO ADMINISTRADOR
-// ==========================================
 const ADMIN_EMAIL = "roberci.azevedo@academico.ifpb.edu.br"; 
 
 // ==========================================
-// CONFIGURAÇÃO DO FIREBASE
+// CONFIGURAÇÃO DO FIREBASE E GA4
 // ==========================================
 const firebaseConfig = {
     apiKey: "AIzaSyAfPWvnGdvPKZ_lrVwOuag14WHLY9AgML8",
@@ -44,14 +46,14 @@ function trackVirtualPage(pageTitle, pagePath) {
 }
 
 // ==========================================
-// AUTENTICAÇÃO E RESTRICÇÃO DE CONTA
+// AUTENTICAÇÃO E SESSÃO
 // ==========================================
 function toggleAuthMode() {
     isLoginMode = !isLoginMode;
     document.getElementById('auth-title').innerText = isLoginMode ? 'Entrar' : 'Registar';
     document.getElementById('auth-submit-btn').innerText = isLoginMode ? 'Entrar' : 'Registar';
     document.getElementById('auth-switch-text').innerText = isLoginMode ? 'Novo por aqui?' : 'Já possui uma conta?';
-    document.getElementById('auth-switch-btn').innerText = isLoginMode ? 'Registe-se agora.' : 'Entrar agora.';
+    document.getElementById('auth-switch-btn').innerText = isLoginMode ? 'Entrar agora.' : 'Registe-se agora.';
     document.getElementById('auth-error').style.display = 'none';
 }
 document.getElementById('auth-switch-btn').addEventListener('click', toggleAuthMode);
@@ -72,7 +74,6 @@ document.getElementById('btn-google-auth').addEventListener('click', () => {
     firebase.auth().signInWithPopup(provider).catch(err => alert(err.message));
 });
 
-// Validação de Sessão ativa e do painel do Roberci
 firebase.auth().onAuthStateChanged(user => {
     if (user) {
         currentUserUID = user.uid;
@@ -101,7 +102,7 @@ document.getElementById('logout-btn-pc').addEventListener('click', logout);
 document.getElementById('logout-btn-mobile').addEventListener('click', logout);
 
 // ==========================================
-// SINCRONIZAÇÃO E EDIÇÃO DE PERFIL
+// SINCRONIZAÇÃO E PERFIL DE USUÁRIO
 // ==========================================
 function carregarDadosUsuario() {
     firebase.database().ref('users/' + currentUserUID).once('value').then(snapshot => {
@@ -125,7 +126,6 @@ function salvarDados() {
     }
 }
 
-// Eventos de clique para abrir modal de perfil
 document.getElementById('profile-trigger-pc').addEventListener('click', abrirModalPerfil);
 document.getElementById('user-avatar-mobile').addEventListener('click', abrirModalPerfil);
 
@@ -170,7 +170,7 @@ function atualizarInterfacePerfil() {
 }
 
 // ==========================================
-// CONTROLO DE NAVEGAÇÃO INTERNA
+// GERENCIAMENTO DE TELAS / NAVEGAÇÃO
 // ==========================================
 function setNavActive(idDesktop, idMobile) {
     document.querySelectorAll('.nav-menu a, .mobile-bottom-nav a').forEach(el => el.classList.remove('active', 'active-nav'));
@@ -247,16 +247,12 @@ function alternarScrollBody(travar) {
 }
 
 // ==========================================
-// FORMULÁRIO ADMIN: SALVAR PARA A PESQUISA
+// FORMULÁRIO DO PAINEL ADMINISTRATIVO
 // ==========================================
 document.getElementById('admin-form').addEventListener('submit', function(e) {
     e.preventDefault();
     const user = firebase.auth().currentUser;
-    
-    if (!user || user.email !== ADMIN_EMAIL) {
-        alert("Ação não autorizada!");
-        return;
-    }
+    if (!user || user.email !== ADMIN_EMAIL) return alert("Ação não autorizada!");
 
     const titulo = document.getElementById('admin-titulo').value;
     const poster = document.getElementById('admin-poster').value;
@@ -279,18 +275,18 @@ document.getElementById('admin-form').addEventListener('submit', function(e) {
 
     firebase.database().ref('conteudos_customizados/' + novoConteudo.id).set(novoConteudo)
         .then(() => {
-            alert("Sucesso! O conteúdo foi adicionado e já pode ser procurado na barra de pesquisa.");
+            alert("Sucesso! Conteúdo salvo e integrado no mecanismo de busca.");
             document.getElementById('admin-form').reset();
         })
-        .catch(error => alert("Erro ao guardar na base de dados: " + error.message));
+        .catch(error => alert("Erro ao salvar: " + error.message));
 });
 
 // ==========================================
-// RENDERIZAÇÃO DE CONTEÚDO TMDB (HOME)
+// INTEGRAÇÃO TMDB & CARREGAMENTO DA HOME
 // ==========================================
 async function fetchTMDB(endpoint) {
     try {
-        const response = await fetch(`https://api.themoviedb.org/3${endpoint}${endpoint.includes('?') ? '&' : '?'}api_key=${TMDB_KEY}&language=pt-PT`);
+        const response = await fetch(`https://api.themoviedb.org/3${endpoint}${endpoint.includes('?') ? '&' : '?'}api_key=${TMDB_KEY}&language=pt-BR`);
         return await response.json();
     } catch { return { results: [] }; }
 }
@@ -329,7 +325,7 @@ function renderCards(items, containerId, forceType = null) {
 }
 
 // ==========================================
-// SISTEMA DE BUSCA MISTA (TMDB + CUSTOM)
+// MECANISMO DE BUSCA AVANÇADA MISTA
 // ==========================================
 function iniciarBusca(termo) {
     clearTimeout(debounceTimer);
@@ -353,7 +349,7 @@ function limparBusca() {
 }
 document.getElementById('main-search-input').addEventListener('input', (e) => iniciarBusca(e.target.value));
 
-async function executarBusca(termo) {
+async function ejecutarBusca(termo) {
     const container = document.getElementById('search-grid');
     const emptyState = document.getElementById('search-empty-state');
     container.innerHTML = '';
@@ -361,7 +357,6 @@ async function executarBusca(termo) {
     let resultadosFinais = [];
     const termoLower = termo.toLowerCase();
 
-    // 1. Procura na base de dados customizada (Filmes do Admin)
     try {
         const snapshot = await firebase.database().ref('conteudos_customizados').once('value');
         const customData = snapshot.val();
@@ -372,30 +367,24 @@ async function executarBusca(termo) {
                 }
             });
         }
-    } catch(e) { console.error("Erro ao ler Firebase custom:", e); }
+    } catch(e) { console.error(e); }
 
-    // 2. Procura no TMDB oficial
     const data = await fetchTMDB(`/search/multi?query=${encodeURIComponent(termo)}`);
     let filtradosTMDB = data.results.filter(item => item.poster_path);
-    
-    // 3. Junta tudo num único Array
     resultadosFinais = [...resultadosFinais, ...filtradosTMDB];
 
     if (resultadosFinais.length === 0) {
         emptyState.style.display = 'block';
     } else {
         emptyState.style.display = 'none';
-        
         resultadosFinais.forEach(item => {
             if (!item.poster_path) return;
             const card = document.createElement('div');
             card.className = 'movie-card';
             const indicator = biblioteca.watchlist[item.id] ? '<div class="watched-indicator">✔</div>' : '';
-            
             const finalPosterUrl = item.poster_path.startsWith('http') ? item.poster_path : `https://image.tmdb.org/t/p/w500${item.poster_path}`;
             
-            card.innerHTML = `<img src="${finalPosterUrl}" loading="lazy" style="height: 195px; object-fit: cover; border-radius: 6px;">${indicator}`;
-            
+            card.innerHTML = `<img src="${finalPosterUrl}" loading="lazy">${indicator}`;
             card.onclick = () => abrirDetalhes(item.id, item.media_type || 'movie');
             container.appendChild(card);
         });
@@ -403,7 +392,7 @@ async function executarBusca(termo) {
 }
 
 // ==========================================
-// WATCHLIST
+// WATCHLIST (A MINHA LISTA)
 // ==========================================
 function renderizarWatchlist() {
     const container = document.getElementById('watchlist-grid');
@@ -438,10 +427,7 @@ function alternarWatchlist() {
     }
     atualizarBotaoWatchlist();
     salvarDados();
-    
-    if(document.getElementById('watchlist-section').style.display === 'block') {
-        renderizarWatchlist();
-    }
+    if(document.getElementById('watchlist-section').style.display === 'block') renderizarWatchlist();
 }
 
 function atualizarBotaoWatchlist() {
@@ -450,16 +436,14 @@ function atualizarBotaoWatchlist() {
 }
 
 // ==========================================
-// MODAL DE DETALHES COM SINOPSE E AVALIAÇÃO
+// MODAL DE DETALHES & SISTEMA DE ESTRELAS
 // ==========================================
 async function abrirDetalhes(id, tipo, diretoplay = false) {
     resetarVisualEstrelas();
     
-    // 1. SE FOR CONTEÚDO EXCLUSIVO DO ADMIN
     if (String(id).startsWith('custom_')) {
         const snapshot = await firebase.database().ref('conteudos_customizados/' + id).once('value');
         const customItem = snapshot.val();
-        
         if (customItem) {
             itemSelecionado = { id: customItem.id, tipo: customItem.media_type, poster_path: customItem.poster_path, title: customItem.title, video_url: customItem.video_url };
             
@@ -478,10 +462,7 @@ async function abrirDetalhes(id, tipo, diretoplay = false) {
                 alternarScrollBody(true);
             };
             
-            if (biblioteca.reviews && biblioteca.reviews[id]) {
-                pintarEstrelas(biblioteca.reviews[id]);
-            }
-            
+            if (biblioteca.reviews && biblioteca.reviews[id]) pintarEstrelas(biblioteca.reviews[id]);
             atualizarBotaoWatchlist();
             document.getElementById('detailsModal').style.display = 'flex';
             alternarScrollBody(true);
@@ -489,7 +470,6 @@ async function abrirDetalhes(id, tipo, diretoplay = false) {
         }
     }
     
-    // 2. SE FOR CONTEÚDO PADRÃO TMDB
     const data = await fetchTMDB(`/${tipo}/${id}`);
     itemSelecionado = { id: id, tipo: tipo, poster_path: data.poster_path, title: data.title || data.name };
     
@@ -500,16 +480,11 @@ async function abrirDetalhes(id, tipo, diretoplay = false) {
     document.getElementById('modal-rating').innerText = data.vote_average ? `Classificação: ${data.vote_average.toFixed(1)}` : "N/A";
     
     document.getElementById('modal-play-btn').onclick = () => abrirPlayer(id, tipo);
-    
-    if (biblioteca.reviews && biblioteca.reviews[id]) {
-        pintarEstrelas(biblioteca.reviews[id]);
-    }
+    if (biblioteca.reviews && biblioteca.reviews[id]) pintarEstrelas(biblioteca.reviews[id]);
     
     atualizarBotaoWatchlist();
-    
-    if (diretoplay) {
-        abrirPlayer(id, tipo);
-    } else {
+    if (diretoplay) abrirPlayer(id, tipo); 
+    else {
         document.getElementById('detailsModal').style.display = 'flex';
         alternarScrollBody(true);
     }
@@ -520,12 +495,9 @@ function fecharDetalhes() {
     alternarScrollBody(false);
 }
 
-// FUNÇÕES AUXILIARES DE AVALIAÇÃO (ESTRELAS)
 function votarEstrelas(nota) {
     if (!itemSelecionado) return;
-    
     if (!biblioteca.reviews) biblioteca.reviews = {};
-    
     if (biblioteca.reviews[itemSelecionado.id] === nota) {
         delete biblioteca.reviews[itemSelecionado.id];
         resetarVisualEstrelas();
@@ -533,7 +505,6 @@ function votarEstrelas(nota) {
         biblioteca.reviews[itemSelecionado.id] = nota;
         pintarEstrelas(nota);
     }
-    
     salvarDados();
 }
 
@@ -550,7 +521,7 @@ function resetarVisualEstrelas() {
 }
 
 // ==========================================
-// REPRODUTOR DE VÍDEO SEGURO (mgeb.top)
+// REPRODUTOR MULTISERVIDORES (mgeb.top)
 // ==========================================
 async function abrirPlayer(id, tipo) {
     fecharDetalhes();
@@ -562,27 +533,20 @@ async function abrirPlayer(id, tipo) {
         
         const playerS = document.getElementById('player-season-select');
         const playerE = document.getElementById('player-episode-select');
-        
         document.getElementById('videoPlayer').src = `https://mgeb.top/embed/tv/${id}/${playerS.value}/${playerE.value}`;
         
         playerS.onchange = async () => {
             await atualizarEpisodiosNoPlayer(id, playerS.value);
             document.getElementById('videoPlayer').src = `https://mgeb.top/embed/tv/${id}/${playerS.value}/${document.getElementById('player-episode-select').value}`;
         };
-        
         playerE.onchange = () => {
             document.getElementById('videoPlayer').src = `https://mgeb.top/embed/tv/${id}/${playerS.value}/${playerE.value}`;
         };
-        
-        const btnNext = document.getElementById('btn-next-ep');
-        if(btnNext) {
-            btnNext.onclick = () => avancarEpisodioNoPlayer(id);
-        }
+        document.getElementById('btn-next-ep').onclick = () => avancarEpisodioNoPlayer(id);
     } else {
         document.getElementById('episodes-selectors-box').style.display = 'none';
         document.getElementById('videoPlayer').src = `https://mgeb.top/embed/movie/${id}`;
     }
-
     document.getElementById('streaming-player-screen').style.display = 'block';
     alternarScrollBody(true);
 }
@@ -592,7 +556,6 @@ async function carregarTemporadasNoPlayer(id) {
     const select = document.getElementById('player-season-select');
     if(!select) return;
     select.innerHTML = '';
-    
     const validSeasons = data.seasons ? data.seasons.filter(s => s.season_number > 0) : [];
     validSeasons.forEach(s => {
         const opt = document.createElement('option');
@@ -600,10 +563,7 @@ async function carregarTemporadasNoPlayer(id) {
         opt.innerText = `Temp ${s.season_number}`;
         select.appendChild(opt);
     });
-    
-    if (validSeasons.length > 0) {
-        await atualizarEpisodiosNoPlayer(id, validSeasons[0].season_number);
-    }
+    if (validSeasons.length > 0) await atualizarEpisodiosNoPlayer(id, validSeasons[0].season_number);
 }
 
 async function atualizarEpisodiosNoPlayer(id, sNum) {
@@ -611,7 +571,6 @@ async function atualizarEpisodiosNoPlayer(id, sNum) {
     const select = document.getElementById('player-episode-select');
     if(!select) return;
     select.innerHTML = '';
-    
     if (data.episodes) {
         data.episodes.forEach(ep => {
             const opt = document.createElement('option');
@@ -625,15 +584,11 @@ async function atualizarEpisodiosNoPlayer(id, sNum) {
 function avancarEpisodioNoPlayer(id) {
     const sSelect = document.getElementById('player-season-select');
     const eSelect = document.getElementById('player-episode-select');
-    if(!sSelect || !eSelect) return;
-    
     let nextIndex = eSelect.selectedIndex + 1;
     if (nextIndex < eSelect.options.length) {
         eSelect.selectedIndex = nextIndex;
         document.getElementById('videoPlayer').src = `https://mgeb.top/embed/tv/${id}/${sSelect.value}/${eSelect.value}`;
-    } else {
-        alert("Fim da temporada alcançado!");
-    }
+    } else alert("Fim da temporada alcançado!");
 }
 
 document.getElementById('close-player-btn').addEventListener('click', () => {
@@ -644,12 +599,14 @@ document.getElementById('close-player-btn').addEventListener('click', () => {
 });
 
 // ==========================================
-// CINEBOT (Interações)
+// CINEBOT (INTELIGÊNCIA E INTERAÇÕES)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const chatInput = document.getElementById('chatbot-input');
     const sendBtn = document.getElementById('chatbot-send-btn');
     const messagesContainer = document.getElementById('chatbot-messages');
+    const quickActionsContainer = document.getElementById('chat-quick-actions');
+    
     if(!chatInput || !sendBtn) return;
 
     function addMessage(text, type) {
@@ -660,11 +617,71 @@ document.addEventListener('DOMContentLoaded', () => {
         messagesContainer.scrollTop = messagesContainer.scrollHeight; 
     }
 
-    sendBtn.addEventListener('click', () => {
-        const text = chatInput.value.trim();
-        if(!text) return;
+    async function processarMensagemChatbot(mensagem) {
+        const msgLower = mensagem.toLowerCase();
+        
+        if (msgLower.includes("oi") || msgLower.includes("olá") || msgLower.includes("ola") || msgLower.includes("ajuda")) {
+            return "Olá! Sou o CineBot 🤖. Posso recomendar-te filmes ou séries incríveis. Tenta dizer: 'Recomenda-me um filme de ação' ou 'O que está em destaque?'.";
+        }
+        
+        if (msgLower.includes("destaque") || msgLower.includes("popular") || msgLower.includes("bomba") || msgLower.includes("novo")) {
+            try {
+                const data = await fetchTMDB('/trending/movie/day');
+                if(data.results && data.results.length > 0) {
+                    const top = data.results[0];
+                    return `O filme mais popular do dia na CineNet é o bombástico <strong>${top.title || top.name}</strong>! Procura por ele na aba 🔍 ou vê-lo já na Home.`;
+                }
+            } catch(e) { 
+                return "Neste momento os meus servidores estão a processar o catálogo. Dá uma olhadinha nas linhas da página inicial!";
+            }
+        }
+
+        if (msgLower.includes("ação") || msgLower.includes("acao")) {
+            return "Adrenalina pura? Recomendo títulos épicos como 'John Wick', 'Mad Max: Estrada da Fúria' ou 'Missão Impossível'. Usa o nosso menu de procura para os ver!";
+        }
+        if (msgLower.includes("terror") || msgLower.includes("assustador") || msgLower.includes("medo")) {
+            return "Prepara o coração! Recomendo vivamente 'Hereditário', 'Invocação do Mal' ou o aclamado 'Corra!' (Get Out). 👻";
+        }
+        if (msgLower.includes("comédia") || msgLower.includes("comedia") || msgLower.includes("rir")) {
+            return "Para descontrair e rir à gargalhada, procura por 'Superbad', 'Se Beber, Não Case!' ou 'Deadpool'!";
+        }
+        if (msgLower.includes("ficção") || msgLower.includes("sci-fi") || msgLower.includes("espaço")) {
+            return "Para explorares o universo: 'Interestelar', 'Blade Runner 2049' ou a obra-prima 'Duna'. 🚀";
+        }
+        
+        return `Ainda estou a aprender novos comandos, mas se procurares por "<strong>${mensagem}</strong>" na nossa aba de Busca Avançada (🔍), vais encontrar o que procuras no catálogo da CineNet!`;
+    }
+
+    async function enviarParaOBot(textoOriginal) {
+        const text = textoOriginal.trim();
+        if (!text) return;
+
         addMessage(text, 'user');
         chatInput.value = '';
-        setTimeout(() => addMessage("Olá! Estou conectado com a base de dados TMDB através da CineNet para te dar as melhores recomendações.", 'bot'), 600);
+
+        const loadingId = 'loading-' + Date.now();
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'bot-msg';
+        loadingDiv.id = loadingId;
+        loadingDiv.innerHTML = '<small><i>Pesquisando na matriz...</i></small>';
+        messagesContainer.appendChild(loadingDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        const response = await processarMensagemChatbot(text);
+        document.getElementById(loadingId).remove();
+        addMessage(response, 'bot');
+    }
+
+    sendBtn.addEventListener('click', () => enviarParaOBot(chatInput.value));
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') enviarParaOBot(chatInput.value);
     });
+
+    if(quickActionsContainer) {
+        quickActionsContainer.addEventListener('click', (e) => {
+            if(e.target.classList.contains('chat-chip')) {
+                enviarParaOBot(e.target.innerText);
+            }
+        });
+    }
 });

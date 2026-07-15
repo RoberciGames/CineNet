@@ -1,5 +1,5 @@
 :root {
-    --primary-neon: #E50914;
+    --primary-neon: #E50914; 
     --primary-glow: rgba(229, 9, 20, 0.4);
     --surface-dark: #090909;
     --surface-panel: rgba(18, 18, 18, 0.85);
@@ -14,8 +14,7 @@ body {
     font-family: 'Outfit', sans-serif;
     background-color: var(--surface-dark);
     color: var(--text-primary);
-    margin: 0;
-    padding: 0;
+    margin: 0; padding: 0;
     overflow-x: hidden;
 }
 
@@ -24,71 +23,67 @@ body {
 ::-webkit-scrollbar-track { background: var(--surface-dark); }
 ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #555; }
+
 body.modal-open { overflow: hidden !important; }
 
+/* REGRAS DE VISIBILIDADE RESPONSIVA */
 @media (min-width: 769px) { .pc-only { display: flex !important; } .mobile-only { display: none !important; } }
-@media (max-width: 768px) {
-    .pc-only { display: none !important; }
-    .mobile-only { display: flex !important; }
-    body { padding-top: 60px; padding-bottom: 60px; }
-}
+@media (max-width: 768px) { .pc-only { display: none !important; } .mobile-only { display: flex !important; } body { padding-top: 60px; padding-bottom: 60px; } }
 
-.panel-glass {
-    background: rgba(5, 5, 5, 0.85);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--glass-border);
-}
+.panel-glass { background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--glass-border); }
 
-/* AUTENTICAÇÃO STYLE */
-#auth-screen {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    z-index: 9999; display: flex; align-items: center; justify-content: center; background: #000;
-}
-.auth-bg-overlay {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6) 0%, #050505 100%), url('https://assets.nflxext.com/ffe/siteui/vlv3/ca6a7616-0acb-4bc7-9356-97ff199fa6fe/f55a734a-9b77-440a-b333-ac4f0c1df473/BR-pt-20231211-popsignuptwoweeks-perspective_alpha_website_large.jpg');
-    background-size: cover; background-position: center; opacity: 0.4; z-index: 1;
-}
-.auth-container-cinenet { position: relative; z-index: 2; width: 100%; max-width: 420px; padding: 20px; }
-.auth-card-cinenet { background: rgba(0, 0, 0, 0.85); border-radius: 8px; padding: 50px 40px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8); border: 1px solid var(--glass-border); }
-.app-brand-cinenet, .app-brand { text-align: center; font-size: 32px; font-weight: 800; text-decoration: none; display: block; margin-bottom: 25px; letter-spacing: -1px; }
-.brand-accent { color: var(--primary-neon); }
-.brand-light { color: #fff; }
-.auth-card-cinenet h2 { font-size: 26px; margin: 0 0 20px; font-weight: 700; }
-.cinenet-input-group { position: relative; width: 100%; }
-.cinenet-input-group input { width: 100%; height: 56px; background: #333; border: none; border-radius: 4px; padding: 20px 20px 0; color: #fff; font-size: 16px; outline: none; transition: 0.2s; }
-.cinenet-input-group label { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #8c8c8c; font-size: 15px; transition: all 0.15s ease; pointer-events: none; }
-.cinenet-input-group input:focus~label, .cinenet-input-group input:not(:placeholder-shown)~label { top: 15px; font-size: 11px; color: #b3b3b3; }
-.btn-cinenet-main { width: 100%; height: 50px; background: var(--primary-neon); color: #fff; border: none; border-radius: 4px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-.btn-cinenet-main:hover { background: #c11119; }
-.btn-google-cinenet { width: 100%; height: 50px; background: #fff; color: #333; border: none; border-radius: 4px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
-.btn-google-cinenet:hover { background: #e0e0e0; }
-.auth-extra-cinenet { display: flex; justify-content: space-between; margin-top: 15px; font-size: 13px; color: #b3b3b3; }
-.auth-footer-cinenet { margin-top: 40px; color: #737373; font-size: 14px; }
-.auth-footer-cinenet button { background: none; border: none; color: #fff; cursor: pointer; margin-left: 5px; font-weight: 500; font-family: 'Outfit'; font-size: 14px; }
-.alert-box-cinenet { background: #e87c03; color: #fff; border-radius: 4px; padding: 12px; margin-top: 15px; text-align: center; font-size: 14px; }
+/* ==========================================
+   TELA DE LOGIN NETFLIX STYLE
+========================================== */
+#auth-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; display: flex; align-items: center; justify-content: center; background: #000; }
+.auth-bg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, #050505 100%), url('https://assets.nflxext.com/ffe/siteui/vlv3/ca6a7616-0acb-4bc7-9356-97ff199fa6fe/f55a734a-9b77-440a-b333-ac4f0c1df473/BR-pt-20231211-popsignuptwoweeks-perspective_alpha_website_large.jpg'); background-size: cover; background-position: center; opacity: 0.4; z-index: 1; }
+.auth-container-netflix { position: relative; z-index: 2; width: 100%; max-width: 420px; padding: 20px; }
+.auth-card-netflix { background: rgba(0, 0, 0, 0.85); border-radius: 8px; padding: 50px 40px; box-shadow: 0 15px 35px rgba(0,0,0,0.8); border: 1px solid var(--glass-border); }
+.app-brand-netflix, .app-brand { text-align: center; font-size: 32px; font-weight: 800; text-decoration: none; display: block; margin-bottom: 25px; letter-spacing: -1px; }
+.brand-accent { color: var(--primary-neon); } .brand-light { color: #fff; }
+.auth-card-netflix h2 { font-size: 26px; margin: 0 0 20px; font-weight: 700; }
+.netflix-input-group { position: relative; width: 100%; }
+.netflix-input-group input { width: 100%; height: 56px; background: #333; border: none; border-radius: 4px; padding: 20px 20px 0; color: #fff; font-size: 16px; outline: none; transition: 0.2s; }
+.netflix-input-group label { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #8c8c8c; font-size: 15px; transition: all 0.15s ease; pointer-events: none; }
+.netflix-input-group input:focus ~ label, .netflix-input-group input:not(:placeholder-shown) ~ label { top: 15px; font-size: 11px; color: #b3b3b3; }
+.btn-netflix-main { width: 100%; height: 50px; background: var(--primary-neon); color: #fff; border: none; border-radius: 4px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.btn-netflix-main:hover { background: #c11119; }
 
-/* NAVBAR DESKTOP & MOBILE */
-#desktop-navbar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; z-index: 100; align-items: center; padding: 0 4%; display: none; }
+.btn-google-netflix { width: 100%; height: 50px; background: #fff; color: #333; border: none; border-radius: 4px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
+.btn-google-netflix:hover { background: #e0e0e0; }
+
+.auth-extra-netflix { display: flex; justify-content: space-between; margin-top: 15px; font-size: 13px; color: #b3b3b3; }
+.auth-footer-netflix { margin-top: 40px; color: #737373; font-size: 14px; }
+.auth-footer-netflix button { background: none; border: none; color: #fff; cursor: pointer; margin-left: 5px; font-weight: 500; font-family: 'Outfit'; font-size: 14px; }
+.alert-box-netflix { background: #e87c03; color: #fff; border-radius: 4px; padding: 12px; margin-top: 15px; text-align: center; font-size: 14px; }
+
+/* ==========================================
+   NAVEGAÇÃO COMPLETA
+========================================== */
+#desktop-navbar { position: fixed; top: 0; left:0; width: 100%; height: 70px; z-index: 100; align-items: center; padding: 0 4%; display: none; }
 .nav-container { display: flex; width: 100%; justify-content: space-between; align-items: center; }
-.nav-menu { display: flex; list-style: none; gap: 20px; padding: 0; }
+.nav-menu { display: flex; list-style: none; gap: 20px; padding: 0;}
 .nav-menu a { color: #e5e5e5; text-decoration: none; font-size: 14px; transition: color 0.2s; }
 .nav-menu a:hover, .nav-menu a.active { color: #fff; }
 .nav-actions { display: flex; align-items: center; gap: 20px; }
 .profile-menu-container { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .nav-avatar { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; }
 .nav-username { font-size: 14px; font-weight: 500; }
-.btn-disconnect { background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; }
-#mobile-topbar { position: fixed; top: 0; left: 0; width: 100%; height: 60px; z-index: 100; justify-content: space-between; align-items: center; padding: 0 15px; display: none; }
+.btn-disconnect { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+
+#mobile-topbar { position: fixed; top: 0; left:0; width: 100%; height: 60px; z-index: 100; justify-content: space-between; align-items: center; padding: 0 15px; display: none; }
 .mobile-top-actions { display: flex; align-items: center; gap: 12px; }
 .mobile-avatar { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; cursor: pointer; }
-.btn-disconnect-mobile { background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 4px 8px; font-size: 12px; border-radius: 4px; }
-.mobile-bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; z-index: 100; display: none; padding-bottom: env(safe-area-inset-bottom, 0px); display: flex; justify-content: space-around; align-items: center; }
-.mobile-bottom-nav a { flex: 1; color: #888; text-decoration: none; display: flex; flex-direction: column; align-items: center; font-size: 20px; transition: 0.2s; }
-.mobile-bottom-nav a span:last-child { font-size: 10px; margin-top: 4px; }
-.mobile-bottom-nav a.active-nav { color: #fff; transform: translateY(-2px); }
+.btn-disconnect-mobile { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 8px; font-size: 12px; border-radius: 4px; }
 
-/* VISTAS GRID & WRAPPERS */
+.mobile-bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; z-index: 100; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom, 0px); display: none; }
+.mobile-bottom-nav a { color: #888; text-decoration: none; display: flex; flex-direction: column; align-items: center; font-size: 18px; }
+.mobile-bottom-nav a span { font-size: 10px; margin-top: 4px; }
+.mobile-bottom-nav a.active-nav { color: #fff; }
+
+/* ==========================================
+   MÓDULO DE BUSCA E GRIDS
+========================================== */
 #search-results-section, #watchlist-section { padding: 90px 4% 40px; min-height: 100vh; }
 @media (max-width: 768px) { #search-results-section, #watchlist-section { padding: 20px 4% 80px !important; } }
 .search-page-container { max-width: 600px; margin: 0 auto 30px; text-align: center; }
@@ -96,87 +91,91 @@ body.modal-open { overflow: hidden !important; }
 .search-icon-inside { position: absolute; left: 18px; color: #888; font-size: 16px; }
 #main-search-input { width: 100%; padding: 14px 45px 14px 45px; background: #2f2f2f; border: none; border-radius: 4px; color: white; font-size: 15px; outline: none; }
 .search-clear-btn { position: absolute; right: 18px; color: #aaa; cursor: pointer; }
+.search-filter-pills { display: flex; gap: 8px; justify-content: center; margin-bottom: 5px; }
+.filter-pill { background: #222; border: 1px solid #333; color: #aaa; padding: 6px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: 0.2s; }
+.filter-pill.active { background: #fff; color: #000; border-color: #fff; font-weight: 600; }
 .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
 @media (min-width: 769px) { .grid-layout { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; } }
 
-/* HERO SHOWCASE DESTAQUES */
+/* ==========================================
+   HERO BANNER E CARROSSEIS
+========================================== */
 .hero-showcase { height: 70vh; background-size: cover; background-position: center top; display: flex; align-items: flex-end; padding: 0 4% 40px; position: relative; }
-.hero-overlay-shadow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, var(--surface-dark) 0%, transparent 70%), linear-gradient(to right, rgba(0, 0, 0, 0.6) 0%, transparent 100%); }
+.hero-overlay-shadow { position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(to top, var(--surface-dark) 0%, transparent 70%), linear-gradient(to right, rgba(0,0,0,0.6) 0%, transparent 100%); }
 .hero-inner { position: relative; z-index: 2; max-width: 650px; }
-.hero-badge { background: rgba(255, 255, 255, 0.2); padding: 4px 8px; border-radius: 2px; font-size: 11px; font-weight: 700; margin-bottom: 12px; display: inline-block; }
+.hero-badge { background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 2px; font-size: 11px; font-weight: 700; margin-bottom: 12px; display: inline-block; }
 .hero-title-text { font-size: 2.8rem; margin: 5px 0 12px; font-weight: 800; line-height: 1.1; }
 .hero-description { font-size: 1rem; color: #cbcbcb; margin-bottom: 20px; line-height: 1.4; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
 .btn-primary-action { background: #fff; color: #000; border: none; padding: 10px 24px; font-size: 15px; font-weight: 700; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-.btn-primary-action:hover { background: rgba(255, 255, 255, 0.8); }
+.btn-primary-action:hover { background: rgba(255,255,255,0.8); }
 @media (max-width: 768px) { .hero-showcase { height: 45vh; } .hero-title-text { font-size: 1.8rem; } .hero-description { display: none; } }
+
 .main-container { padding: 0 4% 60px; position: relative; z-index: 5; margin-top: -20px; }
 .movie-section { margin-bottom: 30px; }
 .section-title { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
 .movie-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
 .movie-row::-webkit-scrollbar { display: none; }
-.movie-card { width: 130px; flex-shrink: 0; cursor: pointer; position: relative; border-radius: 6px; overflow: hidden; transition: transform 0.2s; }
-.movie-card:hover { transform: scale(1.05); z-index: 10; }
-.movie-card img { width: 100%; height: 195px; object-fit: cover; border-radius: 6px; }
-.watched-indicator { position: absolute; top: 5px; right: 5px; background: var(--primary-neon); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 12px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); }
-@media (min-width: 769px) { .movie-card { width: 160px; } .movie-card img { height: 240px; } }
 
-/* ESTRUTURAS MODAL */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-.modal-content { background: var(--surface-panel); width: 100%; max-width: 700px; height: 95vh; border-radius: 12px; position: relative; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9); }
-.modal-content::-webkit-scrollbar { display: none; }
-.modal-close { position: absolute; top: 15px; right: 15px; background: rgba(0, 0, 0, 0.6); color: white; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer; z-index: 10; display: flex; justify-content: center; align-items: center; }
-.modal-banner { height: 300px; background-size: cover; background-position: center; position: relative; }
-.modal-banner-gradient { position: absolute; bottom: 0; width: 100%; height: 150px; background: linear-gradient(to top, var(--surface-panel), transparent); }
-.modal-body { padding: 0 30px 40px; position: relative; z-index: 5; margin-top: -30px; }
-.modal-title { font-size: 28px; margin: 0 0 10px; line-height: 1.2; }
-.modal-meta { display: flex; gap: 12px; font-size: 14px; margin-bottom: 15px; align-items: center; }
-.match-score { color: #4ade80; font-weight: 700; }
-.btn-secondary-modal { background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 10px 15px; font-size: 15px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
-.btn-secondary-modal:hover { background: rgba(255, 255, 255, 0.2); }
+.movie-card { min-width: 110px; max-width: 110px; cursor: pointer; transition: transform 0.2s ease-in-out; border-radius: 4px; position: relative; }
+.movie-card img { width: 100%; border-radius: 4px; display: block; object-fit: cover; }
+.watched-indicator { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.8); color: #00ff88; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1px solid #00ff88; }
+@media (min-width: 769px) { .movie-card { min-width: 150px; max-width: 150px; } .movie-card:hover { transform: scale(1.05); z-index: 10; } }
 
-/* CINEBOT INTELIGENTE STYLE */
-#chat-section { padding: 80px 4% 40px; display: flex; justify-content: center; height: 100vh; }
-.chatbot-container { width: 100%; max-width: 800px; background: var(--surface-panel); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; flex-direction: column; height: 100%; max-height: 85vh; overflow: hidden; backdrop-filter: blur(10px); }
-.chatbot-header { padding: 15px 20px; background: rgba(0, 0, 0, 0.4); border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; gap: 15px; }
-.chatbot-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-neon); display: flex; justify-content: center; align-items: center; font-size: 20px; }
-.chatbot-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; scrollbar-width: none; }
-.chatbot-messages::-webkit-scrollbar { display: none; }
-.bot-msg, .user-msg { max-width: 85%; padding: 12px 18px; border-radius: 15px; font-size: 15px; line-height: 1.4; }
-.bot-msg { background: rgba(255, 255, 255, 0.1); color: #e5e5e5; align-self: flex-start; border-bottom-left-radius: 2px; }
-.user-msg { background: var(--primary-neon); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; }
-.chat-quick-actions { display: flex; gap: 10px; padding: 10px 15px; overflow-x: auto; border-top: 1px solid var(--glass-border); scrollbar-width: none; }
-.chat-quick-actions::-webkit-scrollbar { display: none; }
-.chat-chip { background: rgba(255, 255, 255, 0.1); color: #ddd; padding: 6px 14px; border-radius: 20px; font-size: 13px; white-space: nowrap; cursor: pointer; transition: 0.2s; border: 1px solid rgba(255, 255, 255, 0.1); }
-.chat-chip:hover { background: var(--primary-neon); color: white; border-color: var(--primary-neon); }
-.chatbot-input-area { display: flex; padding: 15px; background: rgba(0, 0, 0, 0.5); }
-.chatbot-input-area input { flex: 1; padding: 15px 20px; border: 1px solid var(--glass-border); border-radius: 25px; background: var(--surface-dark); color: #fff; font-size: 15px; outline: none; }
-.chatbot-input-area button { width: auto; padding: 0 20px; height: 50px; border-radius: 25px; background: var(--primary-neon); border: none; color: white; display: flex; justify-content: center; align-items: center; margin-left: 10px; cursor: pointer; transition: 0.2s; font-weight:600; }
-.chatbot-input-area button:hover { transform: scale(1.05); }
+/* ==========================================
+   ESTRUTURA DOS MODAIS (DETALHES / PERFIL)
+========================================== */
+.modal-netflix { position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 10px; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.modal-netflix-content { background: #181818; width: 100%; max-width: 650px; border-radius: 6px; overflow: hidden; position: relative; max-height: 95vh; overflow-y: auto; }
+.modal-netflix-content.small-modal { max-width: 400px; padding: 30px; }
 
-/* REPRODUTOR COMPLETO */
-.full-player-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 3000; display: none; flex-direction: column; }
-.player-header { padding: 15px 4%; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent); position: absolute; top: 0; width: 100%; z-index: 10; }
-.btn-close-player { background: transparent; color: #fff; border: none; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); }
-.series-control-hub { display: flex; gap: 10px; align-items: center; }
-.control-unit { display: flex; align-items: center; background: rgba(255, 255, 255, 0.1); border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px); overflow: hidden; }
-.select-label { background: rgba(0, 0, 0, 0.5); padding: 8px 12px; font-size: 14px; font-weight: 600; color: #ccc; }
-.glass-select { background: transparent; color: #fff; border: none; padding: 8px 12px 8px 5px; font-size: 14px; font-weight: 500; outline: none; cursor: pointer; appearance: none; -webkit-appearance: none; }
-.glass-select option { background: #111; color: #fff; }
-.btn-action-glass { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; width: 36px; height: 36px; border-radius: 4px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; backdrop-filter: blur(5px); font-size: 16px; }
-.player-viewport { flex: 1; width: 100%; height: 100%; }
-.player-viewport iframe { width: 100%; height: 100%; }
-@media (max-width: 768px) {
-    .player-header { flex-direction: column; align-items: flex-start; gap: 15px; padding-top: 20px; }
-    .series-control-hub { width: 100%; justify-content: space-between; }
-    .control-unit { flex: 1; } .glass-select { width: 100%; }
-}
+.close-netflix-modal { position: absolute; top: 12px; right: 12px; font-size: 20px; color: #fff; cursor: pointer; z-index: 10; background: #181818; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
 
-/* COMPLEMENTARES ADMIN & INTERAÇÕES */
-.admin-panel-card { background: rgba(15, 15, 15, 0.9); border: 1px solid var(--glass-border); max-width: 600px; margin: 0 auto; padding: 40px 30px; border-radius: 12px; }
-.admin-textarea { width: 100%; height: 110px; background: #333; border: none; border-radius: 4px; padding: 15px; color: #fff; font-family: 'Outfit'; font-size: 15px; outline: none; resize: none; }
-.admin-select { width: 100%; height: 50px; background: #333; color: #fff; border: none; border-radius: 4px; padding: 0 15px; font-size: 15px; outline: none; cursor: pointer; }
-.star-unit { font-size: 26px; color: #444; cursor: pointer; transition: transform 0.1s ease; display: inline-block; }
-.star-unit:hover { transform: scale(1.2); }
-.star-unit.active { color: #ffb800; text-shadow: 0 0 8px rgba(255, 184, 0, 0.4); }
-.avatar-option-choice { transition: 0.2s; border: 2px solid transparent; }
-.avatar-option-choice:hover { transform: scale(1.1); border-color: var(--primary-neon); }
+.modal-netflix-banner { height: 280px; background-size: cover; background-position: center; position: relative; display: flex; align-items: flex-end; padding: 25px; }
+.modal-banner-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(to top, #181818 0%, transparent 100%); }
+.modal-banner-content { position: relative; z-index: 2; }
+
+.info-metadata { display: flex; gap: 12px; align-items: center; font-size: 14px; margin-top: 5px; }
+.meta-rating { color: #46d369; font-weight: 700; }
+.meta-year { color: #a3a3a3; }
+.meta-hd { border: 1px solid #555; font-size: 9px; padding: 1px 4px; border-radius: 2px; color: #aaa; }
+
+.modal-netflix-info { padding: 20px 25px 25px; }
+.modal-overview-text { color: #dfdfdf; font-size: 15px; line-height: 1.5; margin: 10px 0 20px; }
+
+.modal-action-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+.btn-play-netflix-modal { flex: 2; background: #fff; color: #000; border: none; height: 42px; border-radius: 4px; font-weight: 700; font-size: 15px; cursor: pointer; }
+.btn-secondary-modal { flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); color: #fff; height: 42px; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; }
+
+/* CRÍTICAS E ESTRELAS */
+.rating-box { background: #232323; padding: 15px; border-radius: 6px; margin-top: 15px; }
+.star-rating-row { display: flex; gap: 4px; font-size: 22px; color: #444; margin-bottom: 10px; cursor: pointer; }
+.star-rating-row span.active { color: #f5c518; }
+.input-textarea { width: 100%; height: 60px; background: #141414; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 4px; font-family: 'Outfit'; resize: none; outline: none; margin-bottom: 10px; font-size: 14px; }
+.btn-tertiary-modal { background: #333; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-family: 'Outfit'; font-weight: 600; width: 100%; font-size: 13px; }
+
+/* SELEÇÃO DE AVATAR */
+.avatar-selection-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.avatar-option { width: 100%; border-radius: 4px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+.avatar-option.active { border-color: var(--primary-neon); transform: scale(1.02); }
+
+/* ==========================================
+   REPRODUTOR CINEMÁTICO (PLAYER)
+========================================== */
+.player-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 99999; display: flex; flex-direction: column; }
+.player-top-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: #000; }
+.btn-back-player { background: transparent; border: none; color: white; cursor: pointer; font-weight: 700; font-size: 14px; font-family: 'Outfit'; display: flex; align-items: center; gap: 6px; }
+.series-control-hub { display: flex; gap: 12px; }
+.control-unit { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #aaa; font-weight: 600; }
+.input-number-glass { background: #222; border: 1px solid #444; color: white; width: 50px; text-align: center; padding: 6px; border-radius: 4px; font-family: 'Outfit'; outline: none; }
+.player-viewport { flex: 1; width: 100%; background: #000; }
+.player-viewport iframe { width: 100%; height: 100%; border: none; }
+
+/* MELHORIAS DO SELETOR DE EPISÓDIOS (PLAYER) */
+.modern-select-unit { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--glass-border); border-radius: 6px; padding: 4px 10px; transition: all 0.2s ease; }
+.modern-select-unit:hover, .modern-select-unit:focus-within { background: rgba(255, 255, 255, 0.15); border-color: var(--primary-neon); }
+.select-label { color: var(--primary-neon); font-weight: 800; font-size: 14px; margin-right: 5px; }
+.glass-select { background: transparent; border: none; color: white; font-family: 'Outfit'; font-size: 13px; font-weight: 500; outline: none; cursor: pointer; appearance: none; -webkit-appearance: none; padding-right: 15px; position: relative; max-width: 150px; text-overflow: ellipsis; }
+.glass-select option { background: #181818; color: white; }
+.modern-select-unit::after { content: '▼'; font-size: 9px; color: #aaa; pointer-events: none; margin-left: -12px; }
+.btn-action-glass { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--glass-border); color: white; border-radius: 6px; padding: 0 15px; cursor: pointer; font-size: 16px; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+.btn-action-glass:hover { background: var(--primary-neon); border-color: var(--primary-neon); transform: scale(1.05); }

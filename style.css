@@ -1,182 +1,132 @@
-:root {
-    --primary-neon: #E50914;
-    --primary-glow: rgba(229, 9, 20, 0.4);
-    --surface-dark: #090909;
-    --surface-panel: rgba(18, 18, 18, 0.85);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --text-primary: #f5f5f5;
-    --text-secondary: #a3a3a3;
-}
-
-* { box-sizing: border-box; }
-
-body {
-    font-family: 'Outfit', sans-serif;
-    background-color: var(--surface-dark);
-    color: var(--text-primary);
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-}
-
-/* SCROLLBAR PREMIUM */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: var(--surface-dark); }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #555; }
-body.modal-open { overflow: hidden !important; }
-
-@media (min-width: 769px) { .pc-only { display: flex !important; } .mobile-only { display: none !important; } }
-@media (max-width: 768px) {
-    .pc-only { display: none !important; }
-    .mobile-only { display: flex !important; }
-    body { padding-top: 60px; padding-bottom: 60px; }
-}
-
-.panel-glass {
-    background: rgba(5, 5, 5, 0.85);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--glass-border);
-}
-
-/* AUTENTICAÇÃO STYLE */
-#auth-screen {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    z-index: 9999; display: flex; align-items: center; justify-content: center; background: #000;
-}
-.auth-bg-overlay {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6) 0%, #050505 100%), url('https://assets.nflxext.com/ffe/siteui/vlv3/ca6a7616-0acb-4bc7-9356-97ff199fa6fe/f55a734a-9b77-440a-b333-ac4f0c1df473/BR-pt-20231211-popsignuptwoweeks-perspective_alpha_website_large.jpg');
-    background-size: cover; background-position: center; opacity: 0.4; z-index: 1;
-}
-.auth-container-cinenet { position: relative; z-index: 2; width: 100%; max-width: 420px; padding: 20px; }
-.auth-card-cinenet { background: rgba(0, 0, 0, 0.85); border-radius: 8px; padding: 50px 40px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8); border: 1px solid var(--glass-border); }
-.app-brand-cinenet, .app-brand { text-align: center; font-size: 32px; font-weight: 800; text-decoration: none; display: block; margin-bottom: 25px; letter-spacing: -1px; }
-.brand-accent { color: var(--primary-neon); }
-.brand-light { color: #fff; }
-.auth-card-cinenet h2 { font-size: 26px; margin: 0 0 20px; font-weight: 700; }
-.cinenet-input-group { position: relative; width: 100%; }
-.cinenet-input-group input { width: 100%; height: 56px; background: #333; border: none; border-radius: 4px; padding: 20px 20px 0; color: #fff; font-size: 16px; outline: none; transition: 0.2s; }
-.cinenet-input-group label { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #8c8c8c; font-size: 15px; transition: all 0.15s ease; pointer-events: none; }
-.cinenet-input-group input:focus~label, .cinenet-input-group input:not(:placeholder-shown)~label { top: 15px; font-size: 11px; color: #b3b3b3; }
-.btn-cinenet-main { width: 100%; height: 50px; background: var(--primary-neon); color: #fff; border: none; border-radius: 4px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-.btn-cinenet-main:hover { background: #c11119; }
-.btn-google-cinenet { width: 100%; height: 50px; background: #fff; color: #333; border: none; border-radius: 4px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
-.btn-google-cinenet:hover { background: #e0e0e0; }
-.auth-extra-cinenet { display: flex; justify-content: space-between; margin-top: 15px; font-size: 13px; color: #b3b3b3; }
-.auth-footer-cinenet { margin-top: 40px; color: #737373; font-size: 14px; }
-.auth-footer-cinenet button { background: none; border: none; color: #fff; cursor: pointer; margin-left: 5px; font-weight: 500; font-family: 'Outfit'; font-size: 14px; }
-.alert-box-cinenet { background: #e87c03; color: #fff; border-radius: 4px; padding: 12px; margin-top: 15px; text-align: center; font-size: 14px; }
-
-/* NAVBAR DESKTOP & MOBILE */
-#desktop-navbar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; z-index: 100; align-items: center; padding: 0 4%; display: none; }
-.nav-container { display: flex; width: 100%; justify-content: space-between; align-items: center; }
-.nav-menu { display: flex; list-style: none; gap: 20px; padding: 0; }
-.nav-menu a { color: #e5e5e5; text-decoration: none; font-size: 14px; transition: color 0.2s; }
-.nav-menu a:hover, .nav-menu a.active { color: #fff; }
-.nav-actions { display: flex; align-items: center; gap: 20px; }
-.profile-menu-container { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-.nav-avatar { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; }
-.nav-username { font-size: 14px; font-weight: 500; }
-.btn-disconnect { background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; }
-#mobile-topbar { position: fixed; top: 0; left: 0; width: 100%; height: 60px; z-index: 100; justify-content: space-between; align-items: center; padding: 0 15px; display: none; }
-.mobile-top-actions { display: flex; align-items: center; gap: 12px; }
-.mobile-avatar { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; cursor: pointer; }
-.btn-disconnect-mobile { background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 4px 8px; font-size: 12px; border-radius: 4px; }
-.mobile-bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; z-index: 100; display: none; padding-bottom: env(safe-area-inset-bottom, 0px); display: flex; justify-content: space-around; align-items: center; }
-.mobile-bottom-nav a { flex: 1; color: #888; text-decoration: none; display: flex; flex-direction: column; align-items: center; font-size: 20px; transition: 0.2s; }
-.mobile-bottom-nav a span:last-child { font-size: 10px; margin-top: 4px; }
-.mobile-bottom-nav a.active-nav { color: #fff; transform: translateY(-2px); }
-
-/* VISTAS GRID & WRAPPERS */
-#search-results-section, #watchlist-section { padding: 90px 4% 40px; min-height: 100vh; }
-@media (max-width: 768px) { #search-results-section, #watchlist-section { padding: 20px 4% 80px !important; } }
-.search-page-container { max-width: 600px; margin: 0 auto 30px; text-align: center; }
-.search-input-wrapper { position: relative; margin: 20px 0; display: flex; align-items: center; }
-.search-icon-inside { position: absolute; left: 18px; color: #888; font-size: 16px; }
-#main-search-input { width: 100%; padding: 14px 45px 14px 45px; background: #2f2f2f; border: none; border-radius: 4px; color: white; font-size: 15px; outline: none; }
-.search-clear-btn { position: absolute; right: 18px; color: #aaa; cursor: pointer; }
-.grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
-@media (min-width: 769px) { .grid-layout { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; } }
-
-/* HERO SHOWCASE DESTAQUES */
-.hero-showcase { height: 70vh; background-size: cover; background-position: center top; display: flex; align-items: flex-end; padding: 0 4% 40px; position: relative; }
-.hero-overlay-shadow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, var(--surface-dark) 0%, transparent 70%), linear-gradient(to right, rgba(0, 0, 0, 0.6) 0%, transparent 100%); }
-.hero-inner { position: relative; z-index: 2; max-width: 650px; }
-.hero-badge { background: rgba(255, 255, 255, 0.2); padding: 4px 8px; border-radius: 2px; font-size: 11px; font-weight: 700; margin-bottom: 12px; display: inline-block; }
-.hero-title-text { font-size: 2.8rem; margin: 5px 0 12px; font-weight: 800; line-height: 1.1; }
-.hero-description { font-size: 1rem; color: #cbcbcb; margin-bottom: 20px; line-height: 1.4; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
-.btn-primary-action { background: #fff; color: #000; border: none; padding: 10px 24px; font-size: 15px; font-weight: 700; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-.btn-primary-action:hover { background: rgba(255, 255, 255, 0.8); }
-@media (max-width: 768px) { .hero-showcase { height: 45vh; } .hero-title-text { font-size: 1.8rem; } .hero-description { display: none; } }
-.main-container { padding: 0 4% 60px; position: relative; z-index: 5; margin-top: -20px; }
-.movie-section { margin-bottom: 30px; }
-.section-title { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
-.movie-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
-.movie-row::-webkit-scrollbar { display: none; }
-.movie-card { width: 130px; flex-shrink: 0; cursor: pointer; position: relative; border-radius: 6px; overflow: hidden; transition: transform 0.2s; }
-.movie-card:hover { transform: scale(1.05); z-index: 10; }
-.movie-card img { width: 100%; height: 195px; object-fit: cover; border-radius: 6px; }
-.watched-indicator { position: absolute; top: 5px; right: 5px; background: var(--primary-neon); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 12px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); }
-@media (min-width: 769px) { .movie-card { width: 160px; } .movie-card img { height: 240px; } }
-
-/* ESTRUTURAS MODAL */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-.modal-content { background: var(--surface-panel); width: 100%; max-width: 700px; height: 95vh; border-radius: 12px; position: relative; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9); }
-.modal-content::-webkit-scrollbar { display: none; }
-.modal-close { position: absolute; top: 15px; right: 15px; background: rgba(0, 0, 0, 0.6); color: white; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer; z-index: 10; display: flex; justify-content: center; align-items: center; }
-.modal-banner { height: 300px; background-size: cover; background-position: center; position: relative; }
-.modal-banner-gradient { position: absolute; bottom: 0; width: 100%; height: 150px; background: linear-gradient(to top, var(--surface-panel), transparent); }
-.modal-body { padding: 0 30px 40px; position: relative; z-index: 5; margin-top: -30px; }
-.modal-title { font-size: 28px; margin: 0 0 10px; line-height: 1.2; }
-.modal-meta { display: flex; gap: 12px; font-size: 14px; margin-bottom: 15px; align-items: center; }
-.match-score { color: #4ade80; font-weight: 700; }
-.btn-secondary-modal { background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 10px 15px; font-size: 15px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
-.btn-secondary-modal:hover { background: rgba(255, 255, 255, 0.2); }
-
-/* CINEBOT INTELIGENTE STYLE */
-#chat-section { padding: 80px 4% 40px; display: flex; justify-content: center; height: 100vh; }
-.chatbot-container { width: 100%; max-width: 800px; background: var(--surface-panel); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; flex-direction: column; height: 100%; max-height: 85vh; overflow: hidden; backdrop-filter: blur(10px); }
-.chatbot-header { padding: 15px 20px; background: rgba(0, 0, 0, 0.4); border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; gap: 15px; }
-.chatbot-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-neon); display: flex; justify-content: center; align-items: center; font-size: 20px; }
-.chatbot-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; scrollbar-width: none; }
-.chatbot-messages::-webkit-scrollbar { display: none; }
-.bot-msg, .user-msg { max-width: 85%; padding: 12px 18px; border-radius: 15px; font-size: 15px; line-height: 1.4; }
-.bot-msg { background: rgba(255, 255, 255, 0.1); color: #e5e5e5; align-self: flex-start; border-bottom-left-radius: 2px; }
-.user-msg { background: var(--primary-neon); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; }
-.chat-quick-actions { display: flex; gap: 10px; padding: 10px 15px; overflow-x: auto; border-top: 1px solid var(--glass-border); scrollbar-width: none; }
-.chat-quick-actions::-webkit-scrollbar { display: none; }
-.chat-chip { background: rgba(255, 255, 255, 0.1); color: #ddd; padding: 6px 14px; border-radius: 20px; font-size: 13px; white-space: nowrap; cursor: pointer; transition: 0.2s; border: 1px solid rgba(255, 255, 255, 0.1); }
-.chat-chip:hover { background: var(--primary-neon); color: white; border-color: var(--primary-neon); }
-.chatbot-input-area { display: flex; padding: 15px; background: rgba(0, 0, 0, 0.5); }
-.chatbot-input-area input { flex: 1; padding: 15px 20px; border: 1px solid var(--glass-border); border-radius: 25px; background: var(--surface-dark); color: #fff; font-size: 15px; outline: none; }
-.chatbot-input-area button { width: auto; padding: 0 20px; height: 50px; border-radius: 25px; background: var(--primary-neon); border: none; color: white; display: flex; justify-content: center; align-items: center; margin-left: 10px; cursor: pointer; transition: 0.2s; font-weight:600; }
-.chatbot-input-area button:hover { transform: scale(1.05); }
-
-/* REPRODUTOR COMPLETO */
-.full-player-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 3000; display: none; flex-direction: column; }
-.player-header { padding: 15px 4%; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent); position: absolute; top: 0; width: 100%; z-index: 10; }
-.btn-close-player { background: transparent; color: #fff; border: none; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); }
-.series-control-hub { display: flex; gap: 10px; align-items: center; }
-.control-unit { display: flex; align-items: center; background: rgba(255, 255, 255, 0.1); border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px); overflow: hidden; }
-.select-label { background: rgba(0, 0, 0, 0.5); padding: 8px 12px; font-size: 14px; font-weight: 600; color: #ccc; }
-.glass-select { background: transparent; color: #fff; border: none; padding: 8px 12px 8px 5px; font-size: 14px; font-weight: 500; outline: none; cursor: pointer; appearance: none; -webkit-appearance: none; }
-.glass-select option { background: #111; color: #fff; }
-.btn-action-glass { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; width: 36px; height: 36px; border-radius: 4px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; backdrop-filter: blur(5px); font-size: 16px; }
-.player-viewport { flex: 1; width: 100%; height: 100%; }
-.player-viewport iframe { width: 100%; height: 100%; }
-@media (max-width: 768px) {
-    .player-header { flex-direction: column; align-items: flex-start; gap: 15px; padding-top: 20px; }
-    .series-control-hub { width: 100%; justify-content: space-between; }
-    .control-unit { flex: 1; } .glass-select { width: 100%; }
-}
-
-/* COMPLEMENTARES ADMIN & INTERAÇÕES */
-.admin-panel-card { background: rgba(15, 15, 15, 0.9); border: 1px solid var(--glass-border); max-width: 600px; margin: 0 auto; padding: 40px 30px; border-radius: 12px; }
-.admin-textarea { width: 100%; height: 110px; background: #333; border: none; border-radius: 4px; padding: 15px; color: #fff; font-family: 'Outfit'; font-size: 15px; outline: none; resize: none; }
-.admin-select { width: 100%; height: 50px; background: #333; color: #fff; border: none; border-radius: 4px; padding: 0 15px; font-size: 15px; outline: none; cursor: pointer; }
-.star-unit { font-size: 26px; color: #444; cursor: pointer; transition: transform 0.1s ease; display: inline-block; }
-.star-unit:hover { transform: scale(1.2); }
-.star-unit.active { color: #ffb800; text-shadow: 0 0 8px rgba(255, 184, 0, 0.4); }
-.avatar-option-choice { transition: 0.2s; border: 2px solid transparent; }
-.avatar-option-choice:hover { transform: scale(1.1); border-color: var(--primary-neon); }
+/* ==========================================
+   RESET & VARIÁVEIS
+   ========================================== */
+   * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; }
+   :root {
+       --bg-color: #141414;
+       --text-color: #ffffff;
+       --primary: #e50914;
+       --primary-hover: #b20710;
+       --secondary-bg: #2b2b2b;
+   }
+   body { background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; }
+   body.modal-open { overflow: hidden; }
+   
+   /* ==========================================
+      AUTENTICAÇÃO
+      ========================================== */
+   .auth-container { display: flex; height: 100vh; align-items: center; justify-content: center; background: url('https://assets.nflxext.com/ffe/siteui/vlv3/f85718e8-fc6d-4954-bca0-f5eaf78e0842/web/PT-pt-20230918-popsignuptwoweeks-perspective_alpha_website_large.jpg') center/cover; }
+   .auth-box { background: rgba(0,0,0,0.85); padding: 50px; border-radius: 8px; width: 100%; max-width: 400px; text-align: center; }
+   .auth-box h1 { margin-bottom: 20px; }
+   .auth-box input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 4px; border: none; background: #333; color: #fff; }
+   .btn-primary { background: var(--primary); color: white; padding: 12px; width: 100%; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+   .btn-primary:hover { background: var(--primary-hover); }
+   .btn-secondary { background: rgba(255,255,255,0.2); color: white; padding: 12px; width: 100%; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+   .auth-switch { margin-top: 15px; font-size: 0.9em; }
+   .auth-switch a { color: #fff; text-decoration: underline; cursor: pointer; }
+   
+   /* ==========================================
+      NAVEGAÇÃO
+      ========================================== */
+   .navbar { position: fixed; top: 0; width: 100%; height: 70px; background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%); display: flex; justify-content: space-between; align-items: center; padding: 0 4%; z-index: 1000; transition: background 0.3s; }
+   .navbar:hover { background: var(--bg-color); }
+   .nav-left { display: flex; align-items: center; gap: 30px; }
+   .logo { color: var(--primary); font-size: 1.8em; font-weight: bold; cursor: pointer; }
+   .nav-menu { list-style: none; display: flex; gap: 15px; }
+   .nav-menu a { color: #e5e5e5; text-decoration: none; cursor: pointer; font-size: 0.9em; transition: 0.2s; }
+   .nav-menu a:hover, .nav-menu a.active { color: white; font-weight: bold; }
+   .nav-right { display: flex; align-items: center; gap: 20px; }
+   .profile-trigger { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+   .profile-trigger img { width: 35px; height: 35px; border-radius: 4px; }
+   .btn-logout { background: transparent; border: 1px solid white; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+   
+   /* NAVEGAÇÃO MOBILE */
+   .mobile-bottom-nav { display: none; position: fixed; bottom: 0; width: 100%; background: #000; justify-content: space-around; padding: 10px 0; z-index: 1000; border-top: 1px solid #333; }
+   .mobile-bottom-nav a { color: #888; text-decoration: none; font-size: 0.8em; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+   .mobile-bottom-nav a.active-nav { color: white; font-weight: bold; }
+   
+   /* ==========================================
+      ESTRUTURA GERAL E GRIDS
+      ========================================== */
+   .app-section { min-height: 100vh; }
+   .hero { height: 80vh; background-size: cover; background-position: center; display: flex; align-items: center; padding: 0 4%; position: relative; }
+   .hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%); }
+   .hero-content { position: relative; z-index: 2; max-width: 600px; }
+   .hero-title { font-size: 3em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+   .hero-desc { font-size: 1.1em; margin-bottom: 20px; line-height: 1.4; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+   .hero-buttons { display: flex; gap: 10px; }
+   .btn-play { background: white; color: black; padding: 10px 25px; border: none; border-radius: 4px; font-size: 1.1em; font-weight: bold; cursor: pointer; }
+   .btn-play:hover { background: rgba(255,255,255,0.7); }
+   .btn-info { background: rgba(109,109,110,0.7); color: white; padding: 10px 25px; border: none; border-radius: 4px; font-size: 1.1em; font-weight: bold; cursor: pointer; }
+   
+   .catalog { padding: 20px 4%; margin-top: -100px; position: relative; z-index: 3; }
+   .catalog h3 { margin-bottom: 15px; font-size: 1.2em; }
+   .movie-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
+   .movie-row::-webkit-scrollbar { display: none; }
+   
+   .movie-card { flex: 0 0 150px; position: relative; cursor: pointer; transition: transform 0.3s; border-radius: 6px; overflow: hidden; }
+   .movie-card img { width: 100%; height: 225px; object-fit: cover; display: block; border-radius: 6px; }
+   .movie-card:hover { transform: scale(1.05); z-index: 10; }
+   
+   .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+   
+   /* ==========================================
+      BUSCA & FILTROS
+      ========================================== */
+   .search-input { width: 100%; padding: 15px; font-size: 1.2em; background: #333; color: white; border: none; border-radius: 6px; margin-bottom: 20px; outline: none; }
+   .filter-container { display: flex; gap: 10px; margin-bottom: 20px; }
+   .filter-pill { background: #333; border: none; color: white; padding: 8px 15px; border-radius: 20px; cursor: pointer; }
+   .filter-pill.active { background: white; color: black; font-weight: bold; }
+   
+   /* ==========================================
+      MODAL DETALHES
+      ========================================== */
+   .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
+   .modal-content { background: var(--bg-color); width: 100%; max-width: 800px; border-radius: 10px; overflow: hidden; position: relative; max-height: 90vh; overflow-y: auto; }
+   .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2em; cursor: pointer; z-index: 10; background: rgba(0,0,0,0.6); width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; border-radius: 50%; }
+   .modal-banner { height: 300px; background-size: cover; background-position: center; position: relative; }
+   .modal-banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, var(--bg-color) 0%, transparent 100%); }
+   .modal-body { padding: 30px; margin-top: -60px; position: relative; z-index: 2; }
+   .modal-meta { color: #a3a3a3; margin: 10px 0; }
+   .stars-container { margin: 15px 0; font-size: 1.5em; cursor: pointer; }
+   .star-unit { color: #555; transition: 0.2s; }
+   .star-unit.active, .star-unit:hover { color: gold; }
+   .modal-actions { display: flex; gap: 15px; margin-top: 20px; }
+   
+   /* ==========================================
+      PLAYER VÍDEO
+      ========================================== */
+   .player-fullscreen { position: fixed; inset: 0; background: #000; z-index: 3000; display: flex; flex-direction: column; }
+   .close-player { position: absolute; top: 20px; left: 20px; z-index: 3010; background: rgba(0,0,0,0.6); color: white; border: 1px solid white; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+   .episode-selectors { position: absolute; top: 20px; right: 20px; z-index: 3010; display: flex; gap: 10px; }
+   .episode-selectors select { background: rgba(0,0,0,0.7); color: white; border: 1px solid white; padding: 5px; border-radius: 4px; }
+   .player-fullscreen iframe { width: 100%; height: 100%; border: none; }
+   
+   /* ==========================================
+      CINEBOT (CHAT)
+      ========================================== */
+   /* Agora forçamos o chat-container a ocupar a tela com Flex, mas quem o esconde é a Section principal */
+   .chat-container { display: flex; flex-direction: column; height: 75vh; max-width: 800px; margin: 0 auto; background: var(--secondary-bg); border-radius: 10px; overflow: hidden; }
+   .chat-header { background: #111; padding: 15px; text-align: center; border-bottom: 1px solid #444; }
+   .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+   .bot-msg { background: #333; padding: 10px 15px; border-radius: 15px 15px 15px 0; align-self: flex-start; max-width: 80%; line-height: 1.4; }
+   .user-msg { background: var(--primary); padding: 10px 15px; border-radius: 15px 15px 0 15px; align-self: flex-end; max-width: 80%; line-height: 1.4; }
+   .chat-quick-actions { padding: 10px; display: flex; gap: 10px; overflow-x: auto; background: #222; scrollbar-width: none; }
+   .chat-quick-actions::-webkit-scrollbar { display: none; }
+   .chat-chip { background: #444; padding: 8px 15px; border-radius: 20px; white-space: nowrap; cursor: pointer; font-size: 0.9em; }
+   .chat-input-area { display: flex; padding: 15px; background: #111; gap: 10px; }
+   .chat-input-area input { flex: 1; padding: 12px; border-radius: 20px; border: none; background: #333; color: white; outline: none; }
+   .chat-input-area button { background: var(--primary); color: white; border: none; padding: 0 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+   
+   /* ==========================================
+      RESPONSIVO (MOBILE)
+      ========================================== */
+   @media (max-width: 768px) {
+       .nav-menu { display: none; }
+       .mobile-bottom-nav { display: flex; }
+       .app-section { padding-bottom: 70px; } /* espaço pro menu mobile */
+       .hero-title { font-size: 2em; }
+       .modal-content { max-height: 85vh; }
+       .modal-banner { height: 200px; }
+       .modal-actions { flex-direction: column; }
+   }

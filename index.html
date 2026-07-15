@@ -43,7 +43,7 @@
                 </ul>
             </div>
             <div class="nav-right">
-                <div class="profile-trigger" id="profile-trigger-pc">
+                <div class="profile-trigger" id="profile-trigger-pc" title="Editar Perfil">
                     <img id="user-avatar-pc" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" alt="Avatar">
                     <span id="user-name-pc">User</span>
                 </div>
@@ -86,7 +86,7 @@
 
         <section id="live-section" class="app-section" style="display: none; padding: 80px 4%;">
             <h2>Canais ao Vivo 🔴</h2>
-            <p style="color: #aaa; margin-bottom: 25px;">Assista à emissão em direto dos seus canais favoritos.</p>
+            <p style="color: #aaa; margin-bottom: 25px;">Assista à emissão em direto dos canais (Powered by EmbedTV).</p>
             <div id="live-grid" class="movie-grid">
                 </div>
         </section>
@@ -101,7 +101,7 @@
             <div class="chat-container">
                 <div class="chat-header">
                     <h3>CineBot 🤖</h3>
-                    <p>O seu assistente inteligente de filmes</p>
+                    <p>O seu assistente inteligente</p>
                 </div>
                 <div id="chatbot-messages" class="chat-messages">
                     <div class="bot-msg">Olá! Sou o CineBot. Como posso ajudar-te hoje?</div>
@@ -126,7 +126,7 @@
                 <input type="text" id="admin-backdrop" placeholder="URL do Backdrop (Horizontal)">
                 <input type="text" id="admin-video" placeholder="URL do Vídeo (mp4, m3u8)" required>
                 <textarea id="admin-sinopse" placeholder="Sinopse"></textarea>
-                <select id="admin-categoria">
+                <select id="admin-categoria" style="padding: 10px; width: 100%; margin-bottom: 10px; background:#333; color:white; border:none;">
                     <option value="movie">Filme</option>
                     <option value="tv">Série</option>
                     <option value="anime">Anime</option>
@@ -163,6 +163,26 @@
             </div>
         </div>
 
+        <div id="profileModal" class="modal" style="display: none;">
+            <div class="modal-content" style="max-width: 400px; padding: 30px; text-align: center;">
+                <span class="close-modal" onclick="fecharModalPerfil()">×</span>
+                <h3 style="margin-top: 0; margin-bottom: 20px;">Editar Perfil</h3>
+                
+                <div style="margin-bottom: 20px;">
+                    <img src="" id="profile-modal-avatar-preview" style="width: 90px; height: 90px; border-radius: 8px; border: 2px solid var(--primary); object-fit: cover; margin-bottom: 10px;">
+                    <div style="display: flex; gap: 10px; justify-content: center;" id="avatar-options-container">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="avatar-option-choice" onclick="selecionarAvatarTemporario(this.src)">
+                        <img src="https://wallpapers.com/images/hd/netflix-profile-pictures-a92v7iqgggkftxt1.jpg" class="avatar-option-choice" onclick="selecionarAvatarTemporario(this.src)">
+                        <img src="https://loodibee.com/wp-content/uploads/Netflix-Avatar-2.png" class="avatar-option-choice" onclick="selecionarAvatarTemporario(this.src)">
+                    </div>
+                </div>
+
+                <input type="text" id="profile-modal-username" placeholder="Nome de Utilizador" style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 4px; border: none; background: #333; color: #fff;">
+
+                <button class="btn-primary" onclick="salvarPerfilUsuario()">Guardar Alterações</button>
+            </div>
+        </div>
+
         <div id="streaming-player-screen" class="player-fullscreen" style="display: none;">
             <button id="close-player-btn" class="close-player">✖ Voltar</button>
             <div id="episodes-selectors-box" class="episode-selectors" style="display: none;">
@@ -177,7 +197,10 @@
             <a id="mob-nav-home" class="active-nav">🏠 Início</a>
             <a id="mob-nav-search">🔍 Busca</a>
             <a id="mob-nav-live">🔴 TV</a>
-            <a id="mob-nav-chat">🤖 Bot</a>
+            <a id="user-avatar-mobile-trigger" style="display:flex; flex-direction:column; align-items:center;">
+                <img id="user-avatar-mobile" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" style="width:24px; height:24px; border-radius:4px; margin-bottom:3px;">
+                Perfil
+            </a>
         </div>
     </div>
 

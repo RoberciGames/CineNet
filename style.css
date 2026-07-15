@@ -37,7 +37,7 @@
    .nav-menu a:hover, .nav-menu a.active { color: white; font-weight: bold; }
    .nav-right { display: flex; align-items: center; gap: 20px; }
    .profile-trigger { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-   .profile-trigger img { width: 35px; height: 35px; border-radius: 4px; }
+   .profile-trigger img { width: 35px; height: 35px; border-radius: 4px; object-fit: cover;}
    .btn-logout { background: transparent; border: 1px solid white; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
    
    /* NAVEGAÇÃO MOBILE */
@@ -79,7 +79,7 @@
    .filter-pill.active { background: white; color: black; font-weight: bold; }
    
    /* ==========================================
-      MODAL DETALHES
+      MODALS E PERFIL
       ========================================== */
    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
    .modal-content { background: var(--bg-color); width: 100%; max-width: 800px; border-radius: 10px; overflow: hidden; position: relative; max-height: 90vh; overflow-y: auto; }
@@ -92,6 +92,10 @@
    .star-unit { color: #555; transition: 0.2s; }
    .star-unit.active, .star-unit:hover { color: gold; }
    .modal-actions { display: flex; gap: 15px; margin-top: 20px; }
+
+   /* Avatares do Modal de Perfil */
+   .avatar-option-choice { width: 40px; height: 40px; border-radius: 4px; cursor: pointer; transition: 0.2s; border: 2px solid transparent; }
+   .avatar-option-choice:hover { transform: scale(1.1); border-color: var(--primary); }
    
    /* ==========================================
       PLAYER VÍDEO
@@ -103,9 +107,8 @@
    .player-fullscreen iframe { width: 100%; height: 100%; border: none; }
    
    /* ==========================================
-      CINEBOT (CHAT)
+      CINEBOT (CHAT) E ADMIN
       ========================================== */
-   /* Agora forçamos o chat-container a ocupar a tela com Flex, mas quem o esconde é a Section principal */
    .chat-container { display: flex; flex-direction: column; height: 75vh; max-width: 800px; margin: 0 auto; background: var(--secondary-bg); border-radius: 10px; overflow: hidden; }
    .chat-header { background: #111; padding: 15px; text-align: center; border-bottom: 1px solid #444; }
    .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
@@ -117,6 +120,8 @@
    .chat-input-area { display: flex; padding: 15px; background: #111; gap: 10px; }
    .chat-input-area input { flex: 1; padding: 12px; border-radius: 20px; border: none; background: #333; color: white; outline: none; }
    .chat-input-area button { background: var(--primary); color: white; border: none; padding: 0 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+
+   .admin-form input, .admin-form textarea { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 4px; border: none; background: #333; color: #fff; }
    
    /* ==========================================
       RESPONSIVO (MOBILE)
@@ -124,7 +129,7 @@
    @media (max-width: 768px) {
        .nav-menu { display: none; }
        .mobile-bottom-nav { display: flex; }
-       .app-section { padding-bottom: 70px; } /* espaço pro menu mobile */
+       .app-section { padding-bottom: 70px; } 
        .hero-title { font-size: 2em; }
        .modal-content { max-height: 85vh; }
        .modal-banner { height: 200px; }

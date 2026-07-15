@@ -8,6 +8,13 @@ let currentUserUID = null;
 let biblioteca = { watchlist: {}, reviews: {} };
 let isLoginMode = true;
 
+// Variáveis do Perfil
+let perfilUsuario = {
+    username: "CineNet User",
+    avatar: "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png"
+};
+let avatarTemp = "";
+
 const ADMIN_EMAIL = "roberci.azevedo@academico.ifpb.edu.br"; 
 
 // CONFIGURAÇÃO DO FIREBASE
@@ -62,16 +69,68 @@ firebase.auth().onAuthStateChanged(user => {
 function logout() { firebase.auth().signOut(); }
 document.getElementById('logout-btn-pc').addEventListener('click', logout);
 
+// ==========================================
+// PERFIL E DADOS DO UTILIZADOR
+// ==========================================
 function carregarDadosUsuario() {
-    firebase.database().ref('users/' + currentUserUID + '/biblioteca').once('value').then(snapshot => {
+    firebase.database().ref('users/' + currentUserUID).once('value').then(snapshot => {
         const data = snapshot.val();
-        if (data) biblioteca = data;
+        if (data) {
+            if(data.biblioteca) biblioteca = data.biblioteca;
+            if(data.perfil) perfilUsuario = data.perfil;
+        }
         if (!biblioteca.watchlist) biblioteca.watchlist = {};
         if (!biblioteca.reviews) biblioteca.reviews = {};
+        atualizarInterfacePerfil();
     });
 }
+
 function salvarDados() {
     if (currentUserUID) firebase.database().ref('users/' + currentUserUID + '/biblioteca').set(biblioteca);
+}
+
+// Lógica de Edição de Perfil
+document.getElementById('profile-trigger-pc').addEventListener('click', abrirModalPerfil);
+document.getElementById('user-avatar-mobile-trigger').addEventListener('click', abrirModalPerfil);
+
+function abrirModalPerfil() {
+    document.getElementById('profile-modal-username').value = perfilUsuario.username;
+    document.getElementById('profile-modal-avatar-preview').src = perfilUsuario.avatar;
+    avatarTemp = perfilUsuario.avatar;
+    document.getElementById('profileModal').style.display = 'flex';
+    document.body.classList.add('modal-open');
+}
+
+function fecharModalPerfil() {
+    document.getElementById('profileModal').style.display = 'none';
+    document.body.classList.remove('modal-open');
+}
+
+function selecionarAvatarTemporario(url) {
+    avatarTemp = url;
+    document.getElementById('profile-modal-avatar-preview').src = url;
+}
+
+function salvarPerfilUsuario() {
+    const novoNome = document.getElementById('profile-modal-username').value.trim();
+    if (!novoNome) return alert("O nome não pode estar vazio!");
+
+    perfilUsuario.username = novoNome;
+    perfilUsuario.avatar = avatarTemp;
+
+    if (currentUserUID) {
+        firebase.database().ref('users/' + currentUserUID + '/perfil').set(perfilUsuario)
+            .then(() => {
+                atualizarInterfacePerfil();
+                fecharModalPerfil();
+            });
+    }
+}
+
+function atualizarInterfacePerfil() {
+    document.getElementById('user-name-pc').innerText = perfilUsuario.username;
+    document.getElementById('user-avatar-pc').src = perfilUsuario.avatar;
+    document.getElementById('user-avatar-mobile').src = perfilUsuario.avatar;
 }
 
 // ==========================================
@@ -120,7 +179,7 @@ function irParaWatchlist() {
 }
 
 function irParaChat() {
-    setNavActive('nav-chat', 'mob-nav-chat');
+    setNavActive('nav-chat', null);
     esconderTodasSessoes();
     document.getElementById('chat-section').style.display = 'block'; 
 }
@@ -132,7 +191,7 @@ function irParaAdmin() {
     document.getElementById('admin-section').style.display = 'block';
 }
 
-// Listeners de Clique
+// Listeners
 document.getElementById('nav-home').onclick = irParaHome;
 document.getElementById('mob-nav-home').onclick = irParaHome;
 document.getElementById('nav-search').onclick = irParaBusca;
@@ -141,13 +200,11 @@ document.getElementById('nav-live').onclick = irParaAoVivo;
 document.getElementById('mob-nav-live').onclick = irParaAoVivo;
 document.getElementById('nav-watchlist').onclick = irParaWatchlist;
 document.getElementById('nav-chat').onclick = irParaChat;
-document.getElementById('mob-nav-chat').onclick = irParaChat;
 document.getElementById('nav-admin').onclick = irParaAdmin;
 
 // ==========================================
-// TV AO VIVO (INTEGRAÇÃO EMBEDTV.LAT)
+// TV AO VIVO (EMBEDTV.LAT)
 // ==========================================
-// Formato usado pela embedtv.lat geralmente: https://embedtv.lat/canal/globo
 const canaisConfig = [
     { id: "c1", nome: "TV Globo", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Rede_Globo_logo.svg/512px-Rede_Globo_logo.svg.png", embed: "https://embedtv.lat/canal/globo" },
     { id: "c2", nome: "SBT", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/SBT_logo_2021.svg/512px-SBT_logo_2021.svg.png", embed: "https://embedtv.lat/canal/sbt" },
@@ -165,7 +222,6 @@ function renderizarCanaisAoVivo() {
     canaisConfig.forEach(canal => {
         const card = document.createElement('div');
         card.className = 'movie-card';
-        // Adaptei a altura da imagem para não distorcer as logomarcas brancas
         card.innerHTML = `<img src="${canal.img}" style="object-fit: contain; background: #fff; padding: 25px; width: 100%; height: 225px;" alt="${canal.nome}">`;
         card.onclick = () => abrirCanalAoVivo(canal);
         grid.appendChild(card);
@@ -173,13 +229,8 @@ function renderizarCanaisAoVivo() {
 }
 
 function abrirCanalAoVivo(canal) {
-    esconderTodasSessoes();
     document.getElementById('episodes-selectors-box').style.display = 'none';
-    
-    // Injeta o link do embedtv
     document.getElementById('videoPlayer').src = canal.embed;
-    
-    // Abre o player full screen
     document.getElementById('streaming-player-screen').style.display = 'flex';
 }
 
@@ -271,7 +322,7 @@ async function executarBusca(termo) {
 }
 
 // ==========================================
-// MODAL & REPRODUTOR (mgeb.top para Filmes/Séries)
+// MODAL & REPRODUTOR (mgeb.top)
 // ==========================================
 async function abrirDetalhes(id, tipo, diretoplay = false) {
     const data = await fetchTMDB(`/${tipo}/${id}`);
@@ -305,16 +356,13 @@ async function abrirPlayer(id, tipo) {
     document.getElementById('streaming-player-screen').style.display = 'flex';
 }
 
-// CORREÇÃO: O Botão Voltar agora reconhece se estávamos na TV ao Vivo ou noutra tela
 document.getElementById('close-player-btn').addEventListener('click', () => {
     document.getElementById('streaming-player-screen').style.display = 'none';
     document.getElementById('videoPlayer').src = '';
     
-    // Se estavas na TV, volta para a TV. Se estavas num filme, volta para os filmes.
-    if (document.getElementById('nav-live').classList.contains('active') || document.getElementById('mob-nav-live').classList.contains('active-nav')) {
+    // Volta corretamente para a tela de origem
+    if (document.getElementById('nav-live').classList.contains('active') || (document.getElementById('mob-nav-live') && document.getElementById('mob-nav-live').classList.contains('active-nav'))) {
         document.getElementById('live-section').style.display = 'block';
-    } else {
-        document.getElementById('main-content').style.display = 'block';
     }
 });
 

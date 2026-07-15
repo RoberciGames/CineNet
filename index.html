@@ -9,7 +9,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/png" href="logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    
+    <link rel="stylesheet" href="style.css?v=3">
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-73VPBQSWKM"></script>
     <script>
@@ -23,40 +24,40 @@
 
     <div id="auth-screen">
         <div class="auth-bg-overlay"></div>
-        <div class="auth-container-netflix">
-            <div class="auth-card-netflix">
-                <div class="app-brand-netflix">
+        <div class="auth-container-cinenet">
+            <div class="auth-card-cinenet">
+                <div class="app-brand-cinenet">
                     <span class="brand-accent">CINE</span><span class="brand-light">NET</span>
                 </div>
                 <h2 id="auth-title">Entrar</h2>
                 
                 <form id="auth-form">
-                    <div class="netflix-input-group" style="margin-bottom: 15px;">
+                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
                         <input type="email" id="auth-email" placeholder=" " required>
-                        <label>Email do Usuário</label>
+                        <label>E-mail do Utilizador</label>
                     </div>
-                    <div class="netflix-input-group" style="margin-bottom: 25px;">
+                    <div class="cinenet-input-group" style="margin-bottom: 25px;">
                         <input type="password" id="auth-password" placeholder=" " required minlength="6">
-                        <label>Senha</label>
+                        <label>Palavra-passe</label>
                     </div>
-                    <button type="submit" class="btn-netflix-main" id="auth-submit-btn">Entrar</button>
+                    <button type="submit" class="btn-cinenet-main" id="auth-submit-btn">Entrar</button>
                     
                     <div style="text-align: center; margin: 15px 0; color: #888; font-size: 13px;">OU</div>
                     
-                    <button type="button" class="btn-google-netflix" id="btn-google-auth">
+                    <button type="button" class="btn-google-cinenet" id="btn-google-auth">
                         <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="Google Logo">
                         Entrar com o Google
                     </button>
                 </form>
 
-                <div class="auth-extra-netflix">
+                <div class="auth-extra-cinenet">
                     <span>Lembrar-me</span>
                     <span>Precisa de ajuda?</span>
                 </div>
-                <div id="auth-error" class="alert-box-netflix" style="display:none;"></div>
-                <div class="auth-footer-netflix">
+                <div id="auth-error" class="alert-box-cinenet" style="display:none;"></div>
+                <div class="auth-footer-cinenet">
                     <span id="auth-switch-text">Novo por aqui?</span>
-                    <button type="button" id="auth-switch-btn">Assine agora.</button>
+                    <button type="button" id="auth-switch-btn">Registe-se agora.</button>
                 </div>
             </div>
         </div>
@@ -73,13 +74,15 @@
                     <ul class="nav-menu">
                         <li><a href="#" class="active" id="nav-home">Início</a></li>
                         <li><a href="#" id="nav-search">Pesquisar</a></li>
-                        <li><a href="#" id="nav-watchlist">Minha Lista</a></li>
+                        <li><a href="#" id="nav-watchlist">A Minha Lista</a></li>
+                        <li><a href="#" id="nav-chat">CineBot</a></li>
+                        <li id="li-nav-admin" style="display: none;"><a href="#" id="nav-admin">🔧 Admin</a></li>
                     </ul>
                 </div>
                 <div class="nav-actions">
-                    <div class="profile-menu-container" id="profile-trigger-pc">
-                        <img src="" id="user-avatar-pc" class="nav-avatar" alt="Avatar">
-                        <span id="user-name-pc" class="nav-username"></span>
+                    <div class="profile-menu-container" id="profile-trigger-pc" title="Editar Perfil">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" id="user-avatar-pc" class="nav-avatar" alt="Avatar">
+                        <span id="user-name-pc" class="nav-username">CineNet User</span>
                     </div>
                     <button class="btn-disconnect" id="logout-btn-pc">Sair</button>
                 </div>
@@ -91,7 +94,7 @@
                 <span class="brand-accent">CINE</span><span class="brand-light">NET</span>
             </a>
             <div class="mobile-top-actions">
-                <img src="" id="user-avatar-mobile" class="mobile-avatar" alt="Avatar">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" id="user-avatar-mobile" class="mobile-avatar" alt="Avatar" title="Editar Perfil">
                 <button class="btn-disconnect-mobile" id="logout-btn-mobile">Sair</button>
             </div>
         </nav>
@@ -101,10 +104,16 @@
                 <span>🏠</span><span>Início</span>
             </a>
             <a href="#" id="mob-nav-search">
-                <span>🔍</span><span>Buscar</span>
+                <span>🔍</span><span>Procurar</span>
             </a>
             <a href="#" id="mob-nav-watchlist">
                 <span>⭐</span><span>Lista</span>
+            </a>
+            <a href="#" id="mob-nav-chat">
+                <span>🤖</span><span>CineBot</span>
+            </a>
+            <a href="#" id="mob-nav-admin" style="display: none;">
+                <span>🔧</span><span>Admin</span>
             </a>
         </nav>
 
@@ -113,7 +122,7 @@
                 <div class="hero-overlay-shadow"></div>
                 <div class="hero-inner">
                     <span class="hero-badge">EM DESTAQUE HOJE</span>
-                    <h1 class="hero-title-text" id="hero-title">Carregando...</h1>
+                    <h1 class="hero-title-text" id="hero-title">A carregar...</h1>
                     <p class="hero-description" id="hero-desc"></p>
                     <div style="display:flex; gap:15px;">
                         <button class="btn-primary-action" id="hero-play-btn">▶ Assistir</button>
@@ -124,7 +133,7 @@
 
             <div class="main-container">
                 <div class="movie-section">
-                    <h3 class="section-title">Bombando na CineNet</h3>
+                    <h3 class="section-title">A Bombar na CineNet</h3>
                     <div class="movie-row" id="row-trending"></div>
                 </div>
                 <div class="movie-section">
@@ -138,109 +147,158 @@
             </div>
         </div>
 
-        <div id="search-results-section" style="display:none;">
-            <div class="search-page-container">
-                <h2 style="margin-bottom: 5px; font-size: 28px;">O que vamos assistir hoje?</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 20px;">Explore milhares de títulos disponíveis instantaneamente.</p>
+        <div id="admin-section" style="display: none; padding: 90px 4% 40px;">
+            <div class="admin-panel-card">
+                <h2>Painel Administrativo Restrito</h2>
+                <p style="color: var(--text-secondary); text-align: center; margin-bottom: 25px; font-size: 14px;">
+                    Sessão iniciada como <strong>Roberci Azevedo</strong>.<br>Os conteúdos adicionados aqui ficarão disponíveis através da barra de pesquisa.
+                </p>
                 
+                <form id="admin-form">
+                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
+                        <input type="text" id="admin-titulo" placeholder=" " required>
+                        <label>Título do Conteúdo</label>
+                    </div>
+                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
+                        <input type="url" id="admin-poster" placeholder=" " required>
+                        <label>URL da Imagem do Poster (Vertical)</label>
+                    </div>
+                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
+                        <input type="url" id="admin-backdrop" placeholder=" " required>
+                        <label>URL da Imagem de Fundo (Horizontal)</label>
+                    </div>
+                    <div class="cinenet-input-group" style="margin-bottom: 15px;">
+                        <input type="url" id="admin-video" placeholder=" " required>
+                        <label>URL de Embed do Vídeo (Servidor Externo)</label>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <textarea id="admin-sinopse" class="admin-textarea" placeholder="Digite a sinopse do conteúdo aqui..." required></textarea>
+                    </div>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <label style="color: #aaa; display: block; margin-bottom: 8px; font-size: 13px;">Selecione a Categoria:</label>
+                        <select id="admin-categoria" class="admin-select">
+                            <option value="movie">🎬 Filme</option>
+                            <option value="tv">📺 Série</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn-cinenet-main">Adicionar ao Catálogo (Pesquisa)</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="search-results-section" style="display:none;">
+             <div class="search-page-container">
+                <h2 style="margin-bottom: 5px; font-size: 28px;">Busca Avançada</h2>
                 <div class="search-input-wrapper">
                     <span class="search-icon-inside">🔍</span>
-                    <input type="text" id="main-search-input" placeholder="Busque por títulos, diretores ou gêneros...">
-                    <span class="search-clear-btn" id="search-clear" style="display:none;">✖</span>
-                </div>
-
-                <div class="search-filter-pills" id="filter-pills-container">
-                    <div class="filter-pill active" data-filter="all">Todos</div>
-                    <div class="filter-pill" data-filter="movie">Filmes</div>
-                    <div class="filter-pill" data-filter="tv">Séries</div>
+                    <input type="text" id="main-search-input" placeholder="Digite o nome do título...">
+                    <span class="search-clear-btn" id="search-clear" style="display:none;" onclick="limparBusca()">✖</span>
                 </div>
             </div>
-
+            <div id="search-empty-state" style="display:none; text-align: center; color: #555; padding: 50px 0;">
+                <p>Nenhum resultado encontrado.</p>
+            </div>
             <div class="grid-layout" id="search-grid"></div>
-            <div id="search-empty-state" style="display:none; text-align:center; padding: 50px 20px; color: #666;">
-                <div style="font-size: 40px; margin-bottom: 15px;">🍿</div>
-                <h3>Nenhum resultado encontrado</h3>
-                <p>Tente refinar sua busca ou mude os filtros acima.</p>
-            </div>
         </div>
 
         <div id="watchlist-section" style="display:none;">
-            <div class="search-page-container">
-                <h2 style="margin-bottom: 5px; font-size: 28px;">Minha Lista</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 20px;">Seus filmes e séries salvos para ver depois.</p>
+            <h2 style="margin-bottom: 5px;">A Minha Lista</h2>
+            <div id="watchlist-empty-state" style="display:none; text-align: center; color: #555; padding: 50px 0;">
+                <p>A tua lista está vazia.</p>
             </div>
-
             <div class="grid-layout" id="watchlist-grid"></div>
-            <div id="watchlist-empty-state" style="display:none; text-align:center; padding: 50px 20px; color: #666;">
-                <div style="font-size: 40px; margin-bottom: 15px;">⭐</div>
-                <h3>Sua lista está vazia</h3>
-                <p>Navegue pelo catálogo e adicione títulos clicando em "+ Minha Lista".</p>
-                <button class="btn-secondary-modal" style="margin-top: 15px; padding: 10px 20px;" id="explore-catalog-btn">Explorar Catálogo</button>
-            </div>
         </div>
 
-        <div class="modal-netflix" id="detailsModal" style="display:none;">
-            <div class="modal-netflix-content">
-                <div class="close-netflix-modal" id="close-details-btn">✖</div>
-                <div class="modal-netflix-banner" id="modal-banner">
-                    <div class="modal-banner-overlay"></div>
-                    <div class="modal-banner-content">
-                        <h2 id="modal-title" style="font-size: 32px; font-weight: 800; margin: 0 0 10px;"></h2>
-                        <div class="info-metadata">
-                            <span class="meta-rating" id="modal-rating"></span>
-                            <span class="meta-year" id="modal-year"></span>
-                            <span class="meta-hd">HD 4K</span>
-                        </div>
+        <div id="chat-section" style="display:none;">
+             <div class="chatbot-container">
+                <div class="chatbot-header">
+                    <div class="chatbot-avatar">🤖</div>
+                    <div>
+                        <h3 style="margin:0; font-size: 16px;">CineBot Inteligente</h3>
+                        <span style="font-size: 12px; color: #4ade80;">Online e pronto a ajudar</span>
                     </div>
                 </div>
-                <div class="modal-netflix-info">
-                    <div class="modal-action-buttons">
-                        <button class="btn-play-netflix-modal" id="modal-play-btn">▶ Assistir</button>
-                        <button class="btn-secondary-modal" id="btn-watchlist">+ Minha Lista</button>
-                    </div>
-                    <p class="modal-overview-text" id="modal-overview"></p>
-                    <div class="rating-box">
-                        <h4 style="margin: 0 0 10px; font-size: 14px; color: #ccc;">Sua Avaliação:</h4>
-                        <div class="star-rating-row" id="star-container">
-                            <span data-star="1">★</span><span data-star="2">★</span><span data-star="3">★</span><span data-star="4">★</span><span data-star="5">★</span>
-                        </div>
-                        <textarea class="input-textarea" id="review-text" placeholder="Deixe um comentário sobre a obra (opcional)..."></textarea>
-                        <button class="btn-tertiary-modal" id="save-review-btn">Salvar Avaliação</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal-netflix" id="profileModal" style="display:none;">
-            <div class="modal-netflix-content small-modal">
-                <div class="close-netflix-modal" id="close-profile-btn">✖</div>
-                <h3 style="margin-bottom: 20px; text-align: center; color: var(--primary-neon);">Editar Perfil</h3>
                 
-                <div class="netflix-input-group" style="margin-bottom: 20px;">
-                    <input type="text" id="edit-username" placeholder=" ">
-                    <label>Nome de Exibição</label>
+                <div class="chatbot-messages" id="chatbot-messages">
+                    <div class="bot-msg">Olá! Sou o assistente de Inteligência Artificial da CineNet. Em que te posso ajudar hoje?</div>
+                </div>
+                
+                <div class="chat-quick-actions" id="chat-quick-actions">
+                    <div class="chat-chip">O que está em destaque?</div>
+                    <div class="chat-chip">Recomenda-me ação</div>
+                    <div class="chat-chip">Quero um filme de terror</div>
+                    <div class="chat-chip">Sugestões de comédia</div>
                 </div>
 
-                <h4 style="margin-bottom: 10px; font-size: 13px; color: #aaa;">Escolha um Avatar Oficial:</h4>
-                <div class="avatar-selection-grid" id="avatar-grid">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="avatar-option">
-                    <img src="https://pbs.twimg.com/media/DmBraqkXcAA1Yco.jpg" class="avatar-option">
-                    <img src="https://wallpapers.com/images/hd/netflix-profile-pictures-1000-x-1000-qo9h82134t9nv0j0.jpg" class="avatar-option">
-                    <img src="https://prodigits.co.uk/thumb/a/i/1/8/8750800-zstq0hff.jpg" class="avatar-option">
+                <div class="chatbot-input-area">
+                    <input type="text" id="chatbot-input" placeholder="Pergunta-me sobre filmes...">
+                    <button id="chatbot-send-btn">Enviar</button>
                 </div>
-
-                <div class="netflix-input-group" style="margin-top:20px;">
-                    <input type="url" id="input-profile-avatar-url" placeholder=" ">
-                    <label>Ou insira a URL de uma imagem externa...</label>
-                </div>
-
-                <button class="btn-netflix-main" style="margin-top: 25px; box-shadow: 0 4px 15px var(--primary-glow);" id="save-profile-btn">Confirmar Alterações</button>
             </div>
         </div>
 
-        <div class="player-overlay" id="playerModal" style="display:none;">
-            <header class="player-top-bar panel-glass">
-                <button class="btn-back-player" id="close-player-btn">⬅ FECHAR REPRODUTOR</button>
+        <div id="detailsModal" class="modal-overlay">
+            <div class="modal-content">
+                <button class="modal-close" onclick="fecharDetalhes()">✖</button>
+                <div class="modal-banner" id="modal-banner"><div class="modal-banner-gradient"></div></div>
+                <div class="modal-body">
+                    <h2 class="modal-title" id="modal-title">Título</h2>
+                    
+                    <div class="modal-meta">
+                        <span class="meta-item match-score" id="modal-rating"></span>
+                        <span class="meta-item" id="modal-year"></span>
+                    </div>
+
+                    <div class="rating-box-container" style="margin: 15px 0; display: flex; align-items: center; gap: 10px;">
+                        <span style="color: #aaa; font-size: 14px;">A tua avaliação:</span>
+                        <div class="star-rating-row" id="modal-star-row">
+                            <span class="star-unit" data-value="1" onclick="votarEstrelas(1)">★</span>
+                            <span class="star-unit" data-value="2" onclick="votarEstrelas(2)">★</span>
+                            <span class="star-unit" data-value="3" onclick="votarEstrelas(3)">★</span>
+                            <span class="star-unit" data-value="4" onclick="votarEstrelas(4)">★</span>
+                            <span class="star-unit" data-value="5" onclick="votarEstrelas(5)">★</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin: 15px 0;">
+                        <button class="btn-primary-action" style="flex:1; justify-content:center;" id="modal-play-btn">▶ Assistir Agora</button>
+                        <button class="btn-secondary-modal" style="flex:1;" id="btn-watchlist" onclick="alternarWatchlist()">+ A Minha Lista</button>
+                    </div>
+
+                    <p class="modal-overview" id="modal-overview" style="line-height: 1.6; color: var(--text-secondary); font-size: 15px; margin-top: 15px;"></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="profileModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content" style="max-width: 400px; height: auto; padding: 30px;">
+                <button class="modal-close" onclick="fecharModalPerfil()">✖</button>
+                <h3 style="margin-top: 0; margin-bottom: 20px; text-align: center;">Editar Perfil</h3>
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="" id="profile-modal-avatar-preview" style="width: 90px; height: 90px; border-radius: 8px; border: 2px solid var(--primary-neon); object-fit: cover; margin-bottom: 10px;">
+                    <div style="display: flex; gap: 10px; justify-content: center;" id="avatar-options-container">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="avatar-option-choice" onclick="selecionarAvatarTemporario(this.src)" style="width: 40px; height: 40px; border-radius: 4px; cursor: pointer;">
+                        <img src="https://wallpapers.com/images/hd/netflix-profile-pictures-a92v7iqgggkftxt1.jpg" class="avatar-option-choice" onclick="selecionarAvatarTemporario(this.src)" style="width: 40px; height: 40px; border-radius: 4px; cursor: pointer;">
+                        <img src="https://loodibee.com/wp-content/uploads/Netflix-Avatar-2.png" class="avatar-option-choice" onclick="selecionarAvatarTemporario(this.src)" style="width: 40px; height: 40px; border-radius: 4px; cursor: pointer;">
+                    </div>
+                </div>
+
+                <div class="cinenet-input-group" style="margin-bottom: 20px;">
+                    <input type="text" id="profile-modal-username" placeholder=" ">
+                    <label>Nome de Utilizador</label>
+                </div>
+
+                <button class="btn-cinenet-main" onclick="salvarPerfilUsuario()">Guardar Alterações</button>
+            </div>
+        </div>
+
+        <div id="streaming-player-screen" class="full-player-screen">
+            <header class="player-header">
+                <button class="btn-close-player" id="close-player-btn">⬅ FECHAR REPRODUTOR</button>
                 <div class="series-control-hub" id="episodes-selectors-box" style="display:none;">
                     <div class="control-unit modern-select-unit">
                         <span class="select-label">T</span>
@@ -267,6 +325,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="script.js"></script>
+    
+    <script src="script.js?v=3"></script>
 </body>
 </html>

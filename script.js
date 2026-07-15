@@ -113,7 +113,7 @@ function irParaAoVivo() {
 }
 
 function irParaWatchlist() {
-    setNavActive('nav-watchlist', null); // Mobile não tem este no bottom nav direto
+    setNavActive('nav-watchlist', null); 
     esconderTodasSessoes();
     document.getElementById('watchlist-section').style.display = 'block';
     renderizarWatchlist();
@@ -122,7 +122,7 @@ function irParaWatchlist() {
 function irParaChat() {
     setNavActive('nav-chat', 'mob-nav-chat');
     esconderTodasSessoes();
-    document.getElementById('chat-section').style.display = 'block'; // O CSS trata do Flex interior
+    document.getElementById('chat-section').style.display = 'block'; 
 }
 
 function irParaAdmin() {
@@ -145,13 +145,18 @@ document.getElementById('mob-nav-chat').onclick = irParaChat;
 document.getElementById('nav-admin').onclick = irParaAdmin;
 
 // ==========================================
-// TV AO VIVO (NOVO SISTEMA)
+// TV AO VIVO (INTEGRAÇÃO EMBEDTV.LAT)
 // ==========================================
+// Formato usado pela embedtv.lat geralmente: https://embedtv.lat/canal/globo
 const canaisConfig = [
-    { id: "c1", nome: "CNN Brasil", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/CNN_Brasil_logo.svg/512px-CNN_Brasil_logo.svg.png", embed: "https://www.youtube.com/embed/live_stream?channel=UCG5pzC02p15Z1rI31j6Zhhw" },
-    { id: "c2", nome: "Record News", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Record_News_logo_2021.svg/512px-Record_News_logo_2021.svg.png", embed: "https://www.youtube.com/embed/live_stream?channel=UCuiLR4p6wQ3xLEm15pEn1Xw" },
-    { id: "c3", nome: "SBT News", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/SBT_News.png/512px-SBT_News.png", embed: "https://www.youtube.com/embed/live_stream?channel=UCwsmUfA1B02z9oWfM_u1rWQ" },
-    { id: "c4", nome: "Jovem Pan News", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Jovem_Pan_News_2021.png/512px-Jovem_Pan_News_2021.png", embed: "https://www.youtube.com/embed/live_stream?channel=UC8K2H3mFGA1Uq7Y2H6N4e4w" }
+    { id: "c1", nome: "TV Globo", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Rede_Globo_logo.svg/512px-Rede_Globo_logo.svg.png", embed: "https://embedtv.lat/canal/globo" },
+    { id: "c2", nome: "SBT", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/SBT_logo_2021.svg/512px-SBT_logo_2021.svg.png", embed: "https://embedtv.lat/canal/sbt" },
+    { id: "c3", nome: "Record", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Record_logo_2023.svg/512px-Record_logo_2023.svg.png", embed: "https://embedtv.lat/canal/record" },
+    { id: "c4", nome: "Band", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Band_logo_2018.svg/512px-Band_logo_2018.svg.png", embed: "https://embedtv.lat/canal/band" },
+    { id: "c5", nome: "Premiere", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Premiere_logo.svg/512px-Premiere_logo.svg.png", embed: "https://embedtv.lat/canal/premiere" },
+    { id: "c6", nome: "SporTV", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/SporTV_logo_2021.svg/512px-SporTV_logo_2021.svg.png", embed: "https://embedtv.lat/canal/sportv" },
+    { id: "c7", nome: "ESPN", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/ESPN_logo.svg/512px-ESPN_logo.svg.png", embed: "https://embedtv.lat/canal/espn" },
+    { id: "c8", nome: "Telecine", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Telecine_logo_2019.svg/512px-Telecine_logo_2019.svg.png", embed: "https://embedtv.lat/canal/telecine" }
 ];
 
 function renderizarCanaisAoVivo() {
@@ -160,17 +165,22 @@ function renderizarCanaisAoVivo() {
     canaisConfig.forEach(canal => {
         const card = document.createElement('div');
         card.className = 'movie-card';
-        card.innerHTML = `<img src="${canal.img}" style="object-fit: contain; background: #fff; padding: 10px;" alt="${canal.nome}">`;
+        // Adaptei a altura da imagem para não distorcer as logomarcas brancas
+        card.innerHTML = `<img src="${canal.img}" style="object-fit: contain; background: #fff; padding: 25px; width: 100%; height: 225px;" alt="${canal.nome}">`;
         card.onclick = () => abrirCanalAoVivo(canal);
         grid.appendChild(card);
     });
 }
 
 function abrirCanalAoVivo(canal) {
-    document.getElementById('main-content').style.display = 'none';
+    esconderTodasSessoes();
     document.getElementById('episodes-selectors-box').style.display = 'none';
-    document.getElementById('videoPlayer').src = canal.embed + "&autoplay=1";
-    document.getElementById('streaming-player-screen').style.display = 'block';
+    
+    // Injeta o link do embedtv
+    document.getElementById('videoPlayer').src = canal.embed;
+    
+    // Abre o player full screen
+    document.getElementById('streaming-player-screen').style.display = 'flex';
 }
 
 // ==========================================
@@ -261,7 +271,7 @@ async function executarBusca(termo) {
 }
 
 // ==========================================
-// MODAL & REPRODUTOR (mgeb.top)
+// MODAL & REPRODUTOR (mgeb.top para Filmes/Séries)
 // ==========================================
 async function abrirDetalhes(id, tipo, diretoplay = false) {
     const data = await fetchTMDB(`/${tipo}/${id}`);
@@ -287,18 +297,25 @@ async function abrirPlayer(id, tipo) {
     fecharDetalhes();
     if (tipo === 'tv') {
         document.getElementById('episodes-selectors-box').style.display = 'flex';
-        // Simplificado: assume T1 E1 de imediato, em produção pode carregar selectors reais
         document.getElementById('videoPlayer').src = `https://mgeb.top/embed/tv/${id}/1/1`;
     } else {
         document.getElementById('episodes-selectors-box').style.display = 'none';
         document.getElementById('videoPlayer').src = `https://mgeb.top/embed/movie/${id}`;
     }
-    document.getElementById('streaming-player-screen').style.display = 'block';
+    document.getElementById('streaming-player-screen').style.display = 'flex';
 }
 
+// CORREÇÃO: O Botão Voltar agora reconhece se estávamos na TV ao Vivo ou noutra tela
 document.getElementById('close-player-btn').addEventListener('click', () => {
     document.getElementById('streaming-player-screen').style.display = 'none';
     document.getElementById('videoPlayer').src = '';
+    
+    // Se estavas na TV, volta para a TV. Se estavas num filme, volta para os filmes.
+    if (document.getElementById('nav-live').classList.contains('active') || document.getElementById('mob-nav-live').classList.contains('active-nav')) {
+        document.getElementById('live-section').style.display = 'block';
+    } else {
+        document.getElementById('main-content').style.display = 'block';
+    }
 });
 
 // Watchlist

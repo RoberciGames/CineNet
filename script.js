@@ -98,8 +98,8 @@ firebase.auth().onAuthStateChanged(user => {
 });
 
 function logout() { firebase.auth().signOut(); }
-document.getElementById('logout-btn-pc').addEventListener('click', logout);
-document.getElementById('logout-btn-mobile').addEventListener('click', logout);
+if(document.getElementById('logout-btn-pc')) document.getElementById('logout-btn-pc').addEventListener('click', logout);
+if(document.getElementById('logout-btn-mobile')) document.getElementById('logout-btn-mobile').addEventListener('click', logout);
 
 // ==========================================
 // SINCRONIZAÇÃO E PERFIL DE USUÁRIO
@@ -126,8 +126,8 @@ function salvarDados() {
     }
 }
 
-document.getElementById('profile-trigger-pc').addEventListener('click', abrirModalPerfil);
-document.getElementById('user-avatar-mobile').addEventListener('click', abrirModalPerfil);
+if(document.getElementById('profile-trigger-pc')) document.getElementById('profile-trigger-pc').addEventListener('click', abrirModalPerfil);
+if(document.getElementById('user-avatar-mobile')) document.getElementById('user-avatar-mobile').addEventListener('click', abrirModalPerfil);
 
 function abrirModalPerfil() {
     document.getElementById('profile-modal-username').value = perfilUsuario.username;
@@ -164,9 +164,9 @@ function salvarPerfilUsuario() {
 }
 
 function atualizarInterfacePerfil() {
-    document.getElementById('user-name-pc').innerText = perfilUsuario.username;
-    document.getElementById('user-avatar-pc').src = perfilUsuario.avatar;
-    document.getElementById('user-avatar-mobile').src = perfilUsuario.avatar;
+    if(document.getElementById('user-name-pc')) document.getElementById('user-name-pc').innerText = perfilUsuario.username;
+    if(document.getElementById('user-avatar-pc')) document.getElementById('user-avatar-pc').src = perfilUsuario.avatar;
+    if(document.getElementById('user-avatar-mobile')) document.getElementById('user-avatar-mobile').src = perfilUsuario.avatar;
 }
 
 // ==========================================
@@ -174,16 +174,16 @@ function atualizarInterfacePerfil() {
 // ==========================================
 function setNavActive(idDesktop, idMobile) {
     document.querySelectorAll('.nav-menu a, .mobile-bottom-nav a').forEach(el => el.classList.remove('active', 'active-nav'));
-    if(idDesktop) document.getElementById(idDesktop).classList.add('active');
-    if(idMobile) document.getElementById(idMobile).classList.add('active-nav');
+    if(idDesktop && document.getElementById(idDesktop)) document.getElementById(idDesktop).classList.add('active');
+    if(idMobile && document.getElementById(idMobile)) document.getElementById(idMobile).classList.add('active-nav');
 }
 
 function esconderTodasSessoes() {
-    document.getElementById('main-content').style.display = 'none';
-    document.getElementById('search-results-section').style.display = 'none';
-    document.getElementById('watchlist-section').style.display = 'none';
-    document.getElementById('chat-section').style.display = 'none'; 
-    document.getElementById('admin-section').style.display = 'none';
+    const sections = ['main-content', 'search-results-section', 'watchlist-section', 'chat-section', 'admin-section'];
+    sections.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.style.display = 'none';
+    });
 }
 
 function irParaHome() {
@@ -211,7 +211,8 @@ function irParaBusca() {
     setNavActive('nav-search', 'mob-nav-search');
     esconderTodasSessoes();
     document.getElementById('search-results-section').style.display = 'block';
-    document.getElementById('main-search-input').focus();
+    const searchInput = document.getElementById('main-search-input');
+    if (searchInput) searchInput.focus();
     trackVirtualPage("Busca", "/search");
 }
 
@@ -227,20 +228,19 @@ function irParaChat() {
     setNavActive('nav-chat', 'mob-nav-chat');
     esconderTodasSessoes();
     document.getElementById('chat-section').style.display = 'block';
-    document.getElementById('chatbot-input').focus();
+    
+    // Correção: Verifica se o input existe antes de dar o focus
+    const chatInput = document.getElementById('chatbot-input');
+    if (chatInput) chatInput.focus();
+    
     trackVirtualPage("CineBot", "/chat");
 }
 
-document.getElementById('nav-home').addEventListener('click', irParaHome);
-document.getElementById('mob-nav-home').addEventListener('click', irParaHome);
-document.getElementById('nav-admin').addEventListener('click', irParaAdmin);
-document.getElementById('mob-nav-admin').addEventListener('click', irParaAdmin);
-document.getElementById('nav-search').addEventListener('click', irParaBusca);
-document.getElementById('mob-nav-search').addEventListener('click', irParaBusca);
-document.getElementById('nav-watchlist').addEventListener('click', irParaWatchlist);
-document.getElementById('mob-nav-watchlist').addEventListener('click', irParaWatchlist);
-document.getElementById('nav-chat').addEventListener('click', irParaChat);
-document.getElementById('mob-nav-chat').addEventListener('click', irParaChat);
+['nav-home', 'mob-nav-home'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).addEventListener('click', irParaHome); });
+['nav-admin', 'mob-nav-admin'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).addEventListener('click', irParaAdmin); });
+['nav-search', 'mob-nav-search'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).addEventListener('click', irParaBusca); });
+['nav-watchlist', 'mob-nav-watchlist'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).addEventListener('click', irParaWatchlist); });
+['nav-chat', 'mob-nav-chat'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).addEventListener('click', irParaChat); });
 
 function alternarScrollBody(travar) {
     document.body.classList.toggle('modal-open', travar);
@@ -249,37 +249,39 @@ function alternarScrollBody(travar) {
 // ==========================================
 // FORMULÁRIO DO PAINEL ADMINISTRATIVO
 // ==========================================
-document.getElementById('admin-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const user = firebase.auth().currentUser;
-    if (!user || user.email !== ADMIN_EMAIL) return alert("Ação não autorizada!");
+if(document.getElementById('admin-form')) {
+    document.getElementById('admin-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const user = firebase.auth().currentUser;
+        if (!user || user.email !== ADMIN_EMAIL) return alert("Ação não autorizada!");
 
-    const titulo = document.getElementById('admin-titulo').value;
-    const poster = document.getElementById('admin-poster').value;
-    const backdrop = document.getElementById('admin-backdrop').value;
-    const video = document.getElementById('admin-video').value;
-    const sinopse = document.getElementById('admin-sinopse').value;
-    const tipo = document.getElementById('admin-categoria').value; 
+        const titulo = document.getElementById('admin-titulo').value;
+        const poster = document.getElementById('admin-poster').value;
+        const backdrop = document.getElementById('admin-backdrop').value;
+        const video = document.getElementById('admin-video').value;
+        const sinopse = document.getElementById('admin-sinopse').value;
+        const tipo = document.getElementById('admin-categoria').value; 
 
-    const novoConteudo = {
-        id: 'custom_' + Date.now(),
-        title: titulo,
-        poster_path: poster,
-        backdrop_path: backdrop,
-        video_url: video,
-        overview: sinopse,
-        media_type: tipo,
-        is_custom: true,
-        adicionadoEm: Date.now()
-    };
+        const novoConteudo = {
+            id: 'custom_' + Date.now(),
+            title: titulo,
+            poster_path: poster,
+            backdrop_path: backdrop,
+            video_url: video,
+            overview: sinopse,
+            media_type: tipo,
+            is_custom: true,
+            adicionadoEm: Date.now()
+        };
 
-    firebase.database().ref('conteudos_customizados/' + novoConteudo.id).set(novoConteudo)
-        .then(() => {
-            alert("Sucesso! Conteúdo salvo e integrado no mecanismo de busca.");
-            document.getElementById('admin-form').reset();
-        })
-        .catch(error => alert("Erro ao salvar: " + error.message));
-});
+        firebase.database().ref('conteudos_customizados/' + novoConteudo.id).set(novoConteudo)
+            .then(() => {
+                alert("Sucesso! Conteúdo salvo e integrado no mecanismo de busca.");
+                document.getElementById('admin-form').reset();
+            })
+            .catch(error => alert("Erro ao salvar: " + error.message));
+    });
+}
 
 // ==========================================
 // INTEGRAÇÃO TMDB & CARREGAMENTO DA HOME
@@ -298,11 +300,14 @@ async function carregarHome() {
 
     if (dataTrending.results.length > 0) {
         const hero = dataTrending.results[0];
-        document.getElementById('hero-banner').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${hero.backdrop_path})`;
-        document.getElementById('hero-title').innerText = hero.title || hero.name;
-        document.getElementById('hero-desc').innerText = hero.overview || "";
-        document.getElementById('hero-play-btn').onclick = () => abrirDetalhes(hero.id, hero.media_type || 'movie', true);
-        document.getElementById('hero-info-btn').onclick = () => abrirDetalhes(hero.id, hero.media_type || 'movie');
+        const heroBanner = document.getElementById('hero-banner');
+        if (heroBanner) {
+            heroBanner.style.backgroundImage = `url(https://image.tmdb.org/t/p/original${hero.backdrop_path})`;
+            document.getElementById('hero-title').innerText = hero.title || hero.name;
+            document.getElementById('hero-desc').innerText = hero.overview || "";
+            document.getElementById('hero-play-btn').onclick = () => abrirDetalhes(hero.id, hero.media_type || 'movie', true);
+            document.getElementById('hero-info-btn').onclick = () => abrirDetalhes(hero.id, hero.media_type || 'movie');
+        }
     }
     renderCards(dataTrending.results, 'row-trending');
     renderCards(dataMovies.results, 'row-movies', 'movie');
@@ -347,9 +352,9 @@ function limparBusca() {
     document.getElementById('search-grid').innerHTML = '';
     ultimoTermoBusca = '';
 }
-document.getElementById('main-search-input').addEventListener('input', (e) => iniciarBusca(e.target.value));
+if(document.getElementById('main-search-input')) document.getElementById('main-search-input').addEventListener('input', (e) => iniciarBusca(e.target.value));
 
-async function ejecutarBusca(termo) {
+async function executarBusca(termo) { // Corrigido de 'ejecutarBusca' para pt-br
     const container = document.getElementById('search-grid');
     const emptyState = document.getElementById('search-empty-state');
     container.innerHTML = '';
@@ -397,15 +402,16 @@ async function ejecutarBusca(termo) {
 function renderizarWatchlist() {
     const container = document.getElementById('watchlist-grid');
     const emptyState = document.getElementById('watchlist-empty-state');
+    if(!container) return;
     container.innerHTML = '';
 
     const listItems = Object.values(biblioteca.watchlist).sort((a, b) => b.adicionadoEm - a.adicionadoEm);
     const validItems = listItems.filter(i => i && i.poster_path);
 
     if (validItems.length === 0) {
-        emptyState.style.display = 'block';
+        if(emptyState) emptyState.style.display = 'block';
     } else {
-        emptyState.style.display = 'none';
+        if(emptyState) emptyState.style.display = 'none';
         validItems.forEach(item => {
             const card = document.createElement('div');
             card.className = 'movie-card';
@@ -427,12 +433,12 @@ function alternarWatchlist() {
     }
     atualizarBotaoWatchlist();
     salvarDados();
-    if(document.getElementById('watchlist-section').style.display === 'block') renderizarWatchlist();
+    if(document.getElementById('watchlist-section') && document.getElementById('watchlist-section').style.display === 'block') renderizarWatchlist();
 }
 
 function atualizarBotaoWatchlist() {
     const btn = document.getElementById('btn-watchlist');
-    btn.innerText = biblioteca.watchlist[itemSelecionado.id] ? "✔ Na Minha Lista" : "+ A Minha Lista";
+    if(btn) btn.innerText = biblioteca.watchlist[itemSelecionado.id] ? "✔ Na Minha Lista" : "+ A Minha Lista";
 }
 
 // ==========================================
@@ -491,7 +497,8 @@ async function abrirDetalhes(id, tipo, diretoplay = false) {
 }
 
 function fecharDetalhes() {
-    document.getElementById('detailsModal').style.display = 'none';
+    const modal = document.getElementById('detailsModal');
+    if (modal) modal.style.display = 'none';
     alternarScrollBody(false);
 }
 
@@ -591,23 +598,28 @@ function avancarEpisodioNoPlayer(id) {
     } else alert("Fim da temporada alcançado!");
 }
 
-document.getElementById('close-player-btn').addEventListener('click', () => {
-    document.getElementById('streaming-player-screen').style.display = 'none';
-    document.getElementById('videoPlayer').src = '';
-    document.getElementById('main-content').style.display = 'block';
-    alternarScrollBody(false);
-});
+if(document.getElementById('close-player-btn')) {
+    document.getElementById('close-player-btn').addEventListener('click', () => {
+        document.getElementById('streaming-player-screen').style.display = 'none';
+        document.getElementById('videoPlayer').src = '';
+        document.getElementById('main-content').style.display = 'block';
+        alternarScrollBody(false);
+    });
+}
 
 // ==========================================
-// CINEBOT (INTELIGÊNCIA E INTERAÇÕES)
+// CINEBOT (INTELIGÊNCIA E INTERAÇÕES) - CORRIGIDO
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
+function inicializarCineBot() {
     const chatInput = document.getElementById('chatbot-input');
     const sendBtn = document.getElementById('chatbot-send-btn');
     const messagesContainer = document.getElementById('chatbot-messages');
     const quickActionsContainer = document.getElementById('chat-quick-actions');
     
-    if(!chatInput || !sendBtn) return;
+    if(!chatInput || !sendBtn || !messagesContainer) {
+        console.warn("CineBot: Os elementos essenciais do chat não foram encontrados no HTML!");
+        return;
+    }
 
     function addMessage(text, type) {
         const msgDiv = document.createElement('div');
@@ -684,4 +696,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
+}
+
+// Verifica de forma segura se o HTML já carregou antes de invocar o CineBot
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', inicializarCineBot);
+} else {
+    inicializarCineBot();
+}

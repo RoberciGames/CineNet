@@ -98,15 +98,10 @@
    .btn-logout { background: transparent; border: 1px solid var(--red-vibrant); color: var(--red-vibrant); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;}
    .btn-logout:hover { background: var(--red-vibrant); color: #fff; }
    
-   /* LAYOUT SEM SIDEBAR */
+   /* LAYOUT PRINCIPAL */
    .main-layout-container { display: block; padding: 90px 4% 40px; min-height: 100vh; }
-   
-   /* CONTEÚDO PRINCIPAL */
    .content-area { display: flex; flex-direction: column; gap: 30px; }
-   .hero {
-       height: 50vh; padding: 40px; display: flex; align-items: flex-end;
-       background-size: cover; background-position: center; position: relative; border-radius: 12px; border: 1px solid rgba(255,0,60,0.3);
-   }
+   .hero { height: 50vh; padding: 40px; display: flex; align-items: flex-end; background-size: cover; background-position: center; position: relative; border-radius: 12px; border: 1px solid rgba(255,0,60,0.3); }
    .hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 100%); border-radius: 12px;}
    .hero-content { position: relative; z-index: 2; width: 100%; }
    .hero-title { font-size: 3em; margin-bottom: 10px; font-weight: 900;}
@@ -114,39 +109,28 @@
    .hero-buttons { display: flex; gap: 15px; }
    .btn-play, .btn-info { padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase;}
    
-   /* CATÁLOGO E CARROSSEL */
-   .catalog { padding: 25px; }
+   /* CARROSSEL DESTAQUE */
+   .catalog { padding: 25px; position: relative; }
    .catalog h3 { margin-bottom: 20px; }
-   
    .movie-row { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; -ms-overflow-style: none; }
-   .movie-row::-webkit-scrollbar { display: none; } 
-   
-   .carousel-btn {
-       position: absolute; top: 55%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.8);
-       color: var(--red-vibrant); border: 1px solid var(--red-vibrant); border-radius: 50%; width: 45px; height: 45px; font-size: 1.2em;
-       cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center;
-       box-shadow: 0 0 15px rgba(255,0,60,0.5); transition: 0.3s;
-   }
+   .movie-row::-webkit-scrollbar { display: none; }
+   .carousel-btn { position: absolute; top: 55%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.8); color: var(--red-vibrant); border: 1px solid var(--red-vibrant); border-radius: 50%; width: 45px; height: 45px; font-size: 1.2em; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(255,0,60,0.5); transition: 0.3s; }
    .carousel-btn:hover { background: var(--red-vibrant); color: #fff; box-shadow: var(--red-glow); scale: 1.1; }
    .carousel-btn.left { left: 5px; }
    .carousel-btn.right { right: 5px; }
-
-   .movie-card {
-       flex: 0 0 160px; position: relative; cursor: pointer; border-radius: 8px; overflow: hidden;
-       border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; background: #111;
-   }
+   .movie-card { flex: 0 0 160px; position: relative; cursor: pointer; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; background: #111; }
    .movie-card img { width: 100%; height: 240px; object-fit: cover; display: block; }
    .movie-card:hover { transform: translateY(-5px); border-color: var(--red-vibrant); box-shadow: var(--red-glow); }
    .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
    
-   /* BUSCA SEPARADA NA ABA */
+   /* BUSCA */
    .search-input-wrapper { position: relative; width: 100%; }
    .search-input-wrapper button { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #fff; cursor: pointer; font-size: 1.2em;}
    .filter-container { display: flex; gap: 10px; }
    .filter-pill { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-secondary); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9em; transition: 0.3s; }
    .filter-pill.active, .filter-pill:hover { background: rgba(255,0,60,0.2); color: #fff; border-color: var(--red-vibrant); }
    
-   /* MODAL DE DETALHES & PERFIL */
+   /* MODAIS */
    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
    .modal-content { width: 90%; max-width: 800px; position: relative; padding: 0; overflow: hidden; display: flex; background: #050505; border-radius: 12px;}
    .close-btn { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5em; cursor: pointer; z-index: 10; color: #fff;}
@@ -157,53 +141,44 @@
    .modal-desc { line-height: 1.6; color: #ccc; margin-bottom: 25px; font-size: 0.95em; }
    .modal-actions { display: flex; gap: 15px; }
    
-   /* REPRODUTOR DE VÍDEO NOVO */
+   /* REPRODUTOR (Agora suporta fullscreen certinho) */
    .player-fullscreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 3000; display: flex; flex-direction: column; }
    .player-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 4%; background: rgba(5,5,5,0.95); border-bottom: 1px solid rgba(255, 0, 60, 0.4); border-radius: 0; }
    .episode-selectors { display: flex; gap: 10px; align-items: center; }
    .player-fullscreen iframe { flex: 1; width: 100%; height: 100%; border: none; background: #000; }
    
-   /* RESPONSIVO */
-   .mobile-bottom-nav { display: none; position: fixed; bottom: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.95); justify-content: space-around; align-items: center; z-index: 1000; border-top: 1px solid rgba(255,0,60,0.3); }
-   .mobile-bottom-nav a { display: flex; flex-direction: column; align-items: center; font-size: 0.8em; font-weight: bold; gap: 4px;}
-   
-   @media (max-width: 1024px) {
-       .modal-poster { width: 100%; height: 300px; }
-   }
-   @media (max-width: 768px) {
-       .nav-menu, .nav-right #profile-trigger-pc, .nav-right #logout-btn-pc { display: none; }
-       .mobile-bottom-nav { display: flex; }
-       .main-layout-container { padding-top: 80px; padding-bottom: 80px; }
-       .hero-title { font-size: 2em; }
-       .episode-selectors { flex-direction: column; gap: 5px; align-items: flex-end; }
-   }
-   
-   /* CINEBOT FLUTUANTE */
-   .chat-fab-btn {
-       position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%;
-       background: #050505; border: 2px solid var(--red-vibrant); box-shadow: var(--red-glow); font-size: 1.8em; cursor: pointer; z-index: 2000; transition: transform 0.3s, box-shadow 0.3s; display: flex; justify-content: center; align-items: center;
-   }
+   /* CHATBOT FLUTUANTE */
+   .chat-fab-btn { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: #050505; border: 2px solid var(--red-vibrant); box-shadow: var(--red-glow); font-size: 1.8em; cursor: pointer; z-index: 2000; transition: transform 0.3s, box-shadow 0.3s; display: flex; justify-content: center; align-items: center; }
    .chat-fab-btn:hover { transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 0, 60, 0.8); background: rgba(255, 0, 60, 0.1); }
-   
-   .floating-chat {
-       position: fixed; bottom: 100px; right: 30px; width: 320px; height: 450px; display: flex; flex-direction: column; z-index: 2000; border: 1px solid rgba(255, 0, 60, 0.3); overflow: hidden; border-radius: 12px; animation: slideUp 0.3s ease-out;
-   }
-   
+   .floating-chat { position: fixed; bottom: 100px; right: 30px; width: 320px; height: 450px; display: flex; flex-direction: column; z-index: 2000; border: 1px solid rgba(255, 0, 60, 0.3); overflow: hidden; border-radius: 12px; animation: slideUp 0.3s ease-out; }
    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-   
    .chat-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(5,5,5,0.95); border-bottom: 1px solid rgba(255, 0, 60, 0.3); }
    .close-chat { background: none; border: none; font-size: 1.2em; cursor: pointer; color: #fff; }
    .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 0.9em; background: rgba(0, 0, 0, 0.8); }
    .glass-msg { padding: 8px 12px; border-radius: 8px; max-width: 85%; line-height: 1.4; }
    .bot-msg { align-self: flex-start; background: rgba(255,0,60,0.1); border-left: 3px solid var(--red-vibrant); color: #fff; }
    .user-msg { align-self: flex-end; background: #1a1a1a; border-right: 3px solid #555; color: #ddd; text-align: right; }
-   
    .chat-input-area { display: flex; padding: 10px; background: rgba(10,10,10,0.9); gap: 8px; border-top: 1px solid rgba(255,0,60,0.3);}
    .futuristic-input-mini { flex: 1; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: #000; color: #fff; outline: none;}
    .futuristic-input-mini:focus { border-color: var(--red-vibrant); }
    .neon-btn-red-mini { background: var(--red-vibrant); color: #fff; border: none; padding: 0 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
    
+   /* RESPONSIVO MOBILE */
+   .mobile-bottom-nav { display: none; position: fixed; bottom: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.95); justify-content: space-around; align-items: center; z-index: 1000; border-top: 1px solid rgba(255,0,60,0.3); }
+   .mobile-bottom-nav a { display: flex; flex-direction: column; align-items: center; font-size: 0.8em; font-weight: bold; gap: 4px;}
+   
+   @media (max-width: 1024px) { .modal-poster { width: 100%; height: 300px; } }
+   
    @media (max-width: 768px) {
+       .nav-menu, .nav-right #profile-trigger-pc, .nav-right #logout-btn-pc { display: none; }
+       .mobile-bottom-nav { display: flex; }
+       .main-layout-container { padding-top: 80px; padding-bottom: 80px; }
+       .hero-title { font-size: 2em; }
+       
+       /* Ajuste do cabeçalho do player no telemóvel para os botões não ficarem encavalitados */
+       .player-header { flex-wrap: wrap; gap: 10px; justify-content: center; padding: 15px; }
+       .episode-selectors { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+
        .chat-fab-btn { bottom: 80px; right: 20px; width: 50px; height: 50px; font-size: 1.5em; }
        .floating-chat { bottom: 140px; right: 20px; width: calc(100% - 40px); height: 400px; }
    }

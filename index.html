@@ -147,15 +147,17 @@
 
     <div id="streaming-player-screen" class="player-fullscreen" style="display: none;">
         <div class="player-header glass-panel">
-            <button id="close-player-btn" class="neon-btn-red-dark" style="padding: 8px 15px; width: auto; margin:0; border-radius: 6px;">✖ Fechar Player</button>
+            <button id="close-player-btn" class="neon-btn-red-dark" style="padding: 8px 15px; width: auto; margin:0; border-radius: 6px;">✖ Fechar</button>
             
             <div id="episodes-selectors-box" class="episode-selectors" style="display: none;">
                 <select id="player-season-select" class="futuristic-input-mini" style="width:auto; margin:0; padding: 8px; border-radius: 6px;"></select>
                 <select id="player-episode-select" class="futuristic-input-mini" style="width:auto; margin:0; padding: 8px; border-radius: 6px;"></select>
-                <button id="btn-next-ep" class="neon-btn-red-mini" style="padding: 8px 15px; border-radius: 6px;">Próximo Ep ▶</button>
+                <button id="btn-next-ep" class="neon-btn-red-mini" style="padding: 8px 15px; border-radius: 6px;">Próximo ▶</button>
             </div>
+
+            <button id="fullscreen-btn" class="neon-btn-red" style="padding: 8px 15px; width: auto; margin:0; border-radius: 6px;">🔲 Ecrã Inteiro</button>
         </div>
-        <iframe id="videoPlayer" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; encrypted-media; fullscreen" frameborder="0"></iframe>
+        <iframe id="videoPlayer" allowfullscreen webkitallowfullscreen mozallowfullscreen allow="autoplay; encrypted-media; fullscreen" frameborder="0"></iframe>
     </div>
 
     <button id="chat-fab" class="chat-fab-btn neon-border-red">🤖</button>

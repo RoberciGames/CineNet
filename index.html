@@ -37,6 +37,7 @@
                     <li><a id="nav-home" class="active futuristic-link">Início</a></li>
                     <li><a id="nav-search" class="futuristic-link">Busca</a></li>
                     <li><a id="nav-watchlist" class="futuristic-link">A Minha Lista</a></li>
+                    <li><a id="nav-chat" class="futuristic-link" style="cursor: pointer;">CineBot 🤖</a></li>
                 </ul>
             </div>
             <div class="nav-right">
@@ -93,22 +94,9 @@
                     </div>
                 </section>
 
-                <section id="watchlist-widget" class="sidebar-widget">
+                <section id="watchlist-widget" class="sidebar-widget" style="border-bottom: none;">
                     <h4 class="red-glow">A Minha Lista</h4>
                     <div id="watchlist-preview-grid" class="movie-grid-mini futuristic-scroll"></div>
-                </section>
-
-                <section id="chat-widget" class="sidebar-widget" style="border-bottom: none;">
-                    <h4 class="red-glow">CineBot 🤖</h4>
-                    <div class="chat-container glass-panel">
-                        <div id="chatbot-messages" class="chat-messages futuristic-scroll">
-                            <div class="bot-msg glass-msg">Olá! Eu sou o CineBot. Como te posso ajudar hoje?</div>
-                        </div>
-                        <div class="chat-input-area">
-                            <input type="text" id="chatbot-input" placeholder="Escreve aqui..." class="futuristic-input-mini">
-                            <button id="chatbot-send-btn" class="neon-btn-red-mini">Enviar</button>
-                        </div>
-                    </div>
                 </section>
             </aside>
         </div>
@@ -148,6 +136,22 @@
             </div>
         </div>
         <iframe id="videoPlayer" allowfullscreen allow="autoplay; encrypted-media" frameborder="0"></iframe>
+    </div>
+
+    <button id="chat-fab" class="chat-fab-btn neon-border-red">🤖</button>
+
+    <div id="floating-chat-widget" class="floating-chat glass-panel" style="display: none;">
+        <div class="chat-header">
+            <h4 class="red-glow" style="margin: 0; font-size: 1.1em;">CineBot 🤖</h4>
+            <button id="close-chat-btn" class="close-chat red-glow">✖</button>
+        </div>
+        <div id="chatbot-messages" class="chat-messages futuristic-scroll">
+            <div class="bot-msg glass-msg">Olá! Sou o CineBot. Pede-me uma recomendação de <b>Ação</b>, <b>Comédia</b>, <b>Série</b>, <b>Anime</b> ou <b>Desenho</b>!</div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatbot-input" placeholder="Pede uma recomendação..." class="futuristic-input-mini">
+            <button id="chatbot-send-btn" class="neon-btn-red-mini">Enviar</button>
+        </div>
     </div>
 
     <script src="script.js"></script>

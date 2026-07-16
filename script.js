@@ -2,10 +2,9 @@
 // CONFIGURAÇÕES PRINCIPAIS E CHAVES
 // ==========================================
 const TMDB_KEY = '17c56e3825d7fbae6581866083d0d778'; 
-let itemSelecionado = null;
 let debounceTimer; 
 let currentUserUID = null;
-let biblioteca = { watchlist: {}, reviews: {} };
+let biblioteca = { watchlist: {} };
 let isLoginMode = true;
 let itemModalAtual = null;
 let heroAtual = null;
@@ -15,7 +14,6 @@ let perfilUsuario = {
     username: "CineNet User",
     avatar: "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png"
 };
-let avatarTemp = "";
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -47,11 +45,8 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
     const password = document.getElementById('auth-password').value;
     const auth = firebase.auth();
     
-    if (isLoginMode) {
-        auth.signInWithEmailAndPassword(email, password).catch(err => mostrarErroAuth(err.message));
-    } else {
-        auth.createUserWithEmailAndPassword(email, password).catch(err => mostrarErroAuth(err.message));
-    }
+    if (isLoginMode) auth.signInWithEmailAndPassword(email, password).catch(err => mostrarErroAuth(err.message));
+    else auth.createUserWithEmailAndPassword(email, password).catch(err => mostrarErroAuth(err.message));
 });
 
 document.getElementById('btn-google-auth').addEventListener('click', () => {
@@ -291,6 +286,7 @@ async function executarBusca(termo) {
 // ==========================================
 function renderizarWatchlistWidgets() {
     const grid = document.getElementById('watchlist-preview-grid');
+    if(!grid) return;
     grid.innerHTML = '';
     const items = Object.values(biblioteca.watchlist).slice(0, 6);
     
@@ -322,35 +318,7 @@ function renderizarWatchlistCompleta() {
 }
 
 // ==========================================
-// CINEBOT
-// ==========================================
-const chatInput = document.getElementById('chatbot-input');
-const chatMsgs = document.getElementById('chatbot-messages');
-
-function addChatMessage(text, tipo) {
-    const div = document.createElement('div');
-    div.className = tipo === 'user' ? 'user-msg glass-msg' : 'bot-msg glass-msg';
-    div.innerText = text; 
-    chatMsgs.appendChild(div);
-    chatMsgs.scrollTop = chatMsgs.scrollHeight;
-}
-
-document.getElementById('chatbot-send-btn').onclick = () => {
-    const txt = chatInput.value.trim();
-    if(!txt) return;
-    addChatMessage(txt, 'user');
-    chatInput.value = '';
-    setTimeout(() => {
-        let resp = "Interessante! Tenta pesquisar palavras-chave na Busca Rápida acima. 🔍";
-        if(txt.toLowerCase().includes('ação')) resp = "Se gostas de Ação, pesquisa por 'John Wick'!";
-        else if(txt.toLowerCase().includes('comédia')) resp = "Para rir, recomendo 'Superbad'.";
-        addChatMessage(resp, 'bot');
-    }, 600);
-};
-
-
-// ==========================================
-// SISTEMA DE REPRODUÇÃO E EMBED (MGEB.TOP)
+// REPRODUTOR DE VÍDEO (MGEB.TOP)
 // ==========================================
 const playerScreen = document.getElementById('streaming-player-screen');
 const videoIframe = document.getElementById('videoPlayer');
@@ -449,3 +417,92 @@ function preencherEpisodios(total) {
         episodeSelect.innerHTML += `<option value="${i}">Episódio ${i}</option>`;
     }
 }
+
+// ==========================================
+// CINEBOT FLUTUANTE INTELIGENTE (TMDB)
+// ==========================================
+const chatFab = document.getElementById('chat-fab');
+const chatWidget = document.getElementById('floating-chat-widget');
+const closeChatBtn = document.getElementById('close-chat-btn');
+const chatInput = document.getElementById('chatbot-input');
+const chatMsgs = document.getElementById('chatbot-messages');
+
+chatFab.onclick = () => {
+    chatWidget.style.display = chatWidget.style.display === 'none' ? 'flex' : 'none';
+    if(chatWidget.style.display === 'flex') chatInput.focus();
+};
+closeChatBtn.onclick = () => { chatWidget.style.display = 'none'; };
+
+document.getElementById('nav-chat').onclick = () => {
+    chatWidget.style.display = 'flex';
+    chatInput.focus();
+};
+
+function addChatMessage(text, tipo) {
+    const div = document.createElement('div');
+    div.className = tipo === 'user' ? 'user-msg glass-msg' : 'bot-msg glass-msg';
+    div.innerHTML = text; 
+    chatMsgs.appendChild(div);
+    chatMsgs.scrollTop = chatMsgs.scrollHeight;
+}
+
+async function getRandomRecommendation(genreType) {
+    let endpoint = '';
+    const randomPage = Math.floor(Math.random() * 5) + 1; 
+    
+    if (genreType === 'acao') endpoint = `/discover/movie?with_genres=28&page=${randomPage}`;
+    else if (genreType === 'comedia') endpoint = `/discover/movie?with_genres=35&page=${randomPage}`;
+    else if (genreType === 'anime') endpoint = `/discover/tv?with_genres=16&with_original_language=ja&page=${randomPage}`;
+    else if (genreType === 'desenho') endpoint = `/discover/tv?with_genres=16&page=${randomPage}`;
+    else if (genreType === 'serie') endpoint = `/discover/tv?page=${randomPage}`;
+    else endpoint = `/trending/all/day`;
+
+    const data = await fetchTMDB(endpoint);
+    
+    if (data && data.results && data.results.length > 0) {
+        const randomIndex = Math.floor(Math.random() * data.results.length);
+        const randomItem = data.results[randomIndex];
+        const titulo = randomItem.title || randomItem.name;
+        const avaliacao = randomItem.vote_average ? randomItem.vote_average.toFixed(1) : 'N/A';
+        
+        return `Recomendo fortemente: <b>${titulo}</b> (⭐ ${avaliacao})!<br><span style="font-size:0.85em; color:#ccc;">Pesquisa o nome na Busca Rápida para assistir. 🍿</span>`;
+    }
+    return "Hmmm, a minha base de dados teve uma pequena falha. Tenta pesquisar na Busca Rápida!";
+}
+
+async function processarMensagemBot(msg) {
+    const text = msg.toLowerCase();
+    
+    if(text.includes('ação') || text.includes('acao')) return await getRandomRecommendation('acao');
+    if(text.includes('comédia') || text.includes('comedia')) return await getRandomRecommendation('comedia');
+    if(text.includes('anime')) return await getRandomRecommendation('anime');
+    if(text.includes('desenho') || text.includes('animação') || text.includes('animacao')) return await getRandomRecommendation('desenho');
+    if(text.includes('série') || text.includes('serie')) return await getRandomRecommendation('serie');
+    if(text.includes('olá') || text.includes('ola') || text.includes('oi')) return "Olá cibernauta! Sou o CineBot 🤖. Pede-me uma recomendação de Filme de Ação, Anime, Série ou Desenho.";
+    
+    return "Boa escolha! Mas se quiseres recomendações aleatórias sem repetir, pede-me por: <b>Ação</b>, <b>Comédia</b>, <b>Série</b>, <b>Anime</b> ou <b>Desenho</b>.";
+}
+
+async function enviarChat() {
+    const txt = chatInput.value.trim();
+    if(!txt) return;
+    
+    addChatMessage(txt, 'user');
+    chatInput.value = '';
+    
+    const loadingId = 'loading-' + Date.now();
+    const divLoading = document.createElement('div');
+    divLoading.id = loadingId;
+    divLoading.className = 'bot-msg glass-msg';
+    divLoading.innerText = 'A procurar no servidor... 🤖';
+    chatMsgs.appendChild(divLoading);
+    chatMsgs.scrollTop = chatMsgs.scrollHeight;
+
+    const resposta = await processarMensagemBot(txt);
+    
+    document.getElementById(loadingId).remove();
+    addChatMessage(resposta, 'bot');
+}
+
+document.getElementById('chatbot-send-btn').onclick = enviarChat;
+chatInput.onkeypress = (e) => { if(e.key === 'Enter') enviarChat(); };

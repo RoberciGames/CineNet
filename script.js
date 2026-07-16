@@ -8,8 +8,9 @@ let currentUserUID = null;
 let biblioteca = { watchlist: {}, reviews: {} };
 let isLoginMode = true;
 let itemModalAtual = null;
+let heroAtual = null;
 
-// Variáveis do Perfil (Mantido)
+// Variáveis do Perfil
 let perfilUsuario = {
     username: "CineNet User",
     avatar: "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png"
@@ -42,7 +43,6 @@ document.getElementById('auth-switch-btn').addEventListener('click', () => {
 
 document.getElementById('auth-form').addEventListener('submit', (e) => {
     e.preventDefault();
-    
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
     const auth = firebase.auth();
@@ -65,7 +65,6 @@ function mostrarErroAuth(msg) {
     errBox.style.display = 'block';
 }
 
-// Monitor de Estado de Login
 firebase.auth().onAuthStateChanged(user => {
     if (user) {
         currentUserUID = user.uid;
@@ -89,7 +88,6 @@ document.getElementById('logout-btn-pc').addEventListener('click', () => {
 // ==========================================
 function carregarDadosUsuario() {
     if (!currentUserUID) return;
-    
     firebase.database().ref('users/' + currentUserUID + '/biblioteca/watchlist').once('value').then(snapshot => {
         const data = snapshot.val();
         if (data) biblioteca.watchlist = data;
@@ -114,10 +112,8 @@ function toggleWatchlist(item) {
         document.getElementById('modal-add-list-btn').classList.replace('neon-btn-red', 'neon-btn-red-dark');
     } else {
         biblioteca.watchlist[item.id] = {
-            id: item.id, 
-            title: item.title || item.name, 
-            poster_path: item.poster_path, 
-            media_type: item.media_type || 'movie'
+            id: item.id, title: item.title || item.name, 
+            poster_path: item.poster_path, media_type: item.media_type || 'movie'
         };
         document.getElementById('modal-add-list-btn').innerText = "✔️ Na Sua Lista";
         document.getElementById('modal-add-list-btn').classList.replace('neon-btn-red-dark', 'neon-btn-red');
@@ -180,16 +176,17 @@ async function fetchTMDB(endpoint) {
 
 async function carregarHomeContent() {
     const data = await fetchTMDB('/trending/all/day');
-    
     if (!data) return;
 
     if (data.results.length > 0) {
-        const hero = data.results[0];
-        const bannerUrl = hero.backdrop_path ? `https://image.tmdb.org/t/p/original${hero.backdrop_path}` : '';
+        heroAtual = data.results[0];
+        const bannerUrl = heroAtual.backdrop_path ? `https://image.tmdb.org/t/p/original${heroAtual.backdrop_path}` : '';
         document.getElementById('hero-banner').style.backgroundImage = `url(${bannerUrl})`;
-        document.getElementById('hero-title').innerText = hero.title || hero.name;
-        document.getElementById('hero-desc').innerText = hero.overview ? hero.overview.substring(0, 150) + '...' : "";
-        document.getElementById('hero-info-btn').onclick = () => abrirDetalhes(hero);
+        document.getElementById('hero-title').innerText = heroAtual.title || heroAtual.name;
+        document.getElementById('hero-desc').innerText = heroAtual.overview ? heroAtual.overview.substring(0, 150) + '...' : "";
+        
+        document.getElementById('hero-info-btn').onclick = () => abrirDetalhes(heroAtual);
+        document.getElementById('hero-play-btn').onclick = () => assistirConteudo(heroAtual);
     }
     renderCards(data.results, 'row-trending');
 }
@@ -233,6 +230,7 @@ function abrirDetalhes(item) {
     }
     
     btnAdd.onclick = () => toggleWatchlist(item);
+    document.getElementById('modal-play-btn').onclick = () => assistirConteudo(itemModalAtual);
     
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
@@ -349,3 +347,105 @@ document.getElementById('chatbot-send-btn').onclick = () => {
         addChatMessage(resp, 'bot');
     }, 600);
 };
+
+
+// ==========================================
+// SISTEMA DE REPRODUÇÃO E EMBED (MGEB.TOP)
+// ==========================================
+const playerScreen = document.getElementById('streaming-player-screen');
+const videoIframe = document.getElementById('videoPlayer');
+const epSelectorsBox = document.getElementById('episodes-selectors-box');
+const seasonSelect = document.getElementById('player-season-select');
+const episodeSelect = document.getElementById('player-episode-select');
+
+let playerAtualData = { id: null, type: null, season: 1, episode: 1 };
+
+function assistirConteudo(item) {
+    fecharModal(); 
+    
+    const isMovie = item.media_type === 'movie' || item.title; 
+    
+    playerAtualData.id = item.id;
+    playerAtualData.type = isMovie ? 'movie' : 'tv';
+    
+    playerScreen.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    if (isMovie) {
+        epSelectorsBox.style.display = 'none';
+        videoIframe.src = `https://mgeb.top/filme/${item.id}`;
+    } else {
+        epSelectorsBox.style.display = 'flex';
+        playerAtualData.season = 1;
+        playerAtualData.episode = 1;
+        
+        carregarTemporadasSerie(item.id);
+        atualizarIframeSerie();
+    }
+}
+
+function atualizarIframeSerie() {
+    videoIframe.src = `https://mgeb.top/serie/${playerAtualData.id}/${playerAtualData.season}/${playerAtualData.episode}`;
+}
+
+seasonSelect.addEventListener('change', async (e) => {
+    playerAtualData.season = e.target.value;
+    playerAtualData.episode = 1; 
+    
+    const data = await fetchTMDB(`/tv/${playerAtualData.id}/season/${playerAtualData.season}`);
+    preencherEpisodios(data && data.episodes ? data.episodes.length : 10);
+    
+    atualizarIframeSerie();
+});
+
+episodeSelect.addEventListener('change', (e) => {
+    playerAtualData.episode = e.target.value;
+    atualizarIframeSerie();
+});
+
+document.getElementById('btn-next-ep').onclick = () => {
+    const totalEps = episodeSelect.options.length;
+    if(playerAtualData.episode < totalEps) {
+        playerAtualData.episode++;
+        episodeSelect.value = playerAtualData.episode;
+        atualizarIframeSerie();
+    }
+};
+
+document.getElementById('close-player-btn').onclick = () => {
+    playerScreen.style.display = 'none';
+    videoIframe.src = ''; 
+    document.body.style.overflow = 'auto';
+};
+
+async function carregarTemporadasSerie(tvId) {
+    seasonSelect.innerHTML = '<option>A Carregar...</option>';
+    episodeSelect.innerHTML = '';
+    
+    const data = await fetchTMDB(`/tv/${tvId}`);
+    seasonSelect.innerHTML = '';
+    
+    if(data && data.seasons) {
+        const temporadasReais = data.seasons.filter(s => s.season_number > 0); 
+        
+        temporadasReais.forEach(s => {
+            seasonSelect.innerHTML += `<option value="${s.season_number}">Temporada ${s.season_number}</option>`;
+        });
+        
+        if(temporadasReais.length > 0) {
+            preencherEpisodios(temporadasReais[0].episode_count);
+        } else {
+            preencherEpisodios(12);
+        }
+    } else {
+        seasonSelect.innerHTML = `<option value="1">Temporada 1</option>`;
+        preencherEpisodios(12);
+    }
+}
+
+function preencherEpisodios(total) {
+    episodeSelect.innerHTML = '';
+    for(let i = 1; i <= total; i++) {
+        episodeSelect.innerHTML += `<option value="${i}">Episódio ${i}</option>`;
+    }
+}

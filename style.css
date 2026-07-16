@@ -52,9 +52,7 @@
    .futuristic-scroll::-webkit-scrollbar-track { background: #111; border-radius: 3px; }
    .futuristic-scroll::-webkit-scrollbar-thumb { background: var(--red-vibrant); border-radius: 3px; }
    
-   /* ==========================================
-      AUTENTICAÇÃO
-      ========================================== */
+   /* AUTENTICAÇÃO */
    .auth-container { display: flex; height: 100vh; align-items: center; justify-content: center; background: #000; }
    .auth-box { padding: 40px; width: 90%; max-width: 400px; text-align: center; }
    .glitch-text { font-size: 2.8em; margin-bottom: 25px; letter-spacing: 2px; font-weight: 900; text-transform: uppercase;}
@@ -69,25 +67,21 @@
    
    .btn-primary, .btn-secondary {
        width: 100%; padding: 14px; border: none; border-radius: 6px; cursor: pointer;
-       font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
-       transition: var(--transition-speed); margin-bottom: 15px;
+       font-weight: bold; text-transform: uppercase; letter-spacing: 1px; transition: var(--transition-speed); margin-bottom: 15px;
    }
-   .neon-btn-red { background: var(--red-vibrant); color: #fff; box-shadow: var(--red-glow); }
+   .neon-btn-red { background: var(--red-vibrant); color: #fff; box-shadow: var(--red-glow); border: 1px solid var(--red-vibrant); cursor: pointer;}
    .neon-btn-red:hover { background: #fff; color: var(--red-vibrant); }
-   .neon-btn-red-dark { background: transparent; color: var(--text-secondary); border: 1px solid var(--text-secondary); }
+   .neon-btn-red-dark { background: transparent; color: var(--text-secondary); border: 1px solid var(--text-secondary); cursor: pointer;}
    .neon-btn-red-dark:hover { background: var(--red-dark); color: #fff; border-color: var(--red-dark); box-shadow: var(--red-dark-glow); }
    
    .auth-switch { color: var(--text-secondary); font-size: 0.9em; }
    .red-link { color: var(--red-vibrant); text-decoration: none; font-weight: bold; }
    
-   /* ==========================================
-      NAVEGAÇÃO (Navbar)
-      ========================================== */
+   /* NAVEGAÇÃO */
    .glass-nav {
        position: fixed; top: 0; width: 100%; height: 70px;
        background: rgba(5, 5, 5, 0.9); backdrop-filter: blur(10px);
-       border-bottom: 1px solid rgba(255, 0, 60, 0.2);
-       display: flex; justify-content: space-between; align-items: center;
+       border-bottom: 1px solid rgba(255, 0, 60, 0.2); display: flex; justify-content: space-between; align-items: center;
        padding: 0 4%; z-index: 1000;
    }
    .logo { font-size: 1.8em; font-weight: 900; text-transform: uppercase; cursor: pointer; }
@@ -103,13 +97,8 @@
    .btn-logout { background: transparent; border: 1px solid var(--red-vibrant); color: var(--red-vibrant); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;}
    .btn-logout:hover { background: var(--red-vibrant); color: #fff; }
    
-   /* ==========================================
-      LAYOUT EM GRADE (Main + Sidebar)
-      ========================================== */
-   .main-layout-container {
-       display: grid; grid-template-columns: 1fr 350px; gap: 30px;
-       padding: 90px 4% 40px; min-height: 100vh;
-   }
+   /* LAYOUT */
+   .main-layout-container { display: grid; grid-template-columns: 1fr 350px; gap: 30px; padding: 90px 4% 40px; min-height: 100vh; }
    
    /* CONTEÚDO PRINCIPAL */
    .content-area { display: flex; flex-direction: column; gap: 30px; }
@@ -122,7 +111,7 @@
    .hero-title { font-size: 3em; margin-bottom: 10px; font-weight: 900;}
    .hero-desc { color: #ddd; margin-bottom: 20px; max-width: 600px; line-height: 1.5; font-size: 0.95em; }
    .hero-buttons { display: flex; gap: 15px; }
-   .btn-play, .btn-info { padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+   .btn-play, .btn-info { padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase;}
    
    .catalog { padding: 25px; }
    .catalog h3 { margin-bottom: 20px; }
@@ -133,10 +122,9 @@
    }
    .movie-card img { width: 100%; height: 240px; object-fit: cover; display: block; }
    .movie-card:hover { transform: translateY(-5px); border-color: var(--red-vibrant); box-shadow: var(--red-glow); }
-   
    .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
    
-   /* BARRA LATERAL (SIDEBAR) */
+   /* BARRA LATERAL */
    .sidebar-area { display: flex; flex-direction: column; gap: 20px; padding: 20px; position: sticky; top: 90px; height: calc(100vh - 110px); }
    .sidebar-widget { padding-bottom: 20px; border-bottom: 1px solid rgba(255, 0, 60, 0.15); }
    .sidebar-widget h4 { margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; font-size: 1em;}
@@ -158,15 +146,12 @@
    .glass-msg { padding: 8px 12px; border-radius: 8px; max-width: 90%; line-height: 1.4; }
    .bot-msg { align-self: flex-start; background: rgba(255,0,60,0.1); border-left: 3px solid var(--red-vibrant); color: #fff; }
    .user-msg { align-self: flex-end; background: #1a1a1a; border-right: 3px solid #555; color: #ddd; text-align: right; }
-   
    .chat-input-area { display: flex; padding: 10px; background: rgba(10,10,10,0.8); gap: 8px; border-top: 1px solid rgba(255,0,60,0.2);}
    .futuristic-input-mini { flex: 1; padding: 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); background: #000; color: #fff; outline: none;}
    .futuristic-input-mini:focus { border-color: var(--red-vibrant); }
    .neon-btn-red-mini { background: var(--red-vibrant); color: #fff; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
    
-   /* ==========================================
-      MODAL DE DETALHES
-      ========================================== */
+   /* MODAL DE DETALHES */
    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
    .modal-content { width: 90%; max-width: 800px; position: relative; padding: 0; overflow: hidden; display: flex; background: #050505; border-radius: 12px;}
    .close-btn { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5em; cursor: pointer; z-index: 10; color: #fff;}
@@ -176,6 +161,12 @@
    .modal-meta { color: var(--red-vibrant); font-weight: bold; margin-bottom: 15px; font-size: 0.9em; }
    .modal-desc { line-height: 1.6; color: #ccc; margin-bottom: 25px; font-size: 0.95em; }
    .modal-actions { display: flex; gap: 15px; }
+   
+   /* REPRODUTOR DE VÍDEO (MGEB) */
+   .player-fullscreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 3000; display: flex; flex-direction: column; }
+   .player-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 4%; background: rgba(5,5,5,0.95); border-bottom: 1px solid rgba(255, 0, 60, 0.4); border-radius: 0; }
+   .episode-selectors { display: flex; gap: 10px; align-items: center; }
+   .player-fullscreen iframe { flex: 1; width: 100%; height: 100%; border: none; background: #000; }
    
    /* RESPONSIVO */
    .mobile-bottom-nav { display: none; position: fixed; bottom: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.95); justify-content: space-around; align-items: center; z-index: 1000; border-top: 1px solid rgba(255,0,60,0.3); }
@@ -191,4 +182,5 @@
        .mobile-bottom-nav { display: flex; }
        .main-layout-container { padding-top: 80px; padding-bottom: 80px; }
        .hero-title { font-size: 2em; }
+       .episode-selectors { flex-direction: column; gap: 5px; align-items: flex-end; }
    }

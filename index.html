@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CineNet</title>
+    <title>CineNet - Cyber Red</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
-<body class="futuristic-theme">
+<body class="cyber-red-theme">
 
     <div id="auth-screen" class="auth-container">
-        <div class="auth-box glass-panel neon-border-magenta">
-            <h1 id="auth-title" class="glitch-text">CineNet</h1>
+        <div class="auth-box glass-panel neon-border-red">
+            <h1 id="auth-title" class="glitch-text red-glow">CineNet</h1>
             <p id="auth-error" class="error-text" style="display: none;"></p>
             <form id="auth-form">
                 <input type="email" id="auth-email" placeholder="E-mail" required class="futuristic-input">
                 <input type="password" id="auth-password" placeholder="Palavra-passe" required class="futuristic-input">
-                <button type="submit" id="auth-submit-btn" class="btn-primary neon-btn-cyan">Entrar</button>
+                <button type="submit" id="auth-submit-btn" class="btn-primary neon-btn-red">Entrar</button>
             </form>
-            <button id="btn-google-auth" class="btn-secondary neon-btn-magenta">Entrar com Google</button>
+            <button id="btn-google-auth" class="btn-secondary neon-btn-red-dark">Entrar com Google</button>
             <p class="auth-switch">
                 <span id="auth-switch-text">Novo por aqui?</span> 
-                <a href="#" id="auth-switch-btn">Registe-se agora.</a>
+                <a href="#" id="auth-switch-btn" class="red-link">Registe-se agora.</a>
             </p>
         </div>
     </div>
@@ -32,21 +32,20 @@
         
         <nav class="navbar glass-nav">
             <div class="nav-left">
-                <h2 class="logo cyan-glow">CineNet</h2>
+                <h2 class="logo red-glow">CineNet</h2>
                 <ul class="nav-menu">
                     <li><a id="nav-home" class="active futuristic-link">Início</a></li>
                     <li><a id="nav-search" class="futuristic-link">Busca</a></li>
                     <li><a id="nav-watchlist" class="futuristic-link">A Minha Lista</a></li>
                     <li><a id="nav-chat" class="futuristic-link">CineBot 🤖</a></li>
-                    <li id="li-nav-admin" style="display: none;"><a id="nav-admin" class="futuristic-link">Admin</a></li>
                 </ul>
             </div>
             <div class="nav-right">
-                <div class="profile-trigger" id="profile-trigger-pc" title="Editar Perfil">
-                    <img id="user-avatar-pc" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" alt="Avatar" class="avatar-neon">
-                    <span id="user-name-pc">User</span>
+                <div class="profile-trigger" id="profile-trigger-pc">
+                    <img id="user-avatar-pc" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" alt="Avatar" class="avatar-neon-red">
+                    <span id="user-name-pc" class="red-glow">User</span>
                 </div>
-                <button id="logout-btn-pc" class="btn-logout neon-btn-magenta">Sair</button>
+                <button id="logout-btn-pc" class="btn-logout neon-btn-red">Sair</button>
             </div>
         </nav>
 
@@ -56,41 +55,38 @@
                 <section id="home-section" class="app-section">
                     <div id="hero-banner" class="hero glass-panel">
                         <div class="hero-content">
-                            <h1 id="hero-title" class="cyan-glow">Carregando...</h1>
+                            <h1 id="hero-title" class="red-glow-strong">A Carregar...</h1>
                             <p id="hero-desc"></p>
                             <div class="hero-buttons">
-                                <button id="hero-play-btn" class="btn-play neon-btn-cyan">▶ Assistir</button>
-                                <button id="hero-info-btn" class="btn-info neon-btn-magenta">ℹ Mais Info</button>
+                                <button id="hero-play-btn" class="btn-play neon-btn-red">▶ Assistir</button>
+                                <button id="hero-info-btn" class="btn-info neon-btn-red-dark">ℹ Mais Info</button>
                             </div>
                         </div>
                     </div>
                     <div class="catalog glass-panel">
-                        <h3 class="magenta-glow">Em Destaque</h3>
+                        <h3 class="red-glow">Em Destaque</h3>
                         <div id="row-trending" class="movie-row futuristic-scroll"></div>
-                        </div>
+                    </div>
                 </section>
 
-                <section id="search-full-section" class="app-section" style="display: none; padding: 100px 4%;">
+                <section id="search-full-section" class="app-section" style="display: none;">
+                    <h2 class="red-glow" style="margin-bottom: 20px;">Resultados da Pesquisa</h2>
                     <div id="search-grid" class="movie-grid futuristic-scroll"></div>
                 </section>
 
-                <section id="watchlist-section" class="app-section" style="display: none; padding: 100px 4%;">
-                    <h2 class="cyan-glow">A Minha Lista</h2>
-                    <div id="watchlist-empty-state" style="display: none; color: #aaa;">A sua lista está vazia.</div>
+                <section id="watchlist-section" class="app-section" style="display: none;">
+                    <h2 class="red-glow" style="margin-bottom: 20px;">A Minha Lista</h2>
+                    <div id="watchlist-empty-state" style="display: none; color: #777;">A sua lista está vazia.</div>
                     <div id="watchlist-grid" class="movie-grid futuristic-scroll"></div>
                 </section>
-
-                <section id="admin-section" class="app-section" style="display: none; padding: 100px 4%;">
-                    <h2 class="magenta-glow">Painel de Administração</h2>
-                    </section>
             </main>
 
             <aside class="sidebar-area glass-panel futuristic-scroll">
                 <section id="search-widget" class="sidebar-widget">
-                    <h4 class="cyan-glow">Busca</h4>
+                    <h4 class="red-glow">Busca Rápida</h4>
                     <div class="search-input-wrapper">
                         <input type="text" id="main-search-input" class="search-input futuristic-input" placeholder="Pesquisar...">
-                        <button id="search-clear" style="display: none;" onclick="limparBusca()">❌</button>
+                        <button id="search-clear" style="display: none;" onclick="limparBusca()">✖</button>
                     </div>
                     <div class="filter-container">
                         <button class="filter-pill active" onclick="setSearchFilter('all', this)">Tudo</button>
@@ -100,20 +96,19 @@
                 </section>
 
                 <section id="watchlist-widget" class="sidebar-widget">
-                    <h4 class="magenta-glow">A Minha Lista</h4>
-                    <div id="watchlist-preview-grid" class="movie-grid-mini futuristic-scroll">
-                        </div>
+                    <h4 class="red-glow">A Minha Lista</h4>
+                    <div id="watchlist-preview-grid" class="movie-grid-mini futuristic-scroll"></div>
                 </section>
 
-                <section id="chat-widget" class="sidebar-widget">
-                    <h4 class="cyan-glow">CineBot 🤖</h4>
+                <section id="chat-widget" class="sidebar-widget" style="border-bottom: none;">
+                    <h4 class="red-glow">CineBot 🤖</h4>
                     <div class="chat-container glass-panel">
                         <div id="chatbot-messages" class="chat-messages futuristic-scroll">
-                            <div class="bot-msg glass-msg">Olá! Sou o CineBot. Como posso ajudar-te?</div>
+                            <div class="bot-msg glass-msg">Olá! Eu sou o CineBot. Como te posso ajudar hoje?</div>
                         </div>
                         <div class="chat-input-area">
-                            <input type="text" id="chatbot-input" placeholder="Escreva..." class="futuristic-input-mini">
-                            <button id="chatbot-send-btn" class="neon-btn-cyan-mini">Enviar</button>
+                            <input type="text" id="chatbot-input" placeholder="Escreve aqui..." class="futuristic-input-mini">
+                            <button id="chatbot-send-btn" class="neon-btn-red-mini">Enviar</button>
                         </div>
                     </div>
                 </section>
@@ -123,10 +118,25 @@
         <div class="mobile-bottom-nav glass-nav">
             <a id="mob-nav-home" class="active-nav futuristic-link">🏠 Início</a>
             <a id="mob-nav-search" class="futuristic-link">🔍 Busca</a>
-            <a id="user-avatar-mobile-trigger" style="display:flex; flex-direction:column; align-items:center;">
-                <img id="user-avatar-mobile" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="avatar-neon-mini">
-                Perfil
-            </a>
+            <a id="mob-nav-watchlist" class="futuristic-link">⭐ Lista</a>
+        </div>
+    </div>
+
+    <div id="movie-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content glass-panel neon-border-red">
+            <button id="close-modal" class="close-btn red-glow">✖</button>
+            <div class="modal-body">
+                <img id="modal-img" src="" alt="Poster" class="modal-poster">
+                <div class="modal-info">
+                    <h2 id="modal-title" class="red-glow-strong">Título</h2>
+                    <p id="modal-meta" class="modal-meta">Ano • Género</p>
+                    <p id="modal-desc" class="modal-desc">Descrição do filme vai aqui...</p>
+                    <div class="modal-actions">
+                        <button id="modal-play-btn" class="btn-play neon-btn-red">▶ Assistir</button>
+                        <button id="modal-add-list-btn" class="btn-info neon-btn-red-dark">⭐ Adicionar à Lista</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

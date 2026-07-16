@@ -41,7 +41,7 @@
                 </ul>
             </div>
             <div class="nav-right">
-                <div class="profile-trigger" id="profile-trigger-pc">
+                <div class="profile-trigger" id="profile-trigger-pc" title="Editar Perfil">
                     <img id="user-avatar-pc" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" alt="Avatar" class="avatar-neon-red">
                     <span id="user-name-pc" class="red-glow">User</span>
                 </div>
@@ -51,6 +51,7 @@
 
         <div class="main-layout-container">
             <main class="content-area">
+                
                 <section id="home-section" class="app-section">
                     <div id="hero-banner" class="hero glass-panel">
                         <div class="hero-content">
@@ -62,9 +63,15 @@
                             </div>
                         </div>
                     </div>
-                    <div class="catalog glass-panel">
+                    
+                    <div class="catalog glass-panel" style="position: relative;">
                         <h3 class="red-glow">Em Destaque</h3>
-                        <div id="row-trending" class="movie-row futuristic-scroll"></div>
+                        
+                        <button id="scroll-left-btn" class="carousel-btn left">◄</button>
+                        
+                        <div id="row-trending" class="movie-row futuristic-scroll" style="scroll-behavior: smooth;"></div>
+                        
+                        <button id="scroll-right-btn" class="carousel-btn right">►</button>
                     </div>
                 </section>
 
@@ -91,19 +98,33 @@
                     <div id="watchlist-grid" class="movie-grid futuristic-scroll"></div>
                 </section>
             </main>
-
-            <aside class="sidebar-area glass-panel futuristic-scroll">
-                <section id="watchlist-widget" class="sidebar-widget" style="border-bottom: none;">
-                    <h4 class="red-glow">Lista Rápida</h4>
-                    <div id="watchlist-preview-grid" class="movie-grid-mini futuristic-scroll"></div>
-                </section>
-            </aside>
         </div>
 
         <div class="mobile-bottom-nav glass-nav">
             <a id="mob-nav-home" class="active-nav futuristic-link">🏠 Início</a>
             <a id="mob-nav-search" class="futuristic-link">🔍 Busca</a>
             <a id="mob-nav-watchlist" class="futuristic-link">⭐ Lista</a>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content glass-panel neon-border-red" style="max-width: 400px; padding: 30px; text-align: center; display: block;">
+            <button id="close-profile-btn" class="close-btn red-glow">✖</button>
+            <h2 class="red-glow" style="margin-bottom: 20px;">Editar Perfil</h2>
+            
+            <img id="edit-avatar-preview" src="" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; border: 3px solid var(--red-vibrant); box-shadow: var(--red-glow);">
+            
+            <div style="margin-bottom: 15px; text-align: left;">
+                <label style="color: var(--text-secondary); font-size: 0.9em;">URL da Imagem (Avatar):</label>
+                <input type="text" id="edit-avatar-url" class="futuristic-input" placeholder="Cole o link de uma imagem..." style="margin-top: 5px;">
+            </div>
+            
+            <div style="margin-bottom: 25px; text-align: left;">
+                <label style="color: var(--text-secondary); font-size: 0.9em;">Nome de Utilizador:</label>
+                <input type="text" id="edit-username" class="futuristic-input" placeholder="Seu nome..." style="margin-top: 5px;">
+            </div>
+            
+            <button id="save-profile-btn" class="btn-primary neon-btn-red">Guardar Alterações</button>
         </div>
     </div>
 

@@ -9,6 +9,7 @@ let isLoginMode = true;
 let itemModalAtual = null;
 let heroAtual = null;
 
+// Variáveis do Perfil Padrão
 let perfilUsuario = {
     username: "CineNet User",
     avatar: "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png"
@@ -73,21 +74,65 @@ firebase.auth().onAuthStateChanged(user => {
 document.getElementById('logout-btn-pc').addEventListener('click', () => firebase.auth().signOut());
 
 // ==========================================
-// WATCHLIST
+// SISTEMA DE PERFIL E EDIÇÃO
+// ==========================================
+const profileModal = document.getElementById('profile-modal');
+
+document.getElementById('profile-trigger-pc').addEventListener('click', () => {
+    document.getElementById('edit-username').value = perfilUsuario.username;
+    document.getElementById('edit-avatar-url').value = perfilUsuario.avatar;
+    document.getElementById('edit-avatar-preview').src = perfilUsuario.avatar;
+    profileModal.style.display = 'flex';
+});
+
+document.getElementById('close-profile-btn').addEventListener('click', () => {
+    profileModal.style.display = 'none';
+});
+
+document.getElementById('edit-avatar-url').addEventListener('input', (e) => {
+    // Muda a imagem de preview enquanto escreve
+    document.getElementById('edit-avatar-preview').src = e.target.value || "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png";
+});
+
+document.getElementById('save-profile-btn').addEventListener('click', () => {
+    perfilUsuario.username = document.getElementById('edit-username').value.trim() || "CineNet User";
+    perfilUsuario.avatar = document.getElementById('edit-avatar-url').value.trim() || "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png";
+    
+    // Salva no Firebase
+    if (currentUserUID) {
+        firebase.database().ref('users/' + currentUserUID + '/perfil').set(perfilUsuario);
+    }
+    
+    atualizarInterfacePerfil();
+    profileModal.style.display = 'none';
+});
+
+function atualizarInterfacePerfil() {
+    document.getElementById('user-name-pc').innerText = perfilUsuario.username;
+    document.getElementById('user-avatar-pc').src = perfilUsuario.avatar;
+}
+
+// ==========================================
+// CARREGAR DADOS GERAIS DO UTILIZADOR
 // ==========================================
 function carregarDadosUsuario() {
     if (!currentUserUID) return;
-    firebase.database().ref('users/' + currentUserUID + '/biblioteca/watchlist').once('value').then(snapshot => {
+    firebase.database().ref('users/' + currentUserUID).once('value').then(snapshot => {
         const data = snapshot.val();
-        if (data) biblioteca.watchlist = data;
-        renderizarWatchlistWidgets();
+        if (data) {
+            if (data.biblioteca && data.biblioteca.watchlist) biblioteca.watchlist = data.biblioteca.watchlist;
+            if (data.perfil) perfilUsuario = data.perfil;
+        }
+        atualizarInterfacePerfil();
     });
 }
 
+// ==========================================
+// WATCHLIST
+// ==========================================
 function salvarDadosWatchlist() {
     if (currentUserUID) firebase.database().ref('users/' + currentUserUID + '/biblioteca/watchlist').set(biblioteca.watchlist);
-    renderizarWatchlistWidgets();
-    if(document.getElementById('watchlist-section').style.display === 'block') renderizarWatchlistCompleta();
+    if (document.getElementById('watchlist-section').style.display === 'block') renderizarWatchlistCompleta();
 }
 
 function toggleWatchlist(item) {
@@ -145,7 +190,7 @@ document.getElementById('nav-watchlist').onclick = irParaWatchlist;
 document.getElementById('mob-nav-watchlist').onclick = irParaWatchlist;
 
 // ==========================================
-// TMDB API
+// TMDB API & CARROSSEL
 // ==========================================
 async function fetchTMDB(endpoint) {
     try {
@@ -182,6 +227,15 @@ function renderCards(items, containerId) {
         container.appendChild(card);
     });
 }
+
+// Setas de Scroll do Carrossel (Em Destaque)
+document.getElementById('scroll-left-btn').addEventListener('click', () => {
+    document.getElementById('row-trending').scrollBy({ left: -400, behavior: 'smooth' });
+});
+document.getElementById('scroll-right-btn').addEventListener('click', () => {
+    document.getElementById('row-trending').scrollBy({ left: 400, behavior: 'smooth' });
+});
+
 
 // ==========================================
 // BUSCA SEPARADA
@@ -227,25 +281,6 @@ async function executarBusca(termo) {
 // ==========================================
 // RENDERIZAÇÃO DA WATCHLIST
 // ==========================================
-function renderizarWatchlistWidgets() {
-    const grid = document.getElementById('watchlist-preview-grid');
-    if(!grid) return;
-    grid.innerHTML = '';
-    const items = Object.values(biblioteca.watchlist).slice(0, 4); // Limitado para caber na sidebar nova
-    
-    if(items.length === 0) {
-        grid.innerHTML = '<p style="color:#555; grid-column:1/-1;">Sem filmes na lista.</p>';
-    } else {
-        items.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'movie-card-mini neon-border-red';
-            div.innerHTML = `<img src="https://image.tmdb.org/t/p/w185${item.poster_path}" alt="Poster">`;
-            div.onclick = () => abrirDetalhes(item);
-            grid.appendChild(div);
-        });
-    }
-}
-
 function renderizarWatchlistCompleta() {
     const grid = document.getElementById('watchlist-grid');
     const emptyState = document.getElementById('watchlist-empty-state');
@@ -268,7 +303,7 @@ const modal = document.getElementById('movie-modal');
 function abrirDetalhes(item) {
     if(!item) return;
     itemModalAtual = item;
-    const isMovie = item.media_type === 'movie' || item.title; // TMDB diferentia titulo e nome
+    const isMovie = item.media_type === 'movie' || item.title; 
     
     document.getElementById('modal-img').src = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
     document.getElementById('modal-title').innerText = item.title || item.name;
@@ -302,7 +337,7 @@ function fecharModal() {
 }
 
 // ==========================================
-// NOVO PLAYER DE VÍDEO (Evita Ecrã Preto)
+// PLAYER DE VÍDEO (vidsrc.me e embed.su)
 // ==========================================
 const playerScreen = document.getElementById('streaming-player-screen');
 const videoIframe = document.getElementById('videoPlayer');
@@ -322,7 +357,6 @@ function assistirConteudo(item) {
     playerScreen.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 
-    // Usando Servidor vidsrc.me e embed.su para estabilidade total
     if (isMovie) {
         epSelectorsBox.style.display = 'none';
         videoIframe.src = `https://vidsrc.me/embed/movie?tmdb=${item.id}`; 
@@ -366,7 +400,7 @@ document.getElementById('btn-next-ep').onclick = () => {
 
 document.getElementById('close-player-btn').onclick = () => {
     playerScreen.style.display = 'none';
-    videoIframe.src = ''; // Muito importante para cortar o vídeo
+    videoIframe.src = ''; 
     document.body.style.overflow = 'auto';
 };
 

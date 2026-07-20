@@ -7,6 +7,7 @@ let debounceTimer;
 let currentUserUID = null;
 let biblioteca = { watchlist: {}, reviews: {} };
 let isLoginMode = true;
+const recomendadosVistos = new Set(); // Evita repetições no CineBot
 
 const ADMIN_EMAIL = "roberci.azevedo@academico.ifpb.edu.br"; 
 
@@ -79,15 +80,14 @@ function salvarDados() {
 // ==========================================
 function setNavActive(idDesktop, idMobile) {
     document.querySelectorAll('.nav-menu a, .mobile-bottom-nav a').forEach(el => el.classList.remove('active', 'active-nav'));
-    if(idDesktop) document.getElementById(idDesktop).classList.add('active');
-    if(idMobile) document.getElementById(idMobile).classList.add('active-nav');
+    if(idDesktop && document.getElementById(idDesktop)) document.getElementById(idDesktop).classList.add('active');
+    if(idMobile && document.getElementById(idMobile)) document.getElementById(idMobile).classList.add('active-nav');
 }
 
 function esconderTodasSessoes() {
     document.getElementById('main-content').style.display = 'none';
     document.getElementById('search-results-section').style.display = 'none';
     document.getElementById('watchlist-section').style.display = 'none';
-    document.getElementById('live-section').style.display = 'none';
     document.getElementById('chat-section').style.display = 'none'; 
     document.getElementById('admin-section').style.display = 'none';
 }
@@ -105,15 +105,8 @@ function irParaBusca() {
     document.getElementById('search-results-section').style.display = 'block';
 }
 
-function irParaAoVivo() {
-    setNavActive('nav-live', 'mob-nav-live');
-    esconderTodasSessoes();
-    document.getElementById('live-section').style.display = 'block';
-    renderizarCanaisAoVivo();
-}
-
 function irParaWatchlist() {
-    setNavActive('nav-watchlist', null); // Mobile não tem este no bottom nav direto
+    setNavActive('nav-watchlist', 'mob-nav-watchlist');
     esconderTodasSessoes();
     document.getElementById('watchlist-section').style.display = 'block';
     renderizarWatchlist();
@@ -122,7 +115,7 @@ function irParaWatchlist() {
 function irParaChat() {
     setNavActive('nav-chat', 'mob-nav-chat');
     esconderTodasSessoes();
-    document.getElementById('chat-section').style.display = 'block'; // O CSS trata do Flex interior
+    document.getElementById('chat-section').style.display = 'block';
 }
 
 function irParaAdmin() {
@@ -137,41 +130,11 @@ document.getElementById('nav-home').onclick = irParaHome;
 document.getElementById('mob-nav-home').onclick = irParaHome;
 document.getElementById('nav-search').onclick = irParaBusca;
 document.getElementById('mob-nav-search').onclick = irParaBusca;
-document.getElementById('nav-live').onclick = irParaAoVivo;
-document.getElementById('mob-nav-live').onclick = irParaAoVivo;
 document.getElementById('nav-watchlist').onclick = irParaWatchlist;
+document.getElementById('mob-nav-watchlist').onclick = irParaWatchlist;
 document.getElementById('nav-chat').onclick = irParaChat;
 document.getElementById('mob-nav-chat').onclick = irParaChat;
 document.getElementById('nav-admin').onclick = irParaAdmin;
-
-// ==========================================
-// TV AO VIVO (NOVO SISTEMA)
-// ==========================================
-const canaisConfig = [
-    { id: "c1", nome: "CNN Brasil", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/CNN_Brasil_logo.svg/512px-CNN_Brasil_logo.svg.png", embed: "https://www.youtube.com/embed/live_stream?channel=UCG5pzC02p15Z1rI31j6Zhhw" },
-    { id: "c2", nome: "Record News", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Record_News_logo_2021.svg/512px-Record_News_logo_2021.svg.png", embed: "https://www.youtube.com/embed/live_stream?channel=UCuiLR4p6wQ3xLEm15pEn1Xw" },
-    { id: "c3", nome: "SBT News", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/SBT_News.png/512px-SBT_News.png", embed: "https://www.youtube.com/embed/live_stream?channel=UCwsmUfA1B02z9oWfM_u1rWQ" },
-    { id: "c4", nome: "Jovem Pan News", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Jovem_Pan_News_2021.png/512px-Jovem_Pan_News_2021.png", embed: "https://www.youtube.com/embed/live_stream?channel=UC8K2H3mFGA1Uq7Y2H6N4e4w" }
-];
-
-function renderizarCanaisAoVivo() {
-    const grid = document.getElementById('live-grid');
-    grid.innerHTML = '';
-    canaisConfig.forEach(canal => {
-        const card = document.createElement('div');
-        card.className = 'movie-card';
-        card.innerHTML = `<img src="${canal.img}" style="object-fit: contain; background: #fff; padding: 10px;" alt="${canal.nome}">`;
-        card.onclick = () => abrirCanalAoVivo(canal);
-        grid.appendChild(card);
-    });
-}
-
-function abrirCanalAoVivo(canal) {
-    document.getElementById('main-content').style.display = 'none';
-    document.getElementById('episodes-selectors-box').style.display = 'none';
-    document.getElementById('videoPlayer').src = canal.embed + "&autoplay=1";
-    document.getElementById('streaming-player-screen').style.display = 'block';
-}
 
 // ==========================================
 // TMDB & CATALOGO
@@ -190,11 +153,12 @@ async function carregarHome() {
 
     if (dataTrending.results.length > 0) {
         const hero = dataTrending.results[0];
+        const mediaType = hero.media_type || 'movie';
         document.getElementById('hero-banner').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${hero.backdrop_path})`;
         document.getElementById('hero-title').innerText = hero.title || hero.name;
         document.getElementById('hero-desc').innerText = hero.overview || "";
-        document.getElementById('hero-play-btn').onclick = () => abrirDetalhes(hero.id, hero.media_type || 'movie', true);
-        document.getElementById('hero-info-btn').onclick = () => abrirDetalhes(hero.id, hero.media_type || 'movie');
+        document.getElementById('hero-play-btn').onclick = () => abrirPlayer(hero.id, mediaType);
+        document.getElementById('hero-info-btn').onclick = () => abrirDetalhes(hero.id, mediaType);
     }
     renderCards(dataTrending.results, 'row-trending');
     renderCards(dataMovies.results, 'row-movies', 'movie');
@@ -209,7 +173,7 @@ function renderCards(items, containerId, forceType = null) {
         if (!item.poster_path) return;
         const card = document.createElement('div');
         card.className = 'movie-card';
-        card.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${item.poster_path}">`;
+        card.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${item.poster_path}" alt="${item.title || item.name}">`;
         card.onclick = () => abrirDetalhes(item.id, forceType || item.media_type || 'movie');
         container.appendChild(card);
     });
@@ -244,7 +208,7 @@ async function executarBusca(termo) {
     container.innerHTML = '';
     const data = await fetchTMDB(`/search/multi?query=${encodeURIComponent(termo)}`);
     
-    let resultados = data.results.filter(i => i.poster_path && (i.media_type === 'movie' || i.media_type === 'tv'));
+    let resultados = (data.results || []).filter(i => i.poster_path && (i.media_type === 'movie' || i.media_type === 'tv'));
     if(filtroBuscaAtual !== 'all') resultados = resultados.filter(i => i.media_type === filtroBuscaAtual);
 
     if (resultados.length === 0) document.getElementById('search-empty-state').style.display = 'block';
@@ -253,7 +217,7 @@ async function executarBusca(termo) {
         resultados.forEach(item => {
             const card = document.createElement('div');
             card.className = 'movie-card';
-            card.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${item.poster_path}">`;
+            card.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${item.poster_path}" alt="${item.title || item.name}">`;
             card.onclick = () => abrirDetalhes(item.id, item.media_type || 'movie');
             container.appendChild(card);
         });
@@ -263,19 +227,24 @@ async function executarBusca(termo) {
 // ==========================================
 // MODAL & REPRODUTOR (mgeb.top)
 // ==========================================
-async function abrirDetalhes(id, tipo, diretoplay = false) {
+async function abrirDetalhes(id, tipo) {
     const data = await fetchTMDB(`/${tipo}/${id}`);
     itemSelecionado = { id: id, tipo: tipo, poster_path: data.poster_path, title: data.title || data.name };
     
     document.getElementById('modal-banner').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${data.backdrop_path || data.poster_path})`;
     document.getElementById('modal-title').innerText = itemSelecionado.title;
-    document.getElementById('modal-overview').innerText = data.overview || "Sem sinopse.";
+    document.getElementById('modal-year').innerText = (data.release_date || data.first_air_date || 'N/A').substring(0, 4);
+    document.getElementById('modal-rating').innerText = `⭐ ${data.vote_average ? data.vote_average.toFixed(1) : 'N/A'}`;
+    document.getElementById('modal-overview').innerText = data.overview || "Sem sinopse disponível.";
     document.getElementById('modal-play-btn').onclick = () => abrirPlayer(id, tipo);
     
     document.getElementById('btn-watchlist').innerText = biblioteca.watchlist[id] ? "✔ Na Minha Lista" : "+ A Minha Lista";
     
-    if (diretoplay) abrirPlayer(id, tipo); 
-    else { document.getElementById('detailsModal').style.display = 'flex'; document.body.classList.add('modal-open'); }
+    const userRating = biblioteca.reviews[id] || 0;
+    atualizarEstrelasUI(userRating);
+
+    document.getElementById('detailsModal').style.display = 'flex'; 
+    document.body.classList.add('modal-open');
 }
 
 function fecharDetalhes() {
@@ -283,14 +252,67 @@ function fecharDetalhes() {
     document.body.classList.remove('modal-open');
 }
 
-async function abrirPlayer(id, tipo) {
+function votarEstrelas(num) {
+    if (!itemSelecionado) return;
+    biblioteca.reviews[itemSelecionado.id] = num;
+    salvarDados();
+    atualizarEstrelasUI(num);
+}
+
+function atualizarEstrelasUI(num) {
+    const stars = document.querySelectorAll('.star-unit');
+    stars.forEach((star, index) => {
+        if (index < num) star.classList.add('active');
+        else star.classList.remove('active');
+    });
+}
+
+async function abrirPlayer(id, tipo, temporada = 1, episodio = 1) {
     fecharDetalhes();
+    const selectorsBox = document.getElementById('episodes-selectors-box');
+    const seasonSelect = document.getElementById('player-season-select');
+    const epSelect = document.getElementById('player-episode-select');
+
     if (tipo === 'tv') {
-        document.getElementById('episodes-selectors-box').style.display = 'flex';
-        // Simplificado: assume T1 E1 de imediato, em produção pode carregar selectors reais
-        document.getElementById('videoPlayer').src = `https://mgeb.top/embed/tv/${id}/1/1`;
+        selectorsBox.style.display = 'flex';
+        const tvData = await fetchTMDB(`/tv/${id}`);
+        seasonSelect.innerHTML = '';
+        const numSeasons = tvData.number_of_seasons || 1;
+        
+        for (let s = 1; s <= numSeasons; s++) {
+            const opt = document.createElement('option');
+            opt.value = s;
+            opt.innerText = `Temporada ${s}`;
+            if (s === temporada) opt.selected = true;
+            seasonSelect.appendChild(opt);
+        }
+
+        const atualizarEpisodios = (sNum) => {
+            epSelect.innerHTML = '';
+            for (let e = 1; e <= 24; e++) {
+                const opt = document.createElement('option');
+                opt.value = e;
+                opt.innerText = `Episódio ${e}`;
+                if (e === episodio) opt.selected = true;
+                epSelect.appendChild(opt);
+            }
+        };
+        atualizarEpisodios(temporada);
+
+        seasonSelect.onchange = () => {
+            const s = parseInt(seasonSelect.value);
+            atualizarEpisodios(s);
+            document.getElementById('videoPlayer').src = `https://mgeb.top/embed/tv/${id}/${s}/1`;
+        };
+        epSelect.onchange = () => {
+            const s = parseInt(seasonSelect.value);
+            const e = parseInt(epSelect.value);
+            document.getElementById('videoPlayer').src = `https://mgeb.top/embed/tv/${id}/${s}/${e}`;
+        };
+
+        document.getElementById('videoPlayer').src = `https://mgeb.top/embed/tv/${id}/${temporada}/${episodio}`;
     } else {
-        document.getElementById('episodes-selectors-box').style.display = 'none';
+        selectorsBox.style.display = 'none';
         document.getElementById('videoPlayer').src = `https://mgeb.top/embed/movie/${id}`;
     }
     document.getElementById('streaming-player-screen').style.display = 'block';
@@ -320,7 +342,7 @@ function renderizarWatchlist() {
         items.forEach(item => {
             const card = document.createElement('div');
             card.className = 'movie-card';
-            card.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${item.poster_path}">`;
+            card.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${item.poster_path}" alt="${item.title}">`;
             card.onclick = () => abrirDetalhes(item.id, item.tipo);
             grid.appendChild(card);
         });
@@ -328,27 +350,88 @@ function renderizarWatchlist() {
 }
 
 // ==========================================
-// CINEBOT (CHATBOT)
+// CINEBOT (CHATBOT CONECTADO AO mgeb.top)
 // ==========================================
 const chatInput = document.getElementById('chatbot-input');
 const sendBtn = document.getElementById('chatbot-send-btn');
 const messagesContainer = document.getElementById('chatbot-messages');
 
-function addMessage(text, type) {
+function addMessage(content, type) {
     const msgDiv = document.createElement('div');
     msgDiv.className = type === 'user' ? 'user-msg' : 'bot-msg';
-    msgDiv.innerHTML = text; 
+    msgDiv.innerHTML = content; 
     messagesContainer.appendChild(msgDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight; 
 }
 
-function processarMensagem(msg) {
+async function processarMensagemBot(msg) {
     const text = msg.toLowerCase();
-    if(text.includes('ação') || text.includes('acao')) return "Recomendo 'John Wick' ou 'Mad Max'! Pesquise por eles na aba de Busca.";
-    if(text.includes('comédia') || text.includes('comedia')) return "Que tal 'Superbad' ou 'Se Beber, Não Case!'?";
-    if(text.includes('terror') || text.includes('medo')) return "Prepara o coração: 'Invocação do Mal' ou 'Hereditário'!";
-    if(text.includes('destaque') || text.includes('novo')) return "Dá uma olhadinha na nossa Home! Lá temos os destaques mundiais atualizados diariamente.";
-    return "Interessante! Procura por essa palavra na aba de Busca (🔍) e vais encontrar grandes resultados!";
+    let endpoint = '';
+    let tipoPadrao = 'movie';
+
+    const generos = {
+        'ação': 28, 'acao': 28,
+        'comédia': 35, 'comedia': 35,
+        'terror': 27, 'medo': 27,
+        'ficção': 878, 'ficcao': 878,
+        'romance': 10749,
+        'animação': 16, 'animacao': 16,
+        'drama': 18,
+        'aventura': 12
+    };
+
+    let generoID = null;
+    for (let key in generos) {
+        if (text.includes(key)) { generoID = generos[key]; break; }
+    }
+
+    if (generoID) {
+        endpoint = `/discover/movie?with_genres=${generoID}&sort_by=popularity.desc`;
+    } else if (text.includes('série') || text.includes('serie')) {
+        endpoint = `/tv/popular`;
+        tipoPadrao = 'tv';
+    } else if (text.includes('destaque') || text.includes('popula') || text.includes('top')) {
+        endpoint = `/trending/all/week`;
+    } else {
+        endpoint = `/search/multi?query=${encodeURIComponent(msg)}`;
+    }
+
+    const data = await fetchTMDB(endpoint);
+    let resultados = (data.results || []).filter(item => item.poster_path && !recomendadosVistos.has(item.id));
+
+    // Se já tiver recomendado tudo da lista, reseta o histórico
+    if (resultados.length === 0) {
+        resultados = (data.results || []).filter(item => item.poster_path);
+    }
+
+    if (resultados.length === 0) {
+        addMessage("Não encontrei nenhuma recomendação para esse pedido. Experimenta procurar por um género como *'Ação'*, *'Terror'* ou pelo nome de um filme!", 'bot');
+        return;
+    }
+
+    const item = resultados[0];
+    recomendadosVistos.add(item.id);
+
+    const mediaType = item.media_type || tipoPadrao;
+    const titulo = item.title || item.name;
+    const sinopse = item.overview ? (item.overview.substring(0, 110) + "...") : "Sem sinopse disponível.";
+    const poster = `https://image.tmdb.org/t/p/w200${item.poster_path}`;
+
+    const cardHTML = `
+        <div class="bot-card-recommendation">
+            <img src="${poster}" alt="${titulo}">
+            <div class="bot-card-info">
+                <h4>${titulo}</h4>
+                <p>${sinopse}</p>
+                <div class="bot-card-actions">
+                    <button class="btn-play-sm" onclick="abrirPlayer(${item.id}, '${mediaType}')">▶ Assistir Agora</button>
+                    <button class="btn-info-sm" onclick="abrirDetalhes(${item.id}, '${mediaType}')">ℹ Detalhes</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    addMessage(`Aqui tens uma excelente sugestão para ti:<br>${cardHTML}`, 'bot');
 }
 
 function enviarChat() {
@@ -356,7 +439,7 @@ function enviarChat() {
     if(!text) return;
     addMessage(text, 'user');
     chatInput.value = '';
-    setTimeout(() => addMessage(processarMensagem(text), 'bot'), 600);
+    setTimeout(() => processarMensagemBot(text), 500);
 }
 
 sendBtn.onclick = enviarChat;

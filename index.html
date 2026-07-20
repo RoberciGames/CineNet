@@ -14,7 +14,7 @@
     <div id="auth-screen" class="auth-container">
         <div class="auth-box">
             <h1 id="auth-title">Entrar</h1>
-            <p id="auth-error" style="color: red; display: none;"></p>
+            <p id="auth-error" style="color: #ff4d4d; display: none;"></p>
             <form id="auth-form">
                 <input type="email" id="auth-email" placeholder="E-mail" required>
                 <input type="password" id="auth-password" placeholder="Palavra-passe" required>
@@ -32,11 +32,10 @@
         
         <nav class="navbar">
             <div class="nav-left">
-                <h2 class="logo">CineNet</h2>
+                <h2 class="logo" onclick="irParaHome()">CineNet</h2>
                 <ul class="nav-menu">
                     <li><a id="nav-home" class="active">Início</a></li>
                     <li><a id="nav-search">Busca</a></li>
-                    <li><a id="nav-live">Ao Vivo 🔴</a></li>
                     <li><a id="nav-watchlist">A Minha Lista</a></li>
                     <li><a id="nav-chat">CineBot 🤖</a></li>
                     <li id="li-nav-admin" style="display: none;"><a id="nav-admin">Admin</a></li>
@@ -45,7 +44,7 @@
             <div class="nav-right">
                 <div class="profile-trigger" id="profile-trigger-pc">
                     <img id="user-avatar-pc" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" alt="Avatar">
-                    <span id="user-name-pc">User</span>
+                    <span id="user-name-pc">Utilizador</span>
                 </div>
                 <button id="logout-btn-pc" class="btn-logout">Sair</button>
             </div>
@@ -63,53 +62,49 @@
                 </div>
             </div>
             <div class="catalog">
-                <h3>Em Destaque</h3>
+                <h3>Em Destaque 🔥</h3>
                 <div id="row-trending" class="movie-row"></div>
-                <h3>Filmes Populares</h3>
+                <h3>Filmes Populares 🎬</h3>
                 <div id="row-movies" class="movie-row"></div>
-                <h3>Séries Populares</h3>
+                <h3>Séries Populares 📺</h3>
                 <div id="row-series" class="movie-row"></div>
             </div>
         </section>
 
-        <section id="search-results-section" class="app-section" style="display: none; padding: 80px 4%;">
-            <input type="text" id="main-search-input" class="search-input" placeholder="Pesquisar filmes, séries, animes...">
-            <button id="search-clear" style="display: none;" onclick="limparBusca()">❌ Limpar</button>
+        <section id="search-results-section" class="app-section" style="display: none; padding: 100px 4% 40px 4%;">
+            <div class="search-bar-container">
+                <input type="text" id="main-search-input" class="search-input" placeholder="Pesquisar filmes, séries, animes...">
+                <button id="search-clear" style="display: none;" onclick="limparBusca()">❌ Limpar</button>
+            </div>
             <div class="filter-container">
                 <button class="filter-pill active" onclick="setSearchFilter('all', this)">Tudo</button>
                 <button class="filter-pill" onclick="setSearchFilter('movie', this)">Filmes</button>
                 <button class="filter-pill" onclick="setSearchFilter('tv', this)">Séries</button>
             </div>
-            <div id="search-empty-state" style="display: none; text-align: center; margin-top: 50px;">Nenhum resultado encontrado.</div>
+            <div id="search-empty-state" style="display: none; text-align: center; margin-top: 50px; color: #aaa;">Nenhum resultado encontrado.</div>
             <div id="search-grid" class="movie-grid"></div>
         </section>
 
-        <section id="live-section" class="app-section" style="display: none; padding: 80px 4%;">
-            <h2>Canais ao Vivo 🔴</h2>
-            <p>Assista à emissão em direto dos seus canais favoritos.</p>
-            <div id="live-grid" class="movie-grid" style="margin-top: 20px;">
-                </div>
-        </section>
-
-        <section id="watchlist-section" class="app-section" style="display: none; padding: 80px 4%;">
+        <section id="watchlist-section" class="app-section" style="display: none; padding: 100px 4% 40px 4%;">
             <h2>A Minha Lista</h2>
-            <div id="watchlist-empty-state" style="display: none;">A sua lista está vazia.</div>
-            <div id="watchlist-grid" class="movie-grid"></div>
+            <div id="watchlist-empty-state" style="display: none; margin-top: 20px; color: #aaa;">A sua lista está vazia.</div>
+            <div id="watchlist-grid" class="movie-grid" style="margin-top: 20px;"></div>
         </section>
 
-        <section id="chat-section" class="app-section" style="display: none; padding: 80px 4%;">
+        <section id="chat-section" class="app-section" style="display: none; padding: 100px 4% 40px 4%;">
             <div class="chat-container">
                 <div class="chat-header">
                     <h3>CineBot 🤖</h3>
-                    <p>O seu assistente inteligente de filmes</p>
+                    <p>O seu assistente inteligente conectado ao mgeb.top</p>
                 </div>
                 <div id="chatbot-messages" class="chat-messages">
-                    <div class="bot-msg">Olá! Sou o CineBot. Como posso ajudar-te hoje?</div>
+                    <div class="bot-msg">Olá! Sou o CineBot. O que gostavas de assistir hoje? Podes pedir filmes de ação, comédia, terror ou recomendações surpresa!</div>
                 </div>
                 <div id="chat-quick-actions" class="chat-quick-actions">
                     <span class="chat-chip">Recomenda um filme de ação</span>
-                    <span class="chat-chip">O que está em destaque?</span>
-                    <span class="chat-chip">Filmes de terror</span>
+                    <span class="chat-chip">Série em destaque</span>
+                    <span class="chat-chip">Filme de terror</span>
+                    <span class="chat-chip">Animação divertida</span>
                 </div>
                 <div class="chat-input-area">
                     <input type="text" id="chatbot-input" placeholder="Escreva aqui...">
@@ -118,7 +113,7 @@
             </div>
         </section>
 
-        <section id="admin-section" class="app-section" style="display: none; padding: 80px 4%;">
+        <section id="admin-section" class="app-section" style="display: none; padding: 100px 4% 40px 4%;">
             <h2>Painel de Administração</h2>
             <form id="admin-form" class="admin-form">
                 <input type="text" id="admin-titulo" placeholder="Título" required>
@@ -168,7 +163,6 @@
             <div id="episodes-selectors-box" class="episode-selectors" style="display: none;">
                 <select id="player-season-select"></select>
                 <select id="player-episode-select"></select>
-                <button id="btn-next-ep" class="btn-secondary">Próximo Ep ▶</button>
             </div>
             <iframe id="videoPlayer" allowfullscreen allow="autoplay"></iframe>
         </div>
@@ -176,8 +170,8 @@
         <div class="mobile-bottom-nav">
             <a id="mob-nav-home" class="active-nav">🏠 Início</a>
             <a id="mob-nav-search">🔍 Busca</a>
-            <a id="mob-nav-live">🔴 TV</a>
-            <a id="mob-nav-chat">🤖 Bot</a>
+            <a id="mob-nav-watchlist">⭐ Lista</a>
+            <a id="mob-nav-chat">🤖 CineBot</a>
         </div>
     </div>
 

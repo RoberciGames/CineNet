@@ -55,7 +55,6 @@ firebase.auth().onAuthStateChanged(user => {
         currentUserUID = user.uid;
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('app-content').style.display = 'block';
-        if (user.email === ADMIN_EMAIL) document.getElementById('li-nav-admin').style.display = 'block';
         carregarDadosUsuario();
         irParaHome();
     } else {
@@ -66,17 +65,14 @@ firebase.auth().onAuthStateChanged(user => {
 });
 
 function logout() { firebase.auth().signOut(); }
-document.getElementById('logout-btn-pc').addEventListener('click', logout);
 
 function carregarDadosUsuario() {
     firebase.database().ref('users/' + currentUserUID + '/biblioteca').once('value').then(snapshot => {
         const data = snapshot.val();
         if (data) biblioteca = data;
-        
         if (!biblioteca.watchlist) biblioteca.watchlist = {};
         if (!biblioteca.reviews) biblioteca.reviews = {};
         if (!biblioteca.perfil) biblioteca.perfil = { nome: "Utilizador", avatar: "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" };
-        
         atualizarNavBar();
     });
 }
@@ -106,7 +102,6 @@ function abrirModalPerfil() {
     document.getElementById('input-profile-name').value = biblioteca.perfil.nome || "Utilizador";
     document.getElementById('input-profile-url').value = "";
     avatarTemporario = biblioteca.perfil.avatar || avataresSeguros[0];
-    
     renderizarGrelhaAvatares();
     document.getElementById('profileModal').style.display = 'flex';
     document.body.classList.add('modal-open');
@@ -125,7 +120,6 @@ function renderizarGrelhaAvatares() {
         img.src = url;
         img.className = 'avatar-option';
         if (url === avatarTemporario) img.classList.add('selected');
-        
         img.onclick = () => {
             avatarTemporario = url;
             document.getElementById('input-profile-url').value = "";
@@ -138,18 +132,25 @@ function renderizarGrelhaAvatares() {
 function salvarPerfil() {
     const novoNome = document.getElementById('input-profile-name').value.trim();
     const customUrl = document.getElementById('input-profile-url').value.trim();
-    
     biblioteca.perfil.nome = novoNome || "Utilizador";
     biblioteca.perfil.avatar = customUrl !== "" ? customUrl : avatarTemporario;
-
     atualizarNavBar();
     salvarDados();
     fecharModalPerfil();
 }
 
 // ==========================================
-// NAVEGAÇÃO ENTRE ABAS
+// NAVEGAÇÃO E SUBMENU MOBILE
 // ==========================================
+
+// Alternar visibilidade do submenu ao tocar em "Títulos"
+function toggleSubmenu() {
+    const submenu = document.getElementById('mobile-submenu');
+    if(submenu) {
+        submenu.classList.toggle('ativa');
+    }
+}
+
 function setNavActive(idDesktop, idMobile) {
     document.querySelectorAll('.nav-menu a, .mobile-bottom-nav a').forEach(el => el.classList.remove('active', 'active-nav'));
     if(idDesktop && document.getElementById(idDesktop)) document.getElementById(idDesktop).classList.add('active');
@@ -157,36 +158,31 @@ function setNavActive(idDesktop, idMobile) {
 }
 
 function esconderTodasSessoes() {
-    const sessoes = ['main-content', 'movies-section', 'series-section', 'animes-section', 'doramas-section', 'search-results-section', 'watchlist-section', 'chat-section', 'admin-section'];
+    const sessoes = ['main-content', 'movies-section', 'series-section', 'animes-section', 'doramas-section', 'search-results-section', 'watchlist-section', 'chat-section'];
     sessoes.forEach(id => {
         if(document.getElementById(id)) document.getElementById(id).style.display = 'none';
     });
 }
 
 function irParaHome() { setNavActive('nav-home', 'mob-nav-home'); esconderTodasSessoes(); document.getElementById('main-content').style.display = 'block'; carregarHome(); }
-function irParaFilmes() { setNavActive('nav-movies', 'mob-nav-movies'); esconderTodasSessoes(); document.getElementById('movies-section').style.display = 'block'; carregarFilmes(); }
-function irParaSeries() { setNavActive('nav-series', 'mob-nav-series'); esconderTodasSessoes(); document.getElementById('series-section').style.display = 'block'; carregarSeries(); }
-function irParaAnimes() { setNavActive('nav-animes', null); esconderTodasSessoes(); document.getElementById('animes-section').style.display = 'block'; carregarAnimes(); }
-function irParaDoramas() { setNavActive('nav-doramas', null); esconderTodasSessoes(); document.getElementById('doramas-section').style.display = 'block'; carregarDoramas(); }
+function irParaFilmes() { setNavActive('nav-movies', 'mob-nav-titulos'); esconderTodasSessoes(); document.getElementById('movies-section').style.display = 'block'; carregarFilmes(); }
+function irParaSeries() { setNavActive('nav-series', 'mob-nav-titulos'); esconderTodasSessoes(); document.getElementById('series-section').style.display = 'block'; carregarSeries(); }
+function irParaAnimes() { setNavActive('nav-animes', 'mob-nav-titulos'); esconderTodasSessoes(); document.getElementById('animes-section').style.display = 'block'; carregarAnimes(); }
+function irParaDoramas() { setNavActive('nav-doramas', 'mob-nav-titulos'); esconderTodasSessoes(); document.getElementById('doramas-section').style.display = 'block'; carregarDoramas(); }
 function irParaBusca() { setNavActive('nav-search', 'mob-nav-search'); esconderTodasSessoes(); document.getElementById('search-results-section').style.display = 'block'; }
-function irParaWatchlist() { setNavActive('nav-watchlist', null); esconderTodasSessoes(); document.getElementById('watchlist-section').style.display = 'block'; renderizarWatchlist(); }
+function irParaWatchlist() { setNavActive('nav-watchlist', 'mob-nav-titulos'); esconderTodasSessoes(); document.getElementById('watchlist-section').style.display = 'block'; renderizarWatchlist(); }
 function irParaChat() { setNavActive(null, 'mob-nav-chat'); esconderTodasSessoes(); document.getElementById('chat-section').style.display = 'block'; }
-function irParaAdmin() { if (firebase.auth().currentUser.email !== ADMIN_EMAIL) return alert("Acesso Negado!"); setNavActive('nav-admin', null); esconderTodasSessoes(); document.getElementById('admin-section').style.display = 'block'; }
 
 if(document.getElementById('nav-home')) document.getElementById('nav-home').onclick = irParaHome;
 if(document.getElementById('mob-nav-home')) document.getElementById('mob-nav-home').onclick = irParaHome;
 if(document.getElementById('nav-movies')) document.getElementById('nav-movies').onclick = irParaFilmes;
-if(document.getElementById('mob-nav-movies')) document.getElementById('mob-nav-movies').onclick = irParaFilmes;
 if(document.getElementById('nav-series')) document.getElementById('nav-series').onclick = irParaSeries;
-if(document.getElementById('mob-nav-series')) document.getElementById('mob-nav-series').onclick = irParaSeries;
 if(document.getElementById('nav-animes')) document.getElementById('nav-animes').onclick = irParaAnimes;
 if(document.getElementById('nav-doramas')) document.getElementById('nav-doramas').onclick = irParaDoramas;
 if(document.getElementById('nav-search')) document.getElementById('nav-search').onclick = irParaBusca;
-if(document.getElementById('mob-nav-search')) document.getElementById('mob-nav-search').onclick = irParaBusca;
 if(document.getElementById('nav-watchlist')) document.getElementById('nav-watchlist').onclick = irParaWatchlist;
 if(document.getElementById('nav-chat')) document.getElementById('nav-chat').onclick = irParaChat;
 if(document.getElementById('mob-nav-chat')) document.getElementById('mob-nav-chat').onclick = irParaChat;
-if(document.getElementById('nav-admin')) document.getElementById('nav-admin').onclick = irParaAdmin;
 
 function scrollCarousel(rowId, direction) {
     const row = document.getElementById(rowId);
@@ -197,7 +193,7 @@ function scrollCarousel(rowId, direction) {
 }
 
 // ==========================================
-// TMDB & CATÁLOGO (Agora em PT-BR)
+// TMDB FETCH & RENDER
 // ==========================================
 async function fetchTMDB(endpoint) {
     try {
@@ -214,13 +210,13 @@ function renderCards(items, containerId, forceType = null) {
         if (!item.poster_path) return;
         const card = document.createElement('div');
         card.className = 'movie-card';
-        card.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${item.poster_path}" alt="${item.title || item.name}" loading="lazy">`;
+        card.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${item.poster_path}" alt="${item.title || item.name}">`;
         card.onclick = () => abrirDetalhes(item.id, forceType || item.media_type || 'movie');
         container.appendChild(card);
     });
 }
 
-// 1. CARREGAR HOME
+// CARREGAR SEÇÕES
 async function carregarHome() {
     const dataTrending = await fetchTMDB('/trending/all/day');
     if (dataTrending.results.length > 0) {
@@ -232,7 +228,6 @@ async function carregarHome() {
         document.getElementById('hero-info-btn').onclick = () => abrirDetalhes(hero.id, hero.media_type || 'movie');
     }
     renderCards(dataTrending.results, 'row-trending');
-
     fetchTMDB('/discover/movie?with_genres=28').then(d => renderCards(d.results, 'row-acao', 'movie'));
     fetchTMDB('/discover/movie?with_genres=878').then(d => renderCards(d.results, 'row-ficcao', 'movie'));
     fetchTMDB('/discover/movie?with_genres=27').then(d => renderCards(d.results, 'row-terror', 'movie'));
@@ -514,6 +509,7 @@ function atualizarEstrelasUI(num) {
     });
 }
 
+// ABRIR PLAYER (Agora não tem os seletores dentro do ecrã do vídeo)
 function abrirPlayer(id, tipo, temporada = 1, episodio = 1) {
     fecharDetalhes();
     if (tipo === 'tv') {
@@ -548,7 +544,7 @@ function renderizarWatchlist() {
         items.forEach(item => {
             const card = document.createElement('div');
             card.className = 'movie-card';
-            card.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${item.poster_path}" alt="Capa" loading="lazy">`;
+            card.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${item.poster_path}">`;
             card.onclick = () => abrirDetalhes(item.id, item.tipo);
             grid.appendChild(card);
         });
@@ -634,7 +630,7 @@ async function processarMensagemBot(msg) {
 
     const cardHTML = `
         <div class="bot-card-recommendation">
-            <img src="${poster}" alt="${titulo}" loading="lazy">
+            <img src="${poster}" alt="${titulo}">
             <div class="bot-card-info">
                 <h4>${titulo}</h4>
                 <p>${sinopse}</p>
